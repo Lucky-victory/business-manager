@@ -1,40 +1,41 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
-import { format } from "date-fns"
-import { useStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { SalesForm } from "@/components/sales/sales-form"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { format } from "date-fns";
+import { useStore } from "@/lib/store";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SalesForm } from "@/components/sales/sales-form";
 
 export function SalesList() {
-  const router = useRouter()
-  const { sales, fetchSales } = useStore()
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const router = useRouter();
+  const { sales, fetchSales } = useStore();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
-    fetchSales()
-  }, [fetchSales])
+    fetchSales();
+  }, [fetchSales]);
 
   // Group sales by date
-  const salesByDate = sales.reduce(
-    (acc, sale) => {
-      const date = format(new Date(sale.date), "yyyy-MM-dd")
-      if (!acc[date]) {
-        acc[date] = {
-          date,
-          totalAmount: 0,
-          count: 0,
-        }
-      }
-      acc[date].totalAmount += sale.amount
-      acc[date].count += 1
-      return acc
-    },
-    {} as Record<string, { date: string; totalAmount: number; count: number }>,
-  )
+  const salesByDate = sales.reduce((acc, sale) => {
+    const date = format(new Date(sale.date), "yyyy-MM-dd");
+    if (!acc[date]) {
+      acc[date] = {
+        date,
+        totalAmount: 0,
+        count: 0,
+      };
+    }
+    acc[date].totalAmount += +sale.amount;
+    acc[date].count += 1;
+    return acc;
+  }, {} as Record<string, { date: string; totalAmount: number; count: number }>);
+  console.log({
+    salesByDate,
+    sales,
+  });
 
   return (
     <div>
@@ -54,12 +55,19 @@ export function SalesList() {
             onClick={() => router.push(`/sales/${saleDay.date}`)}
           >
             <CardHeader className="pb-2">
-              <CardTitle>{format(new Date(saleDay.date), "MMMM d, yyyy")}</CardTitle>
+              <CardTitle>
+                {format(new Date(saleDay.date), "MMMM d, yyyy")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total Sales:</span>
-                <span className="font-medium">${saleDay.totalAmount.toFixed(2)}</span>
+                <span className="font-medium flex items-center">
+                  ₦
+                  <span className="font-bold text-2xl">
+                    {saleDay.totalAmount.toLocaleString("en-US") as string}
+                  </span>
+                </span>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="text-muted-foreground">Items Sold:</span>
@@ -78,6 +86,5 @@ export function SalesList() {
 
       <SalesForm open={isFormOpen} onOpenChange={setIsFormOpen} />
     </div>
-  )
+  );
 }
-

@@ -1,0 +1,192 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { format } from "date-fns"
+import { ArrowLeft, Download, Printer, Send } from "lucide-react"
+import { useStore } from "@/lib/store"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { toast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+
+export default function InvoicePage({ params }: { params: { debtorId: string } }) {
+  const router = useRouter()
+  const { credits, fetchCredits } = useStore()
+  const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Date.now().toString().slice(-6)}`)
+  const [dueDate, setDueDate] = useState(format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"))
+  const [notes, setNotes] = useState("Thank you for your business!")
+
+  useEffect(() => {
+    fetchCredits()
+  }, [fetchCredits])
+
+  // Filter credits for the selected debtor
+  const debtorId = params.debtorId
+  const debtorCredits = credits.filter((credit) => credit.debtorId === debtorId)
+
+  // Get debtor name
+  const debtorName = debtorCredits.length > 0 ? debtorCredits[0].debtorName : "Unknown Debtor"
+
+  // Get unpaid purchases
+  const unpaidPurchases = debtorCredits.filter((credit) => credit.type === "purchase" && !credit.isPaid)
+
+  // Calculate total amount due
+  const totalDue = unpaidPurchases.reduce((sum, purchase) => sum + purchase.amount, 0)
+
+  const handleDownloadInvoice = () => {
+    // In a real app, this would generate a PDF and download it
+    toast({
+      title: "Invoice downloaded",
+      description: "Invoice has been downloaded as a PDF.",
+    })
+  }
+
+  const handlePrintInvoice = () => {
+    // In a real app, this would open the print dialog
+    window.print()
+  }
+
+  const handleSendInvoice = () => {
+    // In a real app, this would send the invoice via email
+    toast({
+      title: "Invoice sent",
+      description: `Invoice has been sent to ${debtorName}.`,
+    })
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6 max-w-3xl">
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-2">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-2xl font-bold">Invoice for {debtorName}</h1>
+      </div>
+
+      <div className="print:hidden mb-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="invoiceNumber">Invoice Number</Label>
+            <Input id="invoiceNumber" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dueDate">Due Date</Label>
+            <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+        </div>
+      </div>
+
+      <Card className="mb-6 print:shadow-none print:border-none">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl">INVOICE</CardTitle>
+            <p className="text-muted-foreground">{invoiceNumber}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-bold">Your Company Name</p>
+            <p className="text-sm text-muted-foreground">123 Business St.</p>
+            <p className="text-sm text-muted-foreground">City, State 12345</p>
+            <p className="text-sm text-muted-foreground">contact@yourcompany.com</p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <h3 className="font-semibold mb-1">Bill To:</h3>
+              <p>{debtorName}</p>
+              <p className="text-sm text-muted-foreground">Client Address</p>
+              <p className="text-sm text-muted-foreground">City, State 12345</p>
+            </div>
+            <div className="text-right">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Invoice Date:</span>
+                  <span>{format(new Date(), "MMMM d, yyyy")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Due Date:</span>
+                  <span>{format(new Date(dueDate), "MMMM d, yyyy")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="py-2 text-left">Item</th>
+                <th className="py-2 text-right">Quantity</th>
+                <th className="py-2 text-right">Price</th>
+                <th className="py-2 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {unpaidPurchases.map((purchase) => (
+                <tr key={purchase.id} className="border-b">
+                  <td className="py-2">{purchase.item}</td>
+                  <td className="py-2 text-right">{purchase.quantity}</td>
+                  <td className="py-2 text-right">${purchase.price?.toFixed(2)}</td>
+                  <td className="py-2 text-right">${purchase.amount.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="mt-6 flex justify-end">
+            <div className="w-1/2 space-y-2">
+              <div className="flex justify-between">
+                <span className="font-medium">Subtotal:</span>
+                <span>${totalDue.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Tax (0%):</span>
+                <span>$0.00</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total Due:</span>
+                <span>${totalDue.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <h3 className="font-semibold mb-1">Notes:</h3>
+            <p className="text-muted-foreground">{notes}</p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between border-t pt-6 print:hidden">
+          <p className="text-sm text-muted-foreground">Payment is due by {format(new Date(dueDate), "MMMM d, yyyy")}</p>
+          <p className="text-sm text-muted-foreground">Thank you for your business!</p>
+        </CardFooter>
+      </Card>
+
+      <div className="flex justify-end gap-2 print:hidden">
+        <Button variant="outline" onClick={handlePrintInvoice}>
+          <Printer className="mr-2 h-4 w-4" />
+          Print
+        </Button>
+        <Button variant="outline" onClick={handleDownloadInvoice}>
+          <Download className="mr-2 h-4 w-4" />
+          Download PDF
+        </Button>
+        <Button onClick={handleSendInvoice}>
+          <Send className="mr-2 h-4 w-4" />
+          Send Invoice
+        </Button>
+      </div>
+
+      <Toaster />
+    </div>
+  )
+}
+

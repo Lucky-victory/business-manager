@@ -32,7 +32,10 @@ export default function SalesDetailPage({
   });
 
   // Calculate total amount
-  const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.amount, 0);
+  const totalAmount = filteredSales.reduce(
+    (sum, sale) => sum + +sale.amount,
+    0
+  );
 
   const formattedDate = dateString
     ? format(new Date(dateString), "MMMM d, yyyy")
@@ -57,7 +60,7 @@ export default function SalesDetailPage({
           <p className="text-muted-foreground">
             Total Sales:{" "}
             <span className="font-medium text-foreground">
-              ${totalAmount.toFixed(2)}
+              ₦{totalAmount.toFixed(2)}
             </span>
           </p>
           <p className="text-muted-foreground">
@@ -88,11 +91,15 @@ export default function SalesDetailPage({
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="font-medium">${sale.price.toFixed(2)}</p>
+                  <p className="font-medium">
+                    ₦{parseInt(sale.price, 10).toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="font-medium">${sale.amount.toFixed(2)}</p>
+                  <p className="font-medium">
+                    ₦{parseInt(sale.amount, 10).toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Payment</p>

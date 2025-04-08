@@ -339,7 +339,7 @@ export default function CreditDetailPage({
                   <div>
                     <p className="text-sm text-muted-foreground">Price</p>
                     <p className="font-medium">
-                      $
+                      ₦
                       {parseInt(
                         purchase.price ? purchase?.price + "" : "0",
                         10
@@ -349,7 +349,7 @@ export default function CreditDetailPage({
                   <div>
                     <p className="text-sm text-muted-foreground">Total</p>
                     <p className="font-medium">
-                      $
+                      ₦
                       {parseInt(
                         purchase.amount ? purchase?.amount + "" : "0",
                         10

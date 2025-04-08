@@ -193,16 +193,16 @@ export default function InvoicePage({
             <div className="w-1/2 space-y-2">
               <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
-                <span>${totalDue.toFixed(2)}</span>
+                <span>₦{totalDue.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Tax (0%):</span>
-                <span>$0.00</span>
+                <span>₦0.00</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Due:</span>
-                <span>${totalDue.toFixed(2)}</span>
+                <span>₦{totalDue.toFixed(2)}</span>
               </div>
             </div>
           </div>

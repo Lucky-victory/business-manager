@@ -91,16 +91,6 @@ export default function CreditDetailPage({
   const unpaidAmount = allPurchases
     .filter((purchase) => !purchase.isPaid)
     .reduce((sum, purchase) => sum + +purchase.amount, 0);
-  console.log({
-    purchases,
-    allPurchases,
-    payments,
-    totalPurchases,
-    totalPayments,
-    totalOwed,
-    paidAmount,
-    unpaidAmount,
-  });
 
   // Handle marking items as paid
   const handleMarkAsPaid = async (creditId: string, isPaid: boolean) => {
@@ -136,14 +126,28 @@ export default function CreditDetailPage({
   // Handle select all checkbox
   useEffect(() => {
     if (selectAll) {
-      setSelectedItems(purchases.filter((p) => !p.isPaid).map((p) => p.id));
-    } else if (
-      selectedItems.length === purchases.filter((p) => !p.isPaid).length
-    ) {
-      // If all items are selected but selectAll is false, update it
-      setSelectAll(true);
+      // Only update selectedItems if they're different from what they should be
+      const unpaidItemIds = purchases.filter((p) => !p.isPaid).map((p) => p.id);
+      const allSelected = unpaidItemIds.every((id) =>
+        selectedItems.includes(id)
+      );
+      const hasExtra = selectedItems.some((id) => !unpaidItemIds.includes(id));
+
+      if (!allSelected || hasExtra) {
+        setSelectedItems(unpaidItemIds);
+      }
+    } else {
+      // Only update selectAll if all items are selected and selectAll is false
+      const unpaidCount = purchases.filter((p) => !p.isPaid).length;
+      if (
+        unpaidCount > 0 &&
+        selectedItems.length === unpaidCount &&
+        !selectAll
+      ) {
+        setSelectAll(true);
+      }
     }
-  }, [selectAll, purchases]);
+  }, [selectAll, purchases, selectedItems]);
 
   // Handle individual checkbox change
   const handleCheckboxChange = (creditId: string, checked: boolean) => {

@@ -1,68 +1,96 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { format } from "date-fns"
-import { ArrowLeft, Download, Printer, Send } from "lucide-react"
-import { useStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { ArrowLeft, Download, Printer, Send } from "lucide-react";
+import { useStore } from "@/lib/store";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
-export default function InvoicePage({ params }: { params: { debtorId: string } }) {
-  const router = useRouter()
-  const { credits, fetchCredits } = useStore()
-  const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Date.now().toString().slice(-6)}`)
-  const [dueDate, setDueDate] = useState(format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"))
-  const [notes, setNotes] = useState("Thank you for your business!")
+export default function InvoicePage({
+  params,
+}: {
+  params: { debtorId: string };
+}) {
+  const router = useRouter();
+  const _params = use<{ debtorId: string }>(params as any);
+  const { credits, fetchCredits } = useStore();
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    `INV-${Date.now().toString().slice(-6)}`
+  );
+  const [dueDate, setDueDate] = useState(
+    format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
+  );
+  const [notes, setNotes] = useState("Thank you for your business!");
 
   useEffect(() => {
-    fetchCredits()
-  }, [fetchCredits])
+    fetchCredits();
+  }, [fetchCredits]);
 
   // Filter credits for the selected debtor
-  const debtorId = params.debtorId
-  const debtorCredits = credits.filter((credit) => credit.debtorId === debtorId)
+  const debtorId = _params.debtorId;
+  const debtorCredits = credits.filter(
+    (credit) => credit.debtorId === debtorId
+  );
 
   // Get debtor name
-  const debtorName = debtorCredits.length > 0 ? debtorCredits[0].debtorName : "Unknown Debtor"
+  const debtorName =
+    debtorCredits.length > 0 ? debtorCredits[0].debtorName : "Unknown Debtor";
 
   // Get unpaid purchases
-  const unpaidPurchases = debtorCredits.filter((credit) => credit.type === "purchase" && !credit.isPaid)
+  const unpaidPurchases = debtorCredits.filter(
+    (credit) => credit.type === "purchase" && !credit.isPaid
+  );
 
   // Calculate total amount due
-  const totalDue = unpaidPurchases.reduce((sum, purchase) => sum + purchase.amount, 0)
+  const totalDue = unpaidPurchases.reduce(
+    (sum, purchase) => sum + +purchase.amount,
+    0
+  );
 
   const handleDownloadInvoice = () => {
     // In a real app, this would generate a PDF and download it
     toast({
       title: "Invoice downloaded",
       description: "Invoice has been downloaded as a PDF.",
-    })
-  }
+    });
+  };
 
   const handlePrintInvoice = () => {
     // In a real app, this would open the print dialog
-    window.print()
-  }
+    window.print();
+  };
 
   const handleSendInvoice = () => {
     // In a real app, this would send the invoice via email
     toast({
       title: "Invoice sent",
       description: `Invoice has been sent to ${debtorName}.`,
-    })
-  }
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">
       <div className="flex items-center mb-6">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="mr-2"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-2xl font-bold">Invoice for {debtorName}</h1>
@@ -72,16 +100,30 @@ export default function InvoicePage({ params }: { params: { debtorId: string } }
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="invoiceNumber">Invoice Number</Label>
-            <Input id="invoiceNumber" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+            <Input
+              id="invoiceNumber"
+              value={invoiceNumber}
+              onChange={(e) => setInvoiceNumber(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="dueDate">Due Date</Label>
-            <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input
+              id="dueDate"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="notes">Notes</Label>
-          <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+          <Textarea
+            id="notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+          />
         </div>
       </div>
 
@@ -95,7 +137,9 @@ export default function InvoicePage({ params }: { params: { debtorId: string } }
             <p className="font-bold">Your Company Name</p>
             <p className="text-sm text-muted-foreground">123 Business St.</p>
             <p className="text-sm text-muted-foreground">City, State 12345</p>
-            <p className="text-sm text-muted-foreground">contact@yourcompany.com</p>
+            <p className="text-sm text-muted-foreground">
+              contact@yourcompany.com
+            </p>
           </div>
         </CardHeader>
         <CardContent>
@@ -134,8 +178,12 @@ export default function InvoicePage({ params }: { params: { debtorId: string } }
                 <tr key={purchase.id} className="border-b">
                   <td className="py-2">{purchase.item}</td>
                   <td className="py-2 text-right">{purchase.quantity}</td>
-                  <td className="py-2 text-right">${purchase.price?.toFixed(2)}</td>
-                  <td className="py-2 text-right">${purchase.amount.toFixed(2)}</td>
+                  <td className="py-2 text-right">
+                    ${parseInt(purchase.price + "", 10).toFixed(2)}
+                  </td>
+                  <td className="py-2 text-right">
+                    ${parseInt(purchase.amount + "", 10).toFixed(2)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -165,8 +213,12 @@ export default function InvoicePage({ params }: { params: { debtorId: string } }
           </div>
         </CardContent>
         <CardFooter className="flex justify-between border-t pt-6 print:hidden">
-          <p className="text-sm text-muted-foreground">Payment is due by {format(new Date(dueDate), "MMMM d, yyyy")}</p>
-          <p className="text-sm text-muted-foreground">Thank you for your business!</p>
+          <p className="text-sm text-muted-foreground">
+            Payment is due by {format(new Date(dueDate), "MMMM d, yyyy")}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Thank you for your business!
+          </p>
         </CardFooter>
       </Card>
 
@@ -187,6 +239,5 @@ export default function InvoicePage({ params }: { params: { debtorId: string } }
 
       <Toaster />
     </div>
-  )
+  );
 }
-

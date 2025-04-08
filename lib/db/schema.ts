@@ -71,9 +71,12 @@ export const products = mysqlTable("products", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   stockQuantity: int("stock_quantity").notNull().default(0),
-  lowStockThreshold: int("low_stock_threshold").default(5),
+  lowStockThreshold: int("low_stock_threshold").default(1),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 // Sales table - stores all sales transactions
@@ -87,7 +90,9 @@ export const sales = mysqlTable("sales", {
   paymentType: varchar("payment_type", { length: 50 }).notNull(),
   date: timestamp("date").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  userId: varchar("user_id", { length: 36 }),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 // Debtors table - stores information about people who owe money
@@ -99,6 +104,9 @@ export const debtors = mysqlTable("debtors", {
   address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 // Credits table - stores both purchases on credit and payments made
@@ -124,7 +132,9 @@ export const credits = mysqlTable("credits", {
   // Invoice related
   invoiceId: varchar("invoice_id", { length: 36 }),
   // User who created this entry
-  userId: varchar("user_id", { length: 36 }),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 // Invoices table
@@ -141,13 +151,29 @@ export const invoices = mysqlTable("invoices", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  userId: varchar("user_id", { length: 36 }),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 });
 
 // Define relationships
-export const debtorsRelations = relations(debtors, ({ many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+  products: many(products),
+  sales: many(sales),
+  debtors: many(debtors),
   credits: many(credits),
   invoices: many(invoices),
+}));
+
+export const debtorsRelations = relations(debtors, ({ many, one }) => ({
+  credits: many(credits),
+  invoices: many(invoices),
+  user: one(users, {
+    fields: [debtors.userId],
+    references: [users.id],
+  }),
 }));
 
 export const creditsRelations = relations(credits, ({ one }) => ({
@@ -159,6 +185,10 @@ export const creditsRelations = relations(credits, ({ one }) => ({
     fields: [credits.invoiceId],
     references: [invoices.id],
   }),
+  user: one(users, {
+    fields: [credits.userId],
+    references: [users.id],
+  }),
 }));
 
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
@@ -167,6 +197,10 @@ export const invoicesRelations = relations(invoices, ({ one, many }) => ({
     references: [debtors.id],
   }),
   credits: many(credits),
+  user: one(users, {
+    fields: [invoices.userId],
+    references: [users.id],
+  }),
 }));
 
 export const salesRelations = relations(sales, ({ one }) => ({
@@ -174,8 +208,30 @@ export const salesRelations = relations(sales, ({ one }) => ({
     fields: [sales.productId],
     references: [products.id],
   }),
+  user: one(users, {
+    fields: [sales.userId],
+    references: [users.id],
+  }),
 }));
 
-export const productsRelations = relations(products, ({ many }) => ({
+export const productsRelations = relations(products, ({ many, one }) => ({
   sales: many(sales),
+  user: one(users, {
+    fields: [products.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(users, {
+    fields: [session.userId],
+    references: [users.id],
+  }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(users, {
+    fields: [account.userId],
+    references: [users.id],
+  }),
 }));

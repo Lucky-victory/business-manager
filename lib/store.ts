@@ -26,9 +26,9 @@ type State = {
   debtors: DebtorSelect[];
   searchResults: SearchResult[];
   fetchSales: () => Promise<void>;
-  addSale: (sale: SaleSelect) => Promise<void>;
+  addSale: (sale: SaleInsert) => Promise<void>;
   fetchCredits: () => Promise<void>;
-  addCredit: (credit: CreditSelect) => Promise<void>;
+  addCredit: (credit: CreditInsert) => Promise<void>;
   updateCreditStatus: (creditId: string, isPaid: boolean) => Promise<void>;
   updateMultipleCreditStatus: (
     creditIds: string[],
@@ -58,7 +58,7 @@ export const useStore = create<State>()(
         }
       },
 
-      addSale: async (sale: SaleSelect) => {
+      addSale: async (sale: SaleInsert) => {
         try {
           const response = await fetch("/api/sales", {
             method: "POST",
@@ -92,7 +92,7 @@ export const useStore = create<State>()(
         }
       },
 
-      addCredit: async (credit: CreditSelect) => {
+      addCredit: async (credit: CreditInsert) => {
         try {
           const response = await fetch("/api/credit", {
             method: "POST",
@@ -112,11 +112,17 @@ export const useStore = create<State>()(
               (d) => d.id === credit.debtorId
             );
 
-            if (!existingDebtor && credit.debtorName) {
-              updatedDebtors.push({
-                id: credit.debtorId,
-                name: credit.debtorName,
-              });
+            if (!existingDebtor) {
+              const newDebtor: DebtorSelect = {
+                id: credit.debtorId!,
+                name: "",
+                email: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                phone: null,
+                address: null,
+              };
+              updatedDebtors.push(newDebtor);
             }
 
             return {
@@ -136,7 +142,7 @@ export const useStore = create<State>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               isPaid,
-              paidDate: isPaid ? new Date().toISOString() : undefined,
+              paidDate: isPaid ? new Date() : null,
             }),
           });
 
@@ -149,7 +155,7 @@ export const useStore = create<State>()(
                 ? {
                     ...credit,
                     isPaid,
-                    paidDate: isPaid ? new Date().toISOString() : undefined,
+                    paidDate: isPaid ? new Date() : null,
                   }
                 : credit
             ),
@@ -170,7 +176,7 @@ export const useStore = create<State>()(
             body: JSON.stringify({
               creditIds,
               isPaid,
-              paidDate: isPaid ? new Date().toISOString() : undefined,
+              paidDate: isPaid ? new Date() : null,
             }),
           });
 
@@ -184,7 +190,7 @@ export const useStore = create<State>()(
                 ? {
                     ...credit,
                     isPaid,
-                    paidDate: isPaid ? new Date().toISOString() : undefined,
+                    paidDate: isPaid ? new Date() : null,
                   }
                 : credit
             ),
@@ -215,11 +221,11 @@ export const useStore = create<State>()(
         // Calculate total outstanding credit
         const totalPurchases = credits
           .filter((credit) => credit.type === "purchase" && !credit.isPaid)
-          .reduce((sum, credit) => sum + credit.amount, 0);
+          .reduce((sum, credit) => sum + Number(credit.amount), 0);
 
         const totalPayments = credits
           .filter((credit) => credit.type === "payment")
-          .reduce((sum, credit) => sum + credit.amount, 0);
+          .reduce((sum, credit) => sum + Number(credit.amount), 0);
 
         return Math.max(0, totalPurchases - totalPayments);
       },

@@ -72,7 +72,7 @@ export function SalesForm({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md">
+      <SheetContent className="sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Add New Sale</SheetTitle>
           <SheetDescription>
@@ -94,8 +94,8 @@ export function SalesForm({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 max-sm:flex max-sm:wrap">
-            <div className="flex justify-center max-sm:wrap">
+          <div className="sm:grid sm:grid-cols-3 gap-4">
+            <div className="flex max-sm:wrap">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantity</Label>
                 <Input
@@ -112,27 +112,27 @@ export function SalesForm({
                   required
                 />
               </div>
-              <div className="">
-                <Label htmlFor="measurementUnit">Unit</Label>
-                <Select
-                  value={formData.measurementUnit as string}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      measurementUnit: value as typeof formData.measurementUnit,
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pcs">pcs</SelectItem>
-                    <SelectItem value="set">set</SelectItem>
-                    <SelectItem value="kg">kg</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="measurementUnit">Unit</Label>
+              <Select
+                value={formData.measurementUnit as string}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    measurementUnit: value as typeof formData.measurementUnit,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pcs">pcs</SelectItem>
+                  <SelectItem value="set">set</SelectItem>
+                  <SelectItem value="kg">kg</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

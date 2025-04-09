@@ -42,6 +42,7 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { Calendar } from "../ui/calendar";
+import { CalendarForm } from "../ui/calendar-popover";
 
 export function SalesForm({
   open,
@@ -194,15 +195,19 @@ export function SalesForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
-
-        <Calendar
-          mode="single"
-          required
-          id="date"
-          selected={new Date(formData.date)}
-          onSelect={(date) => setFormData({ ...formData, date: date as Date })}
-          className="rounded-md border"
+        <CalendarForm
+          label="Date"
+          defaultValue={formData.date}
+          onSelect={(date) => {
+            setFormData({
+              ...formData,
+              date,
+            });
+          }}
+          name="date"
+          calendarProps={{
+            required: true,
+          }}
         />
       </div>
       {isMobile ? (

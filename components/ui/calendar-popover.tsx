@@ -1,101 +1,70 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { cn } from "@/lib/utils";
-import { toast } from "@/components/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Calendar, CalendarProps } from "@/components/ui/calendar";
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useState } from "react";
 
-const FormSchema = z.object({
-  dob: z.date({
-    required_error: "A date of birth is required.",
-  }),
-});
+interface CalendarFormProps {
+  label?: string;
+  onSelect: (date: Date | undefined) => void;
+  name: string;
+  defaultValue: Date | string;
+  calendarProps: Partial<CalendarProps>;
+}
+export function CalendarForm({
+  name,
+  label,
+  calendarProps,
+  defaultValue,
+  onSelect,
+}: CalendarFormProps) {
+  const [value, setValue] = useState(new Date(defaultValue));
 
-export function CalendarForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-  });
-
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  function handleDateSelect(date: Date | undefined) {
+    (date: Date | undefined) => {
+      setValue(date as Date);
+      onSelect(date);
+      console.log({
+        date,
+        value,
+      });
+    };
   }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="dob"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date of birth</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                Your date of birth is used to calculate your age.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-[240px] pl-3 text-left font-normal",
+            !value && "text-muted-foreground"
           )}
+        >
+          {value ? format(value, "PPP") : <span>Pick a date</span>}
+          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="start">
+        
+        <Calendar
+          mode="single"
+          selected={value}
+          required
+          onSelect={handleDateSelect}
+          initialFocus
+          {...calendarProps}
         />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+      </PopoverContent>
+    </Popover>
   );
 }

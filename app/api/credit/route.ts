@@ -1,37 +1,66 @@
-import { NextResponse } from "next/server"
-import { v4 as uuidv4 } from "uuid"
-import { db } from "@/lib/db"
-import { credits, debtors } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
+import { db } from "@/lib/db";
+import { credits, debtors } from "@/lib/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function GET() {
   try {
-    const allCredits = await db.select().from(credits).orderBy(credits.date)
-    const allDebtors = await db.select().from(debtors)
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!authSession?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized", data: null, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const allCredits = await db.query.credits.findMany({
+      orderBy: [desc(credits.date)],
+      where: (credits, { eq }) => eq(credits.userId, authSession?.user?.id),
+    });
+    const allDebtors = await db.select().from(debtors);
 
-    return NextResponse.json({ credits: allCredits, debtors: allDebtors })
+    return NextResponse.json({ credits: allCredits, debtors: allDebtors });
   } catch (error) {
-    console.error("Failed to fetch credit data:", error)
-    return NextResponse.json({ error: "Failed to fetch credit data" }, { status: 500 })
+    console.error("Failed to fetch credit data:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch credit data" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!authSession?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized", data: null, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const body = await request.json();
 
-    const creditId = body.id || uuidv4()
-    const debtorId = body.debtorId || uuidv4()
-    const date = body.date ? new Date(body.date) : new Date()
+    const creditId = body.id || uuidv4();
+    const debtorId = body.debtorId || uuidv4();
+    const date = body.date ? new Date(body.date) : new Date();
 
     // Check if debtor exists, if not create them
-    const existingDebtor = await db.select().from(debtors).where(eq(debtors.id, debtorId))
+    const existingDebtor = await db
+      .select()
+      .from(debtors)
+      .where(eq(debtors.id, debtorId));
 
     if (existingDebtor.length === 0 && body.debtorName) {
       await db.insert(debtors).values({
         id: debtorId,
         name: body.debtorName,
-      })
+      });
     }
 
     // Create the credit entry
@@ -45,14 +74,16 @@ export async function POST(request: Request) {
       amount: body.amount,
       paymentType: body.type === "payment" ? body.paymentType : null,
       date,
-    }
+    };
 
-    await db.insert(credits).values(newCredit)
+    await db.insert(credits).values(newCredit);
 
-    return NextResponse.json(newCredit, { status: 201 })
+    return NextResponse.json(newCredit, { status: 201 });
   } catch (error) {
-    console.error("Failed to create credit entry:", error)
-    return NextResponse.json({ error: "Failed to create credit entry" }, { status: 500 })
+    console.error("Failed to create credit entry:", error);
+    return NextResponse.json(
+      { error: "Failed to create credit entry" },
+      { status: 500 }
+    );
   }
 }
-

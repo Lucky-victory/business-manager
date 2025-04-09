@@ -87,7 +87,10 @@ export const sales = mysqlTable("sales", {
   quantity: int("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  paymentType: varchar("payment_type", { length: 50 }).notNull(),
+  paymentType: varchar("payment_type", {
+    length: 50,
+    enum: ["transfer", "pos", "cash"],
+  }).notNull(),
   date: timestamp("date").notNull(),
   measurementUnit: varchar("measurement_unit", {
     length: 50,

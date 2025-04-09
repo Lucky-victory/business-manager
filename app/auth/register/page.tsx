@@ -176,6 +176,14 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="max-w-md w-full space-y-6 p-8 bg-card rounded-lg shadow-lg">
+        <div className="flex items-center">
+          <button
+            onClick={() => router.back()}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            ← Back
+          </button>
+        </div>
         <div className="text-center">
           <h2 className="mt-4 text-3xl font-bold text-foreground">
             Create your account

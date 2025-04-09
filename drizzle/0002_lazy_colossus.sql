@@ -1,0 +1,1 @@
+ALTER TABLE `credits` ADD `measurement_unit` varchar(50);

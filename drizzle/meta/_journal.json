@@ -8,6 +8,20 @@
       "when": 1744064514451,
       "tag": "0000_mean_scalphunter",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1744129957302,
+      "tag": "0001_small_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1744130184387,
+      "tag": "0002_lazy_colossus",
+      "breakpoints": true
     }
   ]
 }

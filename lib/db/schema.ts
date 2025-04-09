@@ -89,7 +89,12 @@ export const sales = mysqlTable("sales", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentType: varchar("payment_type", { length: 50 }).notNull(),
   date: timestamp("date").notNull(),
+  measurementUnit: varchar("measurement_unit", {
+    length: 50,
+    enum: ["set", "kg", "pcs"],
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
   userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -117,6 +122,10 @@ export const credits = mysqlTable("credits", {
   // For purchases
   item: varchar("item", { length: 255 }),
   quantity: int("quantity"),
+  measurementUnit: varchar("measurement_unit", {
+    length: 50,
+    enum: ["set", "kg", "pcs"],
+  }),
   price: decimal("price", { precision: 10, scale: 2 }),
   // For both purchases and payments
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),

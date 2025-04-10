@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
-import { credits, debtors } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { credits } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { generateUUID, IS_DEV } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -21,13 +21,17 @@ export async function GET() {
       orderBy: [desc(credits.date)],
       where: (credits, { eq }) => eq(credits.userId, authSession?.user?.id),
     });
-    const allDebtors = await db.select().from(debtors);
 
-    return NextResponse.json({ credits: allCredits, debtors: allDebtors });
-  } catch (error) {
-    console.error("Failed to fetch credit data:", error);
     return NextResponse.json(
-      { error: "Failed to fetch credit data" },
+      { data: allCredits, message: "Credits fetched successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: "Failed to fetch credit data",
+        message: IS_DEV ? error?.message : "Failed to fetch credit data",
+      },
       { status: 500 }
     );
   }
@@ -45,23 +49,9 @@ export async function POST(request: Request) {
       );
     }
     const body = await request.json();
+    const { debtorId, id: creditId = generateUUID() } = body;
 
-    const creditId = body.id || uuidv4();
-    const debtorId = body.debtorId || uuidv4();
     const date = body.date ? new Date(body.date) : new Date();
-
-    // Check if debtor exists, if not create them
-    const existingDebtor = await db
-      .select()
-      .from(debtors)
-      .where(eq(debtors.id, debtorId));
-
-    if (existingDebtor.length === 0 && body.debtorName) {
-      await db.insert(debtors).values({
-        id: debtorId,
-        name: body.debtorName,
-      });
-    }
 
     // Create the credit entry
     const newCredit = {
@@ -74,15 +64,36 @@ export async function POST(request: Request) {
       amount: body.amount,
       paymentType: body.type === "payment" ? body.paymentType : null,
       date,
+      userId: authSession?.user?.id,
     };
+    const debtor = await db.query.debtors.findFirst({
+      where: (debtors, { eq }) => eq(debtors.id, debtorId),
+    });
+    if (!debtor) {
+      throw new Error("Debtor not found");
+    }
+    const createdCredit = await db.transaction(async (tx) => {
+      await tx.insert(credits).values(newCredit);
 
-    await db.insert(credits).values(newCredit);
+      return await tx.query.credits.findFirst({
+        where: (credits, { eq, and }) =>
+          and(
+            eq(credits.id, creditId),
+            eq(credits.userId, authSession?.user?.id)
+          ),
+      });
+    });
 
-    return NextResponse.json(newCredit, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create credit entry:", error);
     return NextResponse.json(
-      { error: "Failed to create credit entry" },
+      { data: createdCredit, message: "Credit created successfully" },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: "Failed to create credit entry",
+        message: IS_DEV ? error?.message : "Failed to create credit entry",
+      },
       { status: 500 }
     );
   }

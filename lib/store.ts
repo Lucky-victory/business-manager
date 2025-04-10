@@ -26,17 +26,50 @@ type State = {
   credits: CreditSelect[];
   debtors: DebtorSelect[];
   searchResults: SearchResult[];
+  isLoading: {
+    sales: boolean;
+    credits: boolean;
+    debtors: boolean;
+    search: boolean;
+  };
+  error: string | null;
+
+  // Sales operations
   fetchSales: () => Promise<void>;
-  addSale: (sale: SaleInsert) => Promise<void>;
+  addSale: (sale: SaleInsert) => Promise<SaleSelect | null>;
+  deleteSale: (saleId: string) => Promise<void>;
+
+  // Credit operations
   fetchCredits: () => Promise<void>;
-  addCredit: (credit: CreditInsert) => Promise<void>;
+  addCredit: (credit: CreditInsert) => Promise<CreditSelect | null>;
   updateCreditStatus: (creditId: string, isPaid: boolean) => Promise<void>;
   updateMultipleCreditStatus: (
     creditIds: string[],
     isPaid: boolean
   ) => Promise<void>;
+  deleteCredit: (creditId: string) => Promise<void>;
+
+  // Debtor operations
+  fetchDebtors: () => Promise<void>;
+  addDebtor: (debtor: DebtorInsert) => Promise<DebtorSelect | null>;
+  updateDebtor: (
+    debtorId: string,
+    data: Partial<DebtorInsert>
+  ) => Promise<void>;
+  deleteDebtor: (debtorId: string) => Promise<void>;
+  getDebtorById: (debtorId: string) => Promise<DebtorSelect | null>;
+
+  // Search operations
   searchSalesAndCredit: (query: string) => Promise<void>;
+  clearSearchResults: () => void;
+
+  // Analytics
   getTotalOutstandingCredit: () => number;
+  getDebtorCredits: (debtorId: string) => CreditSelect[];
+  getDebtorBalance: (debtorId: string) => number;
+
+  // State management
+  clearError: () => void;
 };
 
 export const useStore = create<State>()(
@@ -46,21 +79,46 @@ export const useStore = create<State>()(
       credits: [],
       debtors: [],
       searchResults: [],
+      isLoading: {
+        sales: false,
+        credits: false,
+        debtors: false,
+        search: false,
+      },
+      error: null,
 
+      // Sales operations
       fetchSales: async () => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, sales: true },
+            error: null,
+          }));
+
           const response = await fetch("/api/sales");
           if (!response.ok) throw new Error("Failed to fetch sales");
 
-          const data = await response.json();
-          set({ sales: data });
-        } catch (error) {
+          const { data } = await response.json();
+          set((state) => ({
+            sales: data,
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+        } catch (error: any) {
           console.error("Error fetching sales:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, sales: false },
+          }));
         }
       },
 
       addSale: async (sale: SaleInsert) => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, sales: true },
+            error: null,
+          }));
+
           const response = await fetch("/api/sales", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -69,32 +127,81 @@ export const useStore = create<State>()(
 
           if (!response.ok) throw new Error("Failed to add sale");
 
-          const newSale = await response.json();
+          const { data } = await response.json();
           set((state) => ({
-            sales: [...state.sales, newSale],
+            sales: [...state.sales, data],
+            isLoading: { ...state.isLoading, sales: false },
           }));
-        } catch (error) {
+
+          return data;
+        } catch (error: any) {
           console.error("Error adding sale:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+          return null;
         }
       },
 
+      deleteSale: async (saleId: string) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, sales: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/sales/${saleId}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete sale");
+
+          set((state) => ({
+            sales: state.sales.filter((sale) => sale.id !== saleId),
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+        } catch (error: any) {
+          console.error("Error deleting sale:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+        }
+      },
+
+      // Credit operations
       fetchCredits: async () => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, credits: true },
+            error: null,
+          }));
+
           const response = await fetch("/api/credit");
           if (!response.ok) throw new Error("Failed to fetch credit data");
 
-          const data = await response.json();
-          set({
-            credits: data.credits,
-            debtors: data.debtors,
-          });
-        } catch (error) {
+          const { data } = await response.json();
+          set((state) => ({
+            credits: data,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
+        } catch (error: any) {
           console.error("Error fetching credit data:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
         }
       },
 
       addCredit: async (credit: CreditInsert) => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, credits: true },
+            error: null,
+          }));
+
           const response = await fetch("/api/credit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -103,42 +210,31 @@ export const useStore = create<State>()(
 
           if (!response.ok) throw new Error("Failed to add credit");
 
-          const newCredit = await response.json();
+          const { data } = await response.json();
 
-          // Update local state
-          set((state) => {
-            // Check if this is a new debtor
-            const updatedDebtors = [...state.debtors];
-            const existingDebtor = updatedDebtors.find(
-              (d) => d.id === credit.debtorId
-            );
+          set((state) => ({
+            credits: [...state.credits, data],
+            isLoading: { ...state.isLoading, credits: false },
+          }));
 
-            if (!existingDebtor) {
-              const newDebtor: DebtorSelect = {
-                id: credit.debtorId!,
-                name: "",
-                email: null,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                phone: null,
-                address: null,
-                userId: authClient.useSession()?.data?.user?.id as string,
-              };
-              updatedDebtors.push(newDebtor);
-            }
-
-            return {
-              credits: [...state.credits, newCredit],
-              debtors: updatedDebtors,
-            };
-          });
-        } catch (error) {
+          return data;
+        } catch (error: any) {
           console.error("Error adding credit:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
+          return null;
         }
       },
 
       updateCreditStatus: async (creditId: string, isPaid: boolean) => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, credits: true },
+            error: null,
+          }));
+
           const response = await fetch(`/api/credit/${creditId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -150,20 +246,20 @@ export const useStore = create<State>()(
 
           if (!response.ok) throw new Error("Failed to update credit status");
 
-          // Update local state
+          const { data } = await response.json();
+
           set((state) => ({
             credits: state.credits.map((credit) =>
-              credit.id === creditId
-                ? {
-                    ...credit,
-                    isPaid,
-                    paidDate: isPaid ? new Date() : null,
-                  }
-                : credit
+              credit.id === creditId ? data : credit
             ),
+            isLoading: { ...state.isLoading, credits: false },
           }));
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error updating credit status:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
         }
       },
 
@@ -172,6 +268,11 @@ export const useStore = create<State>()(
         isPaid: boolean
       ) => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, credits: true },
+            error: null,
+          }));
+
           const response = await fetch(`/api/credit/batch-update`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -185,7 +286,6 @@ export const useStore = create<State>()(
           if (!response.ok)
             throw new Error("Failed to update multiple credit statuses");
 
-          // Update local state
           set((state) => ({
             credits: state.credits.map((credit) =>
               creditIds.includes(credit.id)
@@ -193,30 +293,250 @@ export const useStore = create<State>()(
                     ...credit,
                     isPaid,
                     paidDate: isPaid ? new Date() : null,
+                    updatedAt: new Date(),
                   }
                 : credit
             ),
+            isLoading: { ...state.isLoading, credits: false },
           }));
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error updating multiple credit statuses:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
         }
       },
 
-      searchSalesAndCredit: async (query: string) => {
+      deleteCredit: async (creditId: string) => {
         try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, credits: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/credit/${creditId}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete credit");
+
+          set((state) => ({
+            credits: state.credits.filter((credit) => credit.id !== creditId),
+            isLoading: { ...state.isLoading, credits: false },
+          }));
+        } catch (error: any) {
+          console.error("Error deleting credit:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, credits: false },
+          }));
+        }
+      },
+
+      // Debtor operations
+      fetchDebtors: async () => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, debtors: true },
+            error: null,
+          }));
+
+          const response = await fetch("/api/debtors");
+          if (!response.ok) throw new Error("Failed to fetch debtors");
+
+          const { data } = await response.json();
+          set((state) => ({
+            debtors: data,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        } catch (error: any) {
+          console.error("Error fetching debtors:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        }
+      },
+
+      addDebtor: async (debtor: DebtorInsert) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, debtors: true },
+            error: null,
+          }));
+
+          const response = await fetch("/api/debtors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(debtor),
+          });
+
+          if (!response.ok) throw new Error("Failed to add debtor");
+
+          const { data } = await response.json();
+          set((state) => ({
+            debtors: [...state.debtors, data],
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+
+          return data;
+        } catch (error: any) {
+          console.error("Error adding debtor:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+          return null;
+        }
+      },
+
+      updateDebtor: async (debtorId: string, data: Partial<DebtorInsert>) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, debtors: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/debtors/${debtorId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) throw new Error("Failed to update debtor");
+
+          const { data: updatedDebtor } = await response.json();
+
+          set((state) => ({
+            debtors: state.debtors.map((debtor) =>
+              debtor.id === debtorId ? updatedDebtor : debtor
+            ),
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        } catch (error: any) {
+          console.error("Error updating debtor:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        }
+      },
+
+      deleteDebtor: async (debtorId: string) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, debtors: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/debtors/${debtorId}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete debtor");
+
+          set((state) => ({
+            debtors: state.debtors.filter((debtor) => debtor.id !== debtorId),
+            credits: state.credits.filter(
+              (credit) => credit.debtorId !== debtorId
+            ),
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        } catch (error: any) {
+          console.error("Error deleting debtor:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+        }
+      },
+
+      getDebtorById: async (debtorId: string) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, debtors: true },
+            error: null,
+          }));
+
+          // First check if we already have this debtor in state
+          const existingDebtor = get().debtors.find((d) => d.id === debtorId);
+          if (existingDebtor) {
+            set((state) => ({
+              isLoading: { ...state.isLoading, debtors: false },
+            }));
+            return existingDebtor;
+          }
+
+          const response = await fetch(`/api/debtors/${debtorId}`);
+          if (!response.ok) throw new Error("Failed to fetch debtor");
+
+          const { data } = await response.json();
+
+          // Update the debtors list if we found a new one
+          if (data) {
+            set((state) => ({
+              debtors: [
+                ...state.debtors.filter((d) => d.id !== debtorId),
+                data,
+              ],
+              isLoading: { ...state.isLoading, debtors: false },
+            }));
+          } else {
+            set((state) => ({
+              isLoading: { ...state.isLoading, debtors: false },
+            }));
+          }
+
+          return data;
+        } catch (error: any) {
+          console.error("Error fetching debtor:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, debtors: false },
+          }));
+          return null;
+        }
+      },
+
+      // Search operations
+      searchSalesAndCredit: async (query: string) => {
+        if (!query.trim()) {
+          set({ searchResults: [] });
+          return;
+        }
+
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, search: true },
+            error: null,
+          }));
+
           const response = await fetch(
             `/api/search?q=${encodeURIComponent(query)}`
           );
           if (!response.ok) throw new Error("Search failed");
 
-          const data = await response.json();
-          set({ searchResults: data.results });
-        } catch (error) {
+          const { data } = await response.json();
+          set({
+            searchResults: data,
+            isLoading: { ...get().isLoading, search: false },
+          });
+        } catch (error: any) {
           console.error("Error searching:", error);
-          set({ searchResults: [] });
+          set({
+            searchResults: [],
+            error: error.message,
+            isLoading: { ...get().isLoading, search: false },
+          });
         }
       },
 
+      clearSearchResults: () => {
+        set({ searchResults: [] });
+      },
+
+      // Analytics
       getTotalOutstandingCredit: () => {
         const { credits } = get();
 
@@ -231,9 +551,39 @@ export const useStore = create<State>()(
 
         return Math.max(0, totalPurchases - totalPayments);
       },
+
+      getDebtorCredits: (debtorId: string) => {
+        const { credits } = get();
+        return credits.filter((credit) => credit.debtorId === debtorId);
+      },
+
+      getDebtorBalance: (debtorId: string) => {
+        const debtorCredits = get().getDebtorCredits(debtorId);
+
+        const totalPurchases = debtorCredits
+          .filter((credit) => credit.type === "purchase" && !credit.isPaid)
+          .reduce((sum, credit) => sum + Number(credit.amount), 0);
+
+        const totalPayments = debtorCredits
+          .filter((credit) => credit.type === "payment")
+          .reduce((sum, credit) => sum + Number(credit.amount), 0);
+
+        return Math.max(0, totalPurchases - totalPayments);
+      },
+
+      // State management
+      clearError: () => {
+        set({ error: null });
+      },
     }),
     {
       name: "business-management-storage",
+      partialize: (state) => ({
+        // Only persist these parts of the state to localStorage
+        sales: state.sales,
+        credits: state.credits,
+        debtors: state.debtors,
+      }),
     }
   )
 );

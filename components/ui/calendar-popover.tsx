@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { SelectSingleEventHandler } from "react-day-picker";
 
 interface CalendarFormProps {
   label?: string;
@@ -30,16 +31,17 @@ export function CalendarForm({
 }: CalendarFormProps) {
   const [value, setValue] = useState(new Date(defaultValue));
 
-  function handleDateSelect(date: Date | undefined) {
-    (date: Date | undefined) => {
-      setValue(date as Date);
-      onSelect(date);
-      console.log({
-        date,
-        value,
-      });
-    };
-  }
+  const handleDateSelect: SelectSingleEventHandler = (
+    date: Date | undefined
+  ) => {
+    setValue(date as Date);
+    onSelect(date);
+    console.log({
+      date,
+      value,
+    });
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -54,12 +56,10 @@ export function CalendarForm({
           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        
+      <PopoverContent className="w-80 p-0 relative z-[60]" align="start">
         <Calendar
           mode="single"
           selected={value}
-          required
           onSelect={handleDateSelect}
           initialFocus
           {...calendarProps}

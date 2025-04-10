@@ -43,6 +43,10 @@ import {
 } from "../ui/drawer";
 import { Calendar } from "../ui/calendar";
 import { CalendarForm } from "../ui/calendar-popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function SalesForm({
   open,
@@ -195,20 +199,50 @@ export function SalesForm({
       </div>
 
       <div className="space-y-2">
-        <CalendarForm
+        {/* <CalendarForm
           label="Date"
           defaultValue={formData.date}
           onSelect={(date) => {
             setFormData({
               ...formData,
-              date,
+              date: date as Date,
             });
           }}
           name="date"
           calendarProps={{
             required: true,
           }}
-        />
+        /> */}
+        <Popover modal={false}>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[240px] pl-3 text-left font-normal",
+                !formData.date && "text-muted-foreground"
+              )}
+            >
+              {formData.date ? (
+                format(formData.date, "PPP")
+              ) : (
+                <span>Pick a date</span>
+              )}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Calendar
+              mode="single"
+              required
+              id="date"
+              selected={new Date(formData.date)}
+              onSelect={(date) =>
+                setFormData({ ...formData, date: date as Date })
+              }
+              className="rounded-md border"
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       {isMobile ? (
         <DrawerFooter className="pt-4">
@@ -223,8 +257,9 @@ export function SalesForm({
   );
   return (
     <>
+      
       {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange}>
+        <Drawer open={open} onOpenChange={onOpenChange} modal={true}>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Add New Sale</DrawerTitle>
@@ -236,8 +271,8 @@ export function SalesForm({
           </DrawerContent>
         </Drawer>
       ) : (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent>
+        <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+          <DialogContent className="pointer-events-auto">
             <DialogHeader>
               <DialogTitle>Add New Sale</DialogTitle>
               <DialogDescription>

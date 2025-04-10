@@ -3,16 +3,21 @@
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { Loader2 } from "lucide-react";
+import { SocialSignInButton } from "@/components/auth/social-sign-in-button";
+import { BackButton } from "@/components/ui/back-button";
+import { AlertError } from "@/components/ui/alert-error";
 
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError("");
     try {
       const result = await authClient.signIn.email({
         email,
@@ -21,37 +26,41 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        setError(result.error?.message || "Invalid credentials");
+        setSubmitError(result.error?.message || "Invalid credentials");
         return;
       }
 
       //   router.push("/dashboard");
     } catch (error) {
-      setError("An error occurred during sign in");
+      setSubmitError("An error occurred during sign in");
     }
   };
-
+  async function signUpWithGoogle() {
+    try {
+      setIsSubmitting(true);
+      await authClient.signIn.social({
+        provider: "google",
+      });
+    } catch (error) {
+      setSubmitError("Google sign-in failed. Please try again.");
+      console.error("Google sign-in error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg">
         <div className="flex items-center">
-          <button
-            onClick={() => router.back()}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            ← Back
-          </button>
+          <BackButton onClick={() => router.back()} />
         </div>
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-foreground">
             Sign in to your account
           </h2>
         </div>
-        {error && (
-          <div className="bg-destructive/15 border border-destructive text-destructive px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
+        {submitError && <AlertError message={submitError} />}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md space-y-4">
             <div>
@@ -91,7 +100,14 @@ export default function SignIn() {
               type="submit"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
             >
-              Sign in
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>Sign in</>
+              )}
             </button>
           </div>
         </form>
@@ -108,21 +124,24 @@ export default function SignIn() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <button
-              onClick={() => {}}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full"
-            >
-              <Image
-                className="h-5 w-5 mr-2"
-                src="/google.svg"
-                alt="Google logo"
-                width={20}
-                height={20}
-              />
-              Sign in with Google
-            </button>
+          <div className="mt-4">
+            <SocialSignInButton
+              provider="google"
+              onClick={signUpWithGoogle}
+              isLoading={isSubmitting}
+            />
           </div>
+        </div>
+        <div className="text-center mt-4">
+          <p className="text-sm text-muted-foreground">
+            Don&apos; have an account?{" "}
+            <a
+              href="/auth/register"
+              className="font-medium text-primary hover:text-primary/80"
+            >
+              Register
+            </a>
+          </p>
         </div>
       </div>
     </div>

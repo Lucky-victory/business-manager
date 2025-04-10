@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
+import Link from "next/link";
 
 export function SalesList() {
   const router = useRouter();
@@ -41,9 +42,11 @@ export function SalesList() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Sales</h2>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Sale
+        <Button asChild>
+          <Link href={"/sales/new"}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Sale
+          </Link>
         </Button>
       </div>
 

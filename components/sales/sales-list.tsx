@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SalesList() {
   const router = useRouter();
   const { sales, fetchSales } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
-
+  const isMobile = useIsMobile();
   useEffect(() => {
     fetchSales();
   }, [fetchSales]);
@@ -37,12 +38,26 @@ export function SalesList() {
     salesByDate,
     sales,
   });
-
+  const allTimeSalesAmount = Object.keys(salesByDate).reduce(
+    (sum, sale) => sum + salesByDate[sale].totalAmount,
+    0
+  );
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Sales</h2>
-        <Button asChild>
+        <div className="flex flex-col">
+          <h2 className="text-xl font-semibold">Sales</h2>
+          <p className="text-muted-foreground">
+            Total Sales: ₦
+            <span className="font-bold text-2xl">
+              {allTimeSalesAmount.toLocaleString("en-US") as string}
+            </span>
+          </p>
+          <p className="text-muted-foreground">
+            Total Items Sold: {sales.length}
+          </p>
+        </div>
+        <Button asChild size={isMobile ? "sm" : undefined}>
           <Link href={"/sales/new"}>
             <Plus className="h-4 w-4 mr-2" />
             Add Sale

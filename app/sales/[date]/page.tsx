@@ -123,7 +123,11 @@ export default function SalesDetailPage({
         )}
       </div>
 
-      <SalesForm open={isFormOpen} onOpenChange={setIsFormOpen} />
+      <SalesForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        defaultDate={dateString}
+      />
     </div>
   );
 }

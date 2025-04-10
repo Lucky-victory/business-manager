@@ -36,18 +36,21 @@ import {
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { cn, generateUUID } from "@/lib/utils";
 
 export function SalesForm({
   open,
   onOpenChange,
+  defaultDate,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultDate?: Date | string;
 }) {
   const { addSale } = useStore();
   const isMobile = useIsMobile();
+  const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState<{
     item: string;
     quantity: number;
@@ -61,37 +64,53 @@ export function SalesForm({
     price: 0,
     paymentType: "cash",
     measurementUnit: "pcs",
-    date: new Date().toISOString().split("T")[0] as string,
+    date: defaultDate ? new Date(defaultDate) : new Date(),
   });
   const auth = useAuth();
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      setIsAdding(true);
+      const amount = formData.quantity * formData.price;
 
-    const amount = formData.quantity * formData.price;
+      await addSale({
+        id: generateUUID(),
+        item: formData.item,
+        quantity: formData.quantity,
+        price: formData.price + "",
+        amount: amount + "",
+        paymentType: formData.paymentType,
+        date: new Date(formData.date),
+        measurementUnit: formData.measurementUnit,
+        userId: auth?.user?.id as string,
+      });
 
-    addSale({
-      id: Date.now().toString(),
-      item: formData.item,
-      quantity: formData.quantity,
-      price: formData.price + "",
-      amount: amount + "",
-      paymentType: formData.paymentType,
-      date: new Date(formData.date).toISOString() as unknown as Date,
-      measurementUnit: formData.measurementUnit,
-      userId: auth?.user?.id as string,
-    });
-
-    // Reset form and close sheet
-    setFormData({
-      item: "",
-      quantity: 1,
-      price: 0,
-      paymentType: "transfer",
-      measurementUnit: "pcs",
-      date: new Date().toISOString().split("T")[0],
-    });
-    onOpenChange(false);
+      // Reset form and close sheet
+      setFormData({
+        item: "",
+        quantity: 1,
+        price: 0,
+        paymentType: "transfer",
+        measurementUnit: "pcs",
+        date: new Date(),
+      });
+      setIsAdding(false);
+      onOpenChange(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
+  const AddButton = (
+    <Button type="submit" className="flex items-center">
+      {isAdding ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> "Adding..."
+        </>
+      ) : (
+        "Add Sale"
+      )}
+    </Button>
+  );
   const FormComp = (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
       <div className="space-y-2">
@@ -207,28 +226,24 @@ export function SalesForm({
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent>
+          <PopoverContent className="p-0">
             <Calendar
               mode="single"
               required
               id="date"
               selected={new Date(formData.date)}
-              onSelect={(date) =>
-                setFormData({ ...formData, date: date as Date })
-              }
+              onSelect={(date, e) => {
+                setFormData({ ...formData, date: date as Date });
+              }}
               className="rounded-md border"
             />
           </PopoverContent>
         </Popover>
       </div>
       {isMobile ? (
-        <DrawerFooter className="pt-4">
-          <Button type="submit">Add Sale</Button>
-        </DrawerFooter>
+        <DrawerFooter className="pt-4">{AddButton}</DrawerFooter>
       ) : (
-        <DialogFooter className="pt-4">
-          <Button type="submit">Add Sale</Button>
-        </DialogFooter>
+        <DialogFooter className="pt-4">{AddButton}</DialogFooter>
       )}
     </form>
   );

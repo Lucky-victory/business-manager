@@ -50,12 +50,8 @@ export async function POST(request: Request) {
       );
     }
     const newSale = {
+      ...body,
       id: saleId,
-      item: body.item,
-      quantity: body.quantity,
-      price: body.price,
-      amount: body.amount,
-      paymentType: body.paymentType,
       date,
       userId: authSession?.user?.id,
     };

@@ -1,0 +1,1 @@
+ALTER TABLE `sales` ADD `profit` decimal(10,2) NOT NULL;

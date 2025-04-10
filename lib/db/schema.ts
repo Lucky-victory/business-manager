@@ -86,6 +86,7 @@ export const sales = mysqlTable("sales", {
   item: varchar("item", { length: 255 }).notNull(),
   quantity: int("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  profit: decimal("profit", { precision: 10, scale: 2 }).notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentType: varchar("payment_type", {
     length: 50,

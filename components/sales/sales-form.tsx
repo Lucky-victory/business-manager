@@ -46,6 +46,7 @@ interface SalesFormData {
   paymentType: SaleInsert["paymentType"];
   measurementUnit: SaleInsert["measurementUnit"];
   date: Date | string;
+  profit: number;
 }
 
 // Types for form props
@@ -123,18 +124,22 @@ const QuantityUnitField = memo(
 );
 QuantityUnitField.displayName = "QuantityUnitField";
 
-const PriceField = memo(
+const NumberField = memo(
   ({
     value,
     onChange,
+    label,
+    id,
   }: {
     value: number;
     onChange: (value: number) => void;
+    label: string;
+    id: string;
   }) => (
     <div className="space-y-2 col-span-1">
-      <Label htmlFor="price">Price per Unit</Label>
+      <Label htmlFor={id}>{label}</Label>
       <Input
-        id="price"
+        id={id}
         type="number"
         min="0"
         step="5"
@@ -145,7 +150,7 @@ const PriceField = memo(
     </div>
   )
 );
-PriceField.displayName = "PriceField";
+NumberField.displayName = "NumberField";
 
 const PaymentTypeField = memo(
   ({
@@ -276,6 +281,7 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
         item: formData.item,
         quantity: formData.quantity,
         price: formData.price + "",
+        profit: formData.profit + "",
         amount: amount + "",
         paymentType: formData.paymentType,
         date: currentDate,
@@ -290,6 +296,7 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
         price: 0,
         paymentType: "transfer",
         measurementUnit: "pcs",
+        profit: 0,
         date: defaultDate ? new Date(defaultDate) : new Date(),
       });
 
@@ -350,12 +357,16 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
           onUnitChange={(value) => updateField("measurementUnit", value)}
         />
 
-        <PriceField
+        <NumberField
           value={formData.price}
+          id="price"
+          label="Price per Unit"
           onChange={(value) => updateField("price", value)}
         />
-        <PriceField
+        <NumberField
           value={formData.profit}
+          id="profit"
+          label="Profit Made"
           onChange={(value) => updateField("profit", value)}
         />
       </div>

@@ -2,11 +2,12 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SaleInsert, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 import {
   Dialog,
@@ -38,6 +39,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn, generateUUID } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function SalesForm({
   open,
@@ -49,8 +51,10 @@ export function SalesForm({
   defaultDate?: Date | string;
 }) {
   const { addSale } = useStore();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
   const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<{
     item: string;
     quantity: number;
@@ -66,12 +70,25 @@ export function SalesForm({
     measurementUnit: "pcs",
     date: defaultDate ? new Date(defaultDate) : new Date(),
   });
+  console.log({
+    defaultDate,
+    date: formData.date,
+  });
+
   const auth = useAuth();
+  const popoverTriggerBtnRef = useRef<HTMLButtonElement | null>(null);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       setIsAdding(true);
       const amount = formData.quantity * formData.price;
+      const currentDate = new Date(formData.date);
+      const now = new Date();
+      currentDate.setHours(now.getHours());
+      currentDate.setMinutes(now.getMinutes());
+      currentDate.setSeconds(now.getSeconds());
+      currentDate.setMilliseconds(now.getMilliseconds());
 
       await addSale({
         id: generateUUID(),
@@ -80,7 +97,7 @@ export function SalesForm({
         price: formData.price + "",
         amount: amount + "",
         paymentType: formData.paymentType,
-        date: new Date(formData.date),
+        date: currentDate,
         measurementUnit: formData.measurementUnit,
         userId: auth?.user?.id as string,
       });
@@ -92,19 +109,38 @@ export function SalesForm({
         price: 0,
         paymentType: "transfer",
         measurementUnit: "pcs",
-        date: new Date(),
+        date: defaultDate ? new Date(defaultDate) : new Date(),
+      });
+      toast({
+        title: "Success",
+        description: "Sale has been added successfully.",
       });
       setIsAdding(false);
       onOpenChange(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to add sale. Please try again.";
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage,
+      });
+      setIsAdding(false);
     }
   };
   const AddButton = (
-    <Button type="submit" className="flex items-center">
+    <Button
+      type="submit"
+      className={cn("flex items-center")}
+      disabled={isAdding}
+    >
       {isAdding ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> "Adding..."
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
         </>
       ) : (
         "Add Sale"
@@ -113,6 +149,13 @@ export function SalesForm({
   );
   const FormComp = (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="item">Item Name</Label>
         <Input
@@ -201,7 +244,6 @@ export function SalesForm({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="cash">Cash</SelectItem>
-
             <SelectItem value="transfer">Bank Transfer</SelectItem>
             <SelectItem value="pos">POS</SelectItem>
           </SelectContent>
@@ -213,6 +255,7 @@ export function SalesForm({
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}
+              ref={popoverTriggerBtnRef}
               className={cn(
                 "w-[240px] pl-3 text-left font-normal",
                 !formData.date && "text-muted-foreground"
@@ -232,8 +275,10 @@ export function SalesForm({
               required
               id="date"
               selected={new Date(formData.date)}
-              onSelect={(date, e) => {
-                setFormData({ ...formData, date: date as Date });
+              onSelect={(date) => {
+                if (date) setFormData({ ...formData, date });
+
+                popoverTriggerBtnRef.current?.click();
               }}
               className="rounded-md border"
             />

@@ -26,6 +26,10 @@ export default function SalesDetailPage({
 
   // Filter sales for the selected date
   const dateString = _params.date;
+  console.log({
+    dateString,
+  });
+
   const filteredSales = sales.filter((sale) => {
     const saleDate = new Date(sale.date);
     return format(saleDate, "yyyy-MM-dd") === dateString;

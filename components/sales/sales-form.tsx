@@ -7,14 +7,7 @@ import { SaleInsert, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+
 import {
   Dialog,
   DialogContent,
@@ -22,7 +15,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -42,7 +34,6 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { Calendar } from "../ui/calendar";
-import { CalendarForm } from "../ui/calendar-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -199,20 +190,6 @@ export function SalesForm({
       </div>
 
       <div className="space-y-2">
-        {/* <CalendarForm
-          label="Date"
-          defaultValue={formData.date}
-          onSelect={(date) => {
-            setFormData({
-              ...formData,
-              date: date as Date,
-            });
-          }}
-          name="date"
-          calendarProps={{
-            required: true,
-          }}
-        /> */}
         <Popover modal={false}>
           <PopoverTrigger asChild>
             <Button
@@ -257,7 +234,6 @@ export function SalesForm({
   );
   return (
     <>
-      
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} modal={true}>
           <DrawerContent>

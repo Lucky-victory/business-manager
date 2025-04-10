@@ -3,12 +3,14 @@
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SalesDetailPage({
   params,
@@ -19,16 +21,14 @@ export default function SalesDetailPage({
   const _params = use<{ date: string }>(params as any);
   const { sales, fetchSales } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
+    setIsLoading(true);
     fetchSales();
+    setIsLoading(false);
   }, [fetchSales]);
 
-  // Filter sales for the selected date
   const dateString = _params.date;
-  console.log({
-    dateString,
-  });
 
   const filteredSales = sales.filter((sale) => {
     const saleDate = new Date(sale.date);
@@ -63,8 +63,11 @@ export default function SalesDetailPage({
         <div>
           <p className="text-muted-foreground">
             Total Sales:{" "}
-            <span className="font-medium text-foreground">
-              ₦{totalAmount.toFixed(2)}
+            <span className="font-medium text-foreground ">
+              ₦
+              <span className="text-2xl font-bold">
+                {formatCurrency(totalAmount)}
+              </span>
             </span>
           </p>
           <p className="text-muted-foreground">
@@ -96,13 +99,13 @@ export default function SalesDetailPage({
                 <div>
                   <p className="text-sm text-muted-foreground">Price</p>
                   <p className="font-medium">
-                    ₦{parseInt(sale.price, 10).toFixed(2)}
+                    ₦{formatCurrency(parseInt(sale.price, 10))}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total</p>
                   <p className="font-medium">
-                    ₦{parseInt(sale.amount, 10).toFixed(2)}
+                    ₦{formatCurrency(parseInt(sale.amount, 10))}
                   </p>
                 </div>
                 <div>
@@ -120,7 +123,13 @@ export default function SalesDetailPage({
           </Card>
         ))}
 
-        {filteredSales.length === 0 && (
+        {isLoading && (
+          <div className="flex flex-col gap-4 max-w-40 mx-auto items-center">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span>Fetching data...</span>
+          </div>
+        )}
+        {!isLoading && filteredSales.length === 0 && (
           <div className="text-center py-10 text-muted-foreground">
             No sales recorded for this date.
           </div>

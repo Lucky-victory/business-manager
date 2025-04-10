@@ -37,6 +37,7 @@ type State = {
   // Sales operations
   fetchSales: () => Promise<void>;
   addSale: (sale: SaleInsert) => Promise<SaleSelect | null>;
+  editSale: (saleId:string,data: Partial<SaleInsert>) => Promise<SaleSelect | null>;
   deleteSale: (saleId: string) => Promise<void>;
 
   // Credit operations
@@ -121,6 +122,37 @@ export const useStore = create<State>()(
 
           const response = await fetch("/api/sales", {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sale),
+          });
+
+          if (!response.ok) throw new Error("Failed to add sale");
+
+          const { data } = await response.json();
+          set((state) => ({
+            sales: [...state.sales, data],
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+
+          return data;
+        } catch (error: any) {
+          console.error("Error adding sale:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, sales: false },
+          }));
+          return null;
+        }
+      },
+      editSale: async (saleId:string,sale: Partial<SaleInsert>) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, sales: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/sales/${saleId}`, {
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(sale),
           });

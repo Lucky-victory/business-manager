@@ -40,6 +40,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Types for form data
 interface SalesFormData {
+  id?: string;
   item: string;
   quantity: number;
   price: number;

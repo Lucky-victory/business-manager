@@ -6,3 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 export const IS_DEV = process.env.NODE_ENV !== "production";
 export const generateUUID = () => uuidv4();
+export const formatCurrency = (val: number) =>
+  val && typeof val === "number" ? val.toLocaleString() : "0.00";

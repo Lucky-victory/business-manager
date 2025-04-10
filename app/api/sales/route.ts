@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
 import { sales } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { desc } from "drizzle-orm";
+import { generateUUID, IS_DEV } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -23,10 +23,12 @@ export async function GET() {
       { data: allSales, message: "Sales fetched successfully" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Failed to fetch sales:", error);
+  } catch (error: any) {
     return NextResponse.json(
-      { error: "Failed to fetch sales" },
+      {
+        error: "Failed to fetch sales",
+        message: IS_DEV ? error?.message : "Failed to fetch sales",
+      },
       { status: 500 }
     );
   }
@@ -36,12 +38,16 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const saleId = body.id || uuidv4();
+    const saleId = body.id || generateUUID();
     const date = body.date ? new Date(body.date) : new Date();
-    const authSession = await auth.api.getSession({ headers: await headers() });
-
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    });
     if (!authSession?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized", data: null, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
     const newSale = {
       id: saleId,
@@ -56,11 +62,16 @@ export async function POST(request: Request) {
 
     await db.insert(sales).values(newSale);
 
-    return NextResponse.json(newSale, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create sale:", error);
     return NextResponse.json(
-      { error: "Failed to create sale" },
+      { data: newSale, message: "Sale created successfully" },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: "Failed to create sale",
+        message: IS_DEV ? error?.message : "Failed to create sale",
+      },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { credits, debtors, sales } from "./db/schema";
+import { authClient } from "./auth-client";
 
 // Types
 export type SaleSelect = typeof sales.$inferSelect;
@@ -121,6 +122,7 @@ export const useStore = create<State>()(
                 updatedAt: new Date(),
                 phone: null,
                 address: null,
+                userId: authClient.useSession()?.data?.user?.id as string,
               };
               updatedDebtors.push(newDebtor);
             }

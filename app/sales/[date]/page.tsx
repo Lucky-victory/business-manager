@@ -10,7 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function SalesDetailPage({
   params,
@@ -95,65 +102,53 @@ export default function SalesDetailPage({
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {filteredSales.map((sale) => (
-          <Card
-            key={sale.id}
-            onClick={() => {
-              setActionType("edit");
-              editItem(sale);
-            }}
-          >
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment</p>
-                  <p className="font-medium capitalize">{sale.paymentType}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Qty</p>
-                  <div className="flex">
-                    <p className="font-medium">
-                      {sale.quantity} {sale.measurementUnit || "--"}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Item</p>
-                  <p className="font-medium">{sale.item}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="font-medium">
-                    ₦{formatCurrency(parseInt(sale.price, 10))}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="font-medium">
-                    ₦{formatCurrency(parseInt(sale.amount, 10))}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Profit</p>
-                  <p className="font-medium">
-                    ₦{formatCurrency(parseInt(sale.profit, 10))}
-                  </p>
-                </div>
-
-                <div className="">
-                  <p className="text-xs text-muted-foreground">Time</p>
-                  <p className="font-medium max-sm:text-sm">
-                    {format(new Date(sale.date), "h:mm a")}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Payment</TableHead>
+              <TableHead>Qty</TableHead>
+              <TableHead>Item</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Profit</TableHead>
+              <TableHead>Time</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredSales.map((sale) => (
+              <TableRow
+                key={sale.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => {
+                  setActionType("edit");
+                  editItem(sale);
+                }}
+              >
+                <TableCell className="font-medium capitalize">
+                  {sale.paymentType}
+                </TableCell>
+                <TableCell>
+                  {sale.quantity} {sale.measurementUnit || "--"}
+                </TableCell>
+                <TableCell>{sale.item}</TableCell>
+                <TableCell>
+                  ₦{formatCurrency(parseInt(sale.price, 10))}
+                </TableCell>
+                <TableCell>
+                  ₦{formatCurrency(parseInt(sale.amount, 10))}
+                </TableCell>
+                <TableCell>
+                  ₦{formatCurrency(parseInt(sale.profit, 10))}
+                </TableCell>
+                <TableCell>{format(new Date(sale.date), "h:mm a")}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         {isLoading && (
-          <div className="flex flex-col gap-4 max-w-40 mx-auto items-center">
+          <div className="flex flex-col gap-4 max-w-40 mx-auto items-center py-8">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             <span>Fetching data...</span>
           </div>

@@ -21,7 +21,7 @@ export default function CreditDetailPage({
   const _params = use<{ debtorId: string }>(params as any);
   const debtorId = _params.debtorId;
 
-  const { credits, fetchCredits } = useStore();
+  const { credits, fetchCredits, debtors } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
@@ -33,10 +33,10 @@ export default function CreditDetailPage({
     (credit) => credit.debtorId === debtorId
   );
 
-  // Get debtor name
-  // const debtorName =
-  //   debtorCredits.length > 0 ? debtorCredits[0].debtorName : "Unknown Debtor";
-  const debtorName = "Unknown Debtor";
+  const debtor = debtors.find(
+    (debtor) => debtor.id === debtorCredits?.[0]?.debtorId
+  );
+  const debtorName = debtor?.name || "Unknown Debtor";
 
   return (
     <div className="container mx-auto px-4 py-6">

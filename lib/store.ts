@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { credits, debtors, sales } from "./db/schema";
-import { authClient } from "./auth-client";
 
 // Types
 export type SaleSelect = typeof sales.$inferSelect;

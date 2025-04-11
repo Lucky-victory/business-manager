@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreditReportDialog } from "@/components/credit/credit-report-dialog";
+import { formatCurrency } from "@/lib/utils";
 
 export function CreditList() {
   const router = useRouter();
@@ -61,10 +62,11 @@ export function CreditList() {
   // Group credits by debtor
   const creditsByDebtor = filteredCredits.reduce(
     (acc, credit) => {
+      const debtor = debtors.find((debtor) => debtor.id === credit.debtorId);
       if (!acc[credit.debtorId]) {
         acc[credit.debtorId] = {
           debtorId: credit.debtorId,
-          debtorName: debtors[credit.debtorId as any]?.name || "Unknown Debtor",
+          debtorName: debtor?.name || "Unknown Debtor",
           totalAmount: 0,
           paidAmount: 0,
           unpaidAmount: 0,
@@ -117,7 +119,7 @@ export function CreditList() {
           <p className="text-muted-foreground">
             Total Outstanding:{" "}
             <span className="font-medium text-red-500">
-              ${totalOutstandingCredit.toFixed(2)}
+              ₦{totalOutstandingCredit.toFixed(2)}
             </span>
           </p>
         </div>
@@ -185,7 +187,7 @@ export function CreditList() {
                       : "text-green-500"
                   }`}
                 >
-                  ${Math.abs(debtorCredit.totalAmount).toFixed(2)}
+                  ₦{formatCurrency(Number(debtorCredit.totalAmount))}
                 </span>
               </div>
               {statusFilter === "all" && (
@@ -193,7 +195,7 @@ export function CreditList() {
                   <div className="flex justify-between mt-2">
                     <span className="text-muted-foreground">Paid Amount:</span>
                     <span className="font-medium text-green-500">
-                      ${debtorCredit.paidAmount.toFixed(2)}
+                      ₦{formatCurrency(Number(debtorCredit.paidAmount))}
                     </span>
                   </div>
                   <div className="flex justify-between mt-2">
@@ -201,7 +203,7 @@ export function CreditList() {
                       Unpaid Amount:
                     </span>
                     <span className="font-medium text-red-500">
-                      ${debtorCredit.unpaidAmount.toFixed(2)}
+                      ₦{formatCurrency(Number(debtorCredit.unpaidAmount))}
                     </span>
                   </div>
                 </>

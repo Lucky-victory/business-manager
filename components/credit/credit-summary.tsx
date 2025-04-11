@@ -1,6 +1,8 @@
 // components/credit/credit-summary.tsx
 "use client";
 
+import { formatCurrency } from "@/lib/utils";
+
 type CreditSummaryProps = {
   debtorCredits: any[];
 };
@@ -40,20 +42,20 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
             totalOwed > 0 ? "text-red-500" : "text-green-500"
           } ml-1`}
         >
-          ${Math.abs(totalOwed).toFixed(2)}
+          ₦{formatCurrency(Number(totalOwed))}
         </span>
       </p>
       <div className="flex gap-4">
         <p className="text-muted-foreground">
           Paid:
           <span className="font-medium text-green-500 ml-1">
-            ${paidAmount.toFixed(2)}
+            ₦{formatCurrency(Number(paidAmount))}
           </span>
         </p>
         <p className="text-muted-foreground">
           Unpaid:
           <span className="font-medium text-red-500 ml-1">
-            ${unpaidAmount.toFixed(2)}
+            ₦{formatCurrency(Number(unpaidAmount))}
           </span>
         </p>
       </div>

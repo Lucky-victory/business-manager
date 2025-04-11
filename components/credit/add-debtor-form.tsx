@@ -21,6 +21,7 @@ import { useAuth } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { SheetFooter } from "../ui/sheet";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -135,16 +136,17 @@ export function AddDebtorForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-
-        <Button type="submit" disabled={isAdding}>
-          {isAdding ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-            </>
-          ) : (
-            "Add Debtor"
-          )}
-        </Button>
+        <SheetFooter>
+          <Button type="submit" disabled={isAdding}>
+            {isAdding ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+              </>
+            ) : (
+              "Add Debtor"
+            )}
+          </Button>
+        </SheetFooter>
       </form>
     </Form>
   );

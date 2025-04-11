@@ -17,7 +17,7 @@ export function PaymentCard({ payment }: PaymentCardProps) {
           <div>
             <p className="text-sm text-muted-foreground">Amount</p>
             <p className="font-medium">
-              ${formatCurrency(Number(payment.amount))}
+              ₦{formatCurrency(Number(payment.amount))}
             </p>
           </div>
           <div>

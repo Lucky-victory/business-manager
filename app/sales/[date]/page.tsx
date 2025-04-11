@@ -105,14 +105,22 @@ export default function SalesDetailPage({
             }}
           >
             <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Payment</p>
+                  <p className="font-medium capitalize">{sale.paymentType}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Qty</p>
+                  <div className="flex">
+                    <p className="font-medium">
+                      {sale.quantity} {sale.measurementUnit || "--"}
+                    </p>
+                  </div>
+                </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Item</p>
                   <p className="font-medium">{sale.item}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Quantity</p>
-                  <p className="font-medium">{sale.quantity}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Price</p>
@@ -127,12 +135,15 @@ export default function SalesDetailPage({
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Payment</p>
-                  <p className="font-medium capitalize">{sale.paymentType}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="text-sm text-muted-foreground">Profit</p>
                   <p className="font-medium">
+                    ₦{formatCurrency(parseInt(sale.profit, 10))}
+                  </p>
+                </div>
+
+                <div className="">
+                  <p className="text-xs text-muted-foreground">Time</p>
+                  <p className="font-medium max-sm:text-sm">
                     {format(new Date(sale.date), "h:mm a")}
                   </p>
                 </div>

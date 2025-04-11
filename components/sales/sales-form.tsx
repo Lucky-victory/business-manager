@@ -37,6 +37,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn, generateUUID } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DrawerOrModal } from "../ui/drawer-or-modal";
 
 // Types for form data
 interface SalesFormData {
@@ -362,8 +363,13 @@ export function SalesForm({
   };
 
   // Memoized add button component
-  const AddButton = (
-    <Button type="submit" className="flex items-center" disabled={isAdding}>
+  const AddButton = ({ isAdding }: { isAdding: boolean }) => (
+    <Button
+      type="submit"
+      form="sales-add-form"
+      className="flex items-center"
+      disabled={isAdding}
+    >
       {isAdding ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
@@ -379,7 +385,11 @@ export function SalesForm({
 
   // Form content
   const FormContent = (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 py-4"
+      id="sales-add-form"
+    >
       <ErrorAlert message={error} />
 
       <ItemNameField
@@ -418,12 +428,6 @@ export function SalesForm({
         date={formData.date!}
         onDateChange={(date) => updateField("date", date)}
       />
-
-      {isMobile ? (
-        <DrawerFooter className="pt-4">{AddButton}</DrawerFooter>
-      ) : (
-        <DialogFooter className="pt-4">{AddButton}</DialogFooter>
-      )}
     </form>
   );
   function handleOpenChange(open: boolean) {
@@ -441,31 +445,15 @@ export function SalesForm({
   // Render responsive layout based on device type
   return (
     <>
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={handleOpenChange} modal={true}>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>Add New Sale</DrawerTitle>
-              <DrawerDescription>
-                Enter the details of the item sold.
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="px-4">{FormContent}</div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
-          <DialogContent className="pointer-events-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Sale</DialogTitle>
-              <DialogDescription>
-                Enter the details of the item sold.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="px-4">{FormContent}</div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <DrawerOrModal
+        description=" Enter the details of the item sold."
+        title="Add New Sale"
+        open={open}
+        onOpenChange={handleOpenChange}
+        footer={<AddButton isAdding={isAdding} />}
+      >
+        {FormContent}
+      </DrawerOrModal>
     </>
   );
 }

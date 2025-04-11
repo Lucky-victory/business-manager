@@ -3,7 +3,7 @@
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format, set } from "date-fns";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Pencil, Trash } from "lucide-react";
 import { SaleSelect, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function SalesDetailPage({
   params,
@@ -31,6 +32,8 @@ export default function SalesDetailPage({
   const [actionType, setActionType] = useState<"create" | "edit">("create");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<SaleSelect | null>(null);
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     setIsLoading(true);
     fetchSales();
@@ -44,7 +47,6 @@ export default function SalesDetailPage({
     return format(saleDate, "yyyy-MM-dd") === dateString;
   });
 
-  // Calculate total amount
   const totalAmount = filteredSales.reduce(
     (sum, sale) => sum + +sale.amount,
     0
@@ -57,6 +59,7 @@ export default function SalesDetailPage({
   const formattedDate = dateString
     ? format(new Date(dateString), "MMMM d, yyyy")
     : "Loading...";
+
   function editItem(item: any) {
     setActionType("edit");
     setSelectedItem(item);
@@ -109,56 +112,132 @@ export default function SalesDetailPage({
             </span>
           </p>
         </div>
-        <Button onClick={() => openAddSaleForm(true)}>
+        <Button
+          onClick={() => openAddSaleForm(true)}
+          size={isMobile ? "sm" : undefined}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Sale
         </Button>
       </div>
 
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Payment</TableHead>
-              <TableHead>Qty</TableHead>
-              <TableHead>Item</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Profit</TableHead>
-              <TableHead>Time</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredSales.map((sale) => (
-              <TableRow
-                key={sale.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => {
-                  setActionType("edit");
-                  editItem(sale);
-                }}
-              >
-                <TableCell className="font-medium capitalize">
-                  {sale.paymentType}
-                </TableCell>
-                <TableCell>
-                  {sale.quantity} {sale.measurementUnit || "--"}
-                </TableCell>
-                <TableCell>{sale.item}</TableCell>
-                <TableCell>
-                  ₦{formatCurrency(parseInt(sale.price, 10))}
-                </TableCell>
-                <TableCell>
-                  ₦{formatCurrency(parseInt(sale.amount, 10))}
-                </TableCell>
-                <TableCell>
-                  ₦{formatCurrency(parseInt(sale.profit, 10))}
-                </TableCell>
-                <TableCell>{format(new Date(sale.date), "h:mm a")}</TableCell>
+        {/* Desktop Table View */}
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Payment</TableHead>
+                <TableHead>Qty</TableHead>
+                <TableHead>Item</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Profit</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredSales.map((sale) => (
+                <TableRow key={sale.id}>
+                  <TableCell className="font-medium capitalize">
+                    {sale.paymentType}
+                  </TableCell>
+                  <TableCell>
+                    {sale.quantity} {sale.measurementUnit || "--"}
+                  </TableCell>
+                  <TableCell>{sale.item}</TableCell>
+                  <TableCell>
+                    ₦{formatCurrency(parseInt(sale.price, 10))}
+                  </TableCell>
+                  <TableCell>
+                    ₦{formatCurrency(parseInt(sale.amount, 10))}
+                  </TableCell>
+                  <TableCell>
+                    ₦{formatCurrency(parseInt(sale.profit, 10))}
+                  </TableCell>
+                  <TableCell>{format(new Date(sale.date), "h:mm a")}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => editItem(sale)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="grid grid-cols-1 gap-4 md:hidden">
+          {filteredSales.map((sale) => (
+            <Card key={sale.id}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-bold">{sale.item}</p>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {sale.paymentType}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => editItem(sale)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Quantity:</p>
+                    <p>
+                      {sale.quantity} {sale.measurementUnit || "--"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Price:</p>
+                    <p>₦{formatCurrency(parseInt(sale.price, 10))}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Total:</p>
+                    <p>₦{formatCurrency(parseInt(sale.amount, 10))}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Profit:</p>
+                    <p>₦{formatCurrency(parseInt(sale.profit, 10))}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Time:</p>
+                    <p>{format(new Date(sale.date), "h:mm a")}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         {isLoading && (
           <div className="flex flex-col gap-4 max-w-40 mx-auto items-center py-8">

@@ -77,6 +77,8 @@ export async function PATCH(
         .update(sales)
         .set({
           ...body,
+          createdAt: undefined,
+          updatedAt: new Date(),
           date: new Date(body.date),
         })
         .where(

@@ -2,9 +2,9 @@
 
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { SaleSelect, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
@@ -21,7 +21,9 @@ export default function SalesDetailPage({
   const _params = use<{ date: string }>(params as any);
   const { sales, fetchSales } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [actionType, setActionType] = useState<"create" | "edit">("create");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<SaleSelect | null>(null);
   useEffect(() => {
     setIsLoading(true);
     fetchSales();
@@ -44,7 +46,17 @@ export default function SalesDetailPage({
   const formattedDate = dateString
     ? format(new Date(dateString), "MMMM d, yyyy")
     : "Loading...";
+  function editItem(item: any) {
+    setActionType("edit");
+    setSelectedItem(item);
+    setIsFormOpen(true);
+  }
 
+  function openAddSaleForm(open: boolean) {
+    setActionType("create");
+    setSelectedItem(null);
+    setIsFormOpen(open);
+  }
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex items-center mb-6">
@@ -77,7 +89,7 @@ export default function SalesDetailPage({
             </span>
           </p>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
+        <Button onClick={() => openAddSaleForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Sale
         </Button>
@@ -85,7 +97,13 @@ export default function SalesDetailPage({
 
       <div className="space-y-4">
         {filteredSales.map((sale) => (
-          <Card key={sale.id}>
+          <Card
+            key={sale.id}
+            onClick={() => {
+              setActionType("edit");
+              editItem(sale);
+            }}
+          >
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -135,12 +153,20 @@ export default function SalesDetailPage({
           </div>
         )}
       </div>
-
-      <SalesForm
-        open={isFormOpen}
-        onOpenChange={setIsFormOpen}
-        defaultDate={dateString}
-      />
+      {selectedItem && actionType === "edit" ? (
+        <SalesForm
+          open={isFormOpen}
+          onOpenChange={openAddSaleForm}
+          defaultDate={dateString}
+          initialData={selectedItem}
+        />
+      ) : (
+        <SalesForm
+          open={isFormOpen}
+          onOpenChange={openAddSaleForm}
+          defaultDate={dateString}
+        />
+      )}
     </div>
   );
 }

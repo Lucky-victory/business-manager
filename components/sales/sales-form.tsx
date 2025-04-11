@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useCallback, memo } from "react";
-import { SaleInsert, useStore } from "@/lib/store";
+import { useRef, useState, useCallback, memo, useEffect } from "react";
+import { SaleInsert, SaleSelect, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +41,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // Types for form data
 interface SalesFormData {
   id?: string;
-  item: string;
+  item?: string;
   quantity: number;
   price: number;
   paymentType: SaleInsert["paymentType"];
@@ -55,6 +55,7 @@ interface SalesFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultDate?: Date | string;
+  initialData?: Partial<SaleInsert>;
 }
 
 // Memoized Form Field Components to prevent unnecessary re-renders
@@ -237,8 +238,13 @@ const ErrorAlert = memo(({ message }: { message: string | null }) => {
 ErrorAlert.displayName = "ErrorAlert";
 
 // Main SalesForm component
-export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
-  const { addSale } = useStore();
+export function SalesForm({
+  open,
+  onOpenChange,
+  defaultDate,
+  initialData,
+}: SalesFormProps) {
+  const { addSale, editSale } = useStore();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const auth = useAuth();
@@ -246,16 +252,31 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
   // State management
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<SalesFormData>({
+  const [formData, setFormData] = useState<SalesFormData | SaleSelect>({
     item: "",
-    quantity: 1,
-    price: 0,
-    paymentType: "transfer",
-    measurementUnit: "pcs",
-    date: defaultDate ? new Date(defaultDate) : new Date(),
-    profit: 0,
+
+    ...({
+      ...initialData,
+      measurementUnit: initialData?.measurementUnit || "pcs",
+      paymentType: initialData?.paymentType || "transfer",
+      // Set default date to today if no initial data is provided
+      date: defaultDate ? new Date(defaultDate) : new Date(),
+      quantity: initialData?.quantity || 1,
+      price: initialData?.price || 0,
+      profit: initialData?.profit || 0,
+    } as SalesFormData),
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        quantity: initialData?.quantity || 1,
+        price: parseInt(initialData?.price as string) || 0,
+        profit: parseInt(initialData?.profit as string) || 0,
+      } as SalesFormData);
+    }
+  }, [initialData]);
   // Memoized field update handlers
   const updateField = useCallback((field: keyof SalesFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -269,26 +290,39 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
     try {
       setIsAdding(true);
 
-      const amount = formData.quantity * formData.price;
-      const currentDate = new Date(formData.date);
+      const amount =
+        formData?.quantity &&
+        formData.quantity * parseInt(formData.price as string);
+      const currentDate = new Date(formData.date as Date);
       const now = new Date();
       currentDate.setHours(now.getHours());
       currentDate.setMinutes(now.getMinutes());
       currentDate.setSeconds(now.getSeconds());
       currentDate.setMilliseconds(now.getMilliseconds());
 
-      await addSale({
-        id: generateUUID(),
-        item: formData.item,
-        quantity: formData.quantity,
-        price: formData.price + "",
-        profit: formData.profit + "",
-        amount: amount + "",
-        paymentType: formData.paymentType,
-        date: currentDate,
-        measurementUnit: formData.measurementUnit,
-        userId: auth?.user?.id as string,
-      });
+      if (initialData) {
+        await editSale(formData.id as string, {
+          ...formData,
+          date: currentDate,
+          price: formData.price + "",
+          profit: formData.profit + "",
+          amount: amount + "",
+          userId: auth?.user?.id as string,
+        });
+      } else {
+        await addSale({
+          id: generateUUID(),
+          item: formData.item as string,
+          quantity: formData.quantity as number,
+          price: formData.price + "",
+          profit: formData.profit + "",
+          amount: amount + "",
+          paymentType: formData.paymentType as SaleInsert["paymentType"],
+          date: currentDate,
+          measurementUnit: formData.measurementUnit,
+          userId: auth?.user?.id as string,
+        });
+      }
 
       // Reset form and close sheet
       setFormData({
@@ -332,8 +366,11 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
     <Button type="submit" className="flex items-center" disabled={isAdding}>
       {isAdding ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+          {initialData ? "Saving..." : "Adding..."}
         </>
+      ) : initialData ? (
+        "Save Sale"
       ) : (
         "Add Sale"
       )}
@@ -346,26 +383,26 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
       <ErrorAlert message={error} />
 
       <ItemNameField
-        value={formData.item}
+        value={formData.item || ""}
         onChange={(value) => updateField("item", value)}
       />
 
       <div className="flex items-center gap-4 max-sm:flex-wrap">
         <QuantityUnitField
-          quantity={formData.quantity}
+          quantity={formData.quantity as number}
           measurementUnit={formData.measurementUnit}
           onQuantityChange={(value) => updateField("quantity", value)}
           onUnitChange={(value) => updateField("measurementUnit", value)}
         />
 
         <NumberField
-          value={formData.price}
+          value={formData.price as number}
           id="price"
           label="Price per Unit"
           onChange={(value) => updateField("price", value)}
         />
         <NumberField
-          value={formData.profit}
+          value={formData.profit as number}
           id="profit"
           label="Profit Made"
           onChange={(value) => updateField("profit", value)}
@@ -373,12 +410,12 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
       </div>
 
       <PaymentTypeField
-        value={formData.paymentType}
+        value={formData.paymentType!}
         onChange={(value) => updateField("paymentType", value)}
       />
 
       <DatePickerField
-        date={formData.date}
+        date={formData.date!}
         onDateChange={(date) => updateField("date", date)}
       />
 
@@ -389,12 +426,23 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
       )}
     </form>
   );
-
+  function handleOpenChange(open: boolean) {
+    onOpenChange(open);
+    setFormData({
+      item: "",
+      quantity: 1,
+      price: 0,
+      paymentType: "transfer",
+      measurementUnit: "pcs",
+      profit: 0,
+      date: defaultDate ? new Date(defaultDate) : new Date(),
+    });
+  }
   // Render responsive layout based on device type
   return (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange} modal={true}>
+        <Drawer open={open} onOpenChange={handleOpenChange} modal={true}>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Add New Sale</DrawerTitle>
@@ -406,7 +454,7 @@ export function SalesForm({ open, onOpenChange, defaultDate }: SalesFormProps) {
           </DrawerContent>
         </Drawer>
       ) : (
-        <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+        <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
           <DialogContent className="pointer-events-auto">
             <DialogHeader>
               <DialogTitle>Add New Sale</DialogTitle>

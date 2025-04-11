@@ -42,6 +42,7 @@ export function SalesList() {
     (sum, sale) => sum + salesByDate[sale].totalAmount,
     0
   );
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">

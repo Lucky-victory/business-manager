@@ -37,7 +37,10 @@ type State = {
   // Sales operations
   fetchSales: () => Promise<void>;
   addSale: (sale: SaleInsert) => Promise<SaleSelect | null>;
-  editSale: (saleId:string,data: Partial<SaleInsert>) => Promise<SaleSelect | null>;
+  editSale: (
+    saleId: string,
+    data: Partial<SaleInsert>
+  ) => Promise<SaleSelect | null>;
   deleteSale: (saleId: string) => Promise<void>;
 
   // Credit operations
@@ -144,7 +147,7 @@ export const useStore = create<State>()(
           return null;
         }
       },
-      editSale: async (saleId:string,sale: Partial<SaleInsert>) => {
+      editSale: async (saleId: string, sale: Partial<SaleInsert>) => {
         try {
           set((state) => ({
             isLoading: { ...state.isLoading, sales: true },
@@ -161,7 +164,9 @@ export const useStore = create<State>()(
 
           const { data } = await response.json();
           set((state) => ({
-            sales: [...state.sales, data],
+            sales: state.sales.map((oldSale) =>
+              oldSale.id === saleId ? data : oldSale
+            ),
             isLoading: { ...state.isLoading, sales: false },
           }));
 

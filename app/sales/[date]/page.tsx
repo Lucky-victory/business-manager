@@ -49,6 +49,10 @@ export default function SalesDetailPage({
     (sum, sale) => sum + +sale.amount,
     0
   );
+  const totalProfit = filteredSales.reduce(
+    (sum, sale) => sum + +sale.profit,
+    0
+  );
 
   const formattedDate = dateString
     ? format(new Date(dateString), "MMMM d, yyyy")
@@ -86,6 +90,15 @@ export default function SalesDetailPage({
               ₦
               <span className="text-2xl font-bold">
                 {formatCurrency(totalAmount)}
+              </span>
+            </span>
+          </p>
+          <p className="text-muted-foreground">
+            Total Profit:{" "}
+            <span className="font-medium text-foreground ">
+              ₦
+              <span className="text-2xl font-bold">
+                {formatCurrency(totalProfit)}
               </span>
             </span>
           </p>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sales, credits, debtors } from "@/lib/db/schema";
-import { like, eq, and } from "drizzle-orm";
+import { like, eq, and, ilike } from "drizzle-orm";
 import { format } from "date-fns";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -11,6 +11,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q")?.toLowerCase() || "";
+    console.log("Search query:", query);
 
     if (!query) {
       return NextResponse.json({ results: [] });
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
       .from(sales)
       .where(
         and(
-          like(sales.item, `%${query}%`),
+          ilike(sales.item, `%${query}%`),
           eq(sales.userId, authSession?.user?.id)
         )
       )
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
       .leftJoin(debtors, eq(credits.debtorId, debtors.id))
       .where(
         and(
-          like(debtors.name, `%${query}%`),
+          ilike(debtors.name, `%${query}%`),
           eq(credits.userId, authSession?.user?.id)
         )
       )
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
       id: sale.id,
       type: "sale",
       title: sale.item,
-      subtitle: `Quantity: ${sale.quantity}`,
+      subtitle: `Quantity: ${sale.quantity} ${sale.measurementUnit}`,
       amount: Number(sale.amount),
       date: sale.date.toISOString(),
       path: `/sales/${format(sale.date, "yyyy-MM-dd")}`,

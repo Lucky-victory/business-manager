@@ -1,30 +1,31 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { format } from "date-fns"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
 
 type SearchResult = {
-  id: string
-  type: "sale" | "credit"
-  title: string
-  subtitle: string
-  amount: number
-  date: string
-  path: string
-}
+  id: string;
+  type: "sale" | "credit";
+  title: string;
+  subtitle: string;
+  amount: number;
+  date: string;
+  path: string;
+};
 
 export function SearchResults({
   results,
   onClear,
 }: {
-  results: SearchResult[]
-  onClear: () => void
+  results: SearchResult[];
+  onClear: () => void;
 }) {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div>
@@ -48,15 +49,23 @@ export function SearchResults({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium">{result.title}</h3>
-                    <Badge variant={result.type === "sale" ? "default" : "secondary"}>
+                    <Badge
+                      variant={result.type === "sale" ? "default" : "secondary"}
+                    >
                       {result.type === "sale" ? "Sale" : "Credit"}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{result.subtitle}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {result.subtitle}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">${result.amount.toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">{format(new Date(result.date), "MMM d, yyyy")}</p>
+                  <p className="font-medium">
+                    ₦{formatCurrency(Number(result.amount))}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(result.date), "MMM d, yyyy")}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -64,10 +73,11 @@ export function SearchResults({
         ))}
 
         {results.length === 0 && (
-          <div className="text-center py-10 text-muted-foreground">No results found. Try a different search term.</div>
+          <div className="text-center py-10 text-muted-foreground">
+            No results found. Try a different search term.
+          </div>
         )}
       </div>
     </div>
-  )
+  );
 }
-

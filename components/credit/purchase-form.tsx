@@ -7,6 +7,8 @@ import { SheetFooter } from "@/components/ui/sheet";
 import { FormField } from "./form-field";
 import { authClient, useAuth } from "@/lib/auth-client";
 import { DebtorSelector } from "./debtor-selector";
+import { DatePickerField } from "../ui/date-picker";
+import { getCurrentDateTime } from "@/lib/utils";
 
 type PurchaseFormProps = {
   defaultDebtorId?: string;
@@ -120,13 +122,14 @@ export function PurchaseForm({
       </div>
 
       <FormField id="date" label="Date" required>
-        <Input
-          type="date"
-          value={purchaseData.date}
-          onChange={(e) =>
-            setPurchaseData({ ...purchaseData, date: e.target.value })
+        <DatePickerField
+          date={purchaseData.date}
+          onDateChange={(date) =>
+            setPurchaseData({
+              ...purchaseData,
+              date: getCurrentDateTime(date as Date).toISOString(),
+            })
           }
-          required
         />
       </FormField>
 

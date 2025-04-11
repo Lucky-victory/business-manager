@@ -18,3 +18,21 @@ export const getCurrentDateTime = (date: string | Date) => {
 
   return currentDate;
 };
+export function calculateProfitMargin(
+  totalSales: number,
+  totalProfit: number
+): number {
+  /**
+   * Calculate the profit margin as a percentage.
+   *
+   * @param totalSales - The total sales amount
+   * @param totalProfit - The total profit amount
+   * @returns The profit margin as a percentage
+   */
+  if (totalSales === 0) {
+    return 0; // Prevent division by zero
+  }
+
+  const profitMargin = (totalProfit / totalSales) * 100;
+  return profitMargin;
+}

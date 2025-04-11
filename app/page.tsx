@@ -11,6 +11,7 @@ import { SalesList } from "@/components/sales/sales-list";
 import { CreditList } from "@/components/credit/credit-list";
 import { SearchResults } from "@/components/search/search-results";
 import { authClient } from "@/lib/auth-client";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,7 +28,11 @@ export default function Home() {
       setIsSearching(false);
     }
   };
-
+  const tabs = ["sales", "credit"] as const;
+  const [tabQueryState, setTabQueryState] = useQueryState(
+    "tab",
+    parseAsStringLiteral(tabs).withDefault("sales")
+  );
   return (
     <main className="container mx-auto px-4 py-6">
       <div className="mb-8">
@@ -54,7 +59,13 @@ export default function Home() {
           onClear={() => setIsSearching(false)}
         />
       ) : (
-        <Tabs defaultValue="sales" className="w-full">
+        <Tabs
+          value={tabQueryState}
+          onValueChange={(value) =>
+            setTabQueryState(value as "sales" | "credit")
+          }
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="sales">Sales</TabsTrigger>
             <TabsTrigger value="credit">Credit</TabsTrigger>

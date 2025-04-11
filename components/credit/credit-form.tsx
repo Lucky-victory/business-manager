@@ -1,6 +1,5 @@
-// components/credit/CreditForm.tsx
 "use client";
-
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import {
@@ -25,10 +24,11 @@ export function CreditForm({
   defaultDebtorId?: string;
   defaultDebtorName?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"purchase" | "payment">(
-    "purchase"
+  const tabs = ["purchase", "payment"] as const;
+  const [tabQueryState, setTabQueryState] = useQueryState(
+    "c_tab",
+    parseAsStringLiteral(tabs).withDefault("purchase")
   );
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md">
@@ -40,9 +40,9 @@ export function CreditForm({
         </SheetHeader>
 
         <Tabs
-          value={activeTab}
+          value={tabQueryState}
           onValueChange={(value) =>
-            setActiveTab(value as "purchase" | "payment")
+            setTabQueryState(value as "purchase" | "payment")
           }
           className="mt-6"
         >

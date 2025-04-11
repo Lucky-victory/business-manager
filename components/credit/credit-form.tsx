@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PurchaseForm } from "./purchase-form";
 import { PaymentForm } from "./payment-form";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
+import { AddDebtorForm } from "./add-debtor-form";
 
 export function CreditForm({
   open,
@@ -71,10 +72,10 @@ export function CreditForm({
           />
         </TabsContent>
         <TabsContent value="add_debtor">
-          <PaymentForm
-            defaultDebtorId={defaultDebtorId}
-            defaultDebtorName={defaultDebtorName}
-            onSuccess={() => onOpenChange(false)}
+          <AddDebtorForm
+            onSuccess={() => {
+              setTabQueryState("purchase");
+            }}
           />
         </TabsContent>
       </Tabs>

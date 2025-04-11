@@ -25,5 +25,3 @@ export function FormField({
     </div>
   );
 }
-
-// components/credit/DebtorSelector.tsx

@@ -35,9 +35,10 @@ import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn, generateUUID } from "@/lib/utils";
+import { cn, generateUUID, getCurrentDateTime } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
+import { DatePickerField } from "../ui/date-picker";
 
 // Types for form data
 interface SalesFormData {
@@ -180,52 +181,6 @@ const PaymentTypeField = memo(
 );
 PaymentTypeField.displayName = "PaymentTypeField";
 
-const DatePickerField = memo(
-  ({
-    date,
-    onDateChange,
-  }: {
-    date: Date | string;
-    onDateChange: (date: Date) => void;
-  }) => {
-    const popoverTriggerBtnRef = useRef<HTMLButtonElement | null>(null);
-
-    return (
-      <div className="space-y-2">
-        <Popover modal={false}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              ref={popoverTriggerBtnRef}
-              className={cn(
-                "w-[240px] pl-3 text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              {date ? format(new Date(date), "PPP") : <span>Pick a date</span>}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0">
-            <Calendar
-              mode="single"
-              required
-              id="date"
-              selected={new Date(date)}
-              onSelect={(selectedDate) => {
-                if (selectedDate) onDateChange(selectedDate);
-                popoverTriggerBtnRef.current?.click();
-              }}
-              className="rounded-md border"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-    );
-  }
-);
-DatePickerField.displayName = "DatePickerField";
-
 const ErrorAlert = memo(({ message }: { message: string | null }) => {
   if (!message) return null;
 
@@ -294,12 +249,7 @@ export function SalesForm({
       const amount =
         formData?.quantity &&
         formData.quantity * parseInt(formData.price as string);
-      const currentDate = new Date(formData.date as Date);
-      const now = new Date();
-      currentDate.setHours(now.getHours());
-      currentDate.setMinutes(now.getMinutes());
-      currentDate.setSeconds(now.getSeconds());
-      currentDate.setMilliseconds(now.getMilliseconds());
+      const currentDate = getCurrentDateTime(formData.date as Date);
 
       if (initialData) {
         await editSale(formData.id as string, {

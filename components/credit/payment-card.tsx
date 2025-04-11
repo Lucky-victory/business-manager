@@ -3,6 +3,7 @@
 
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/utils";
 
 type PaymentCardProps = {
   payment: any;
@@ -15,7 +16,9 @@ export function PaymentCard({ payment }: PaymentCardProps) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Amount</p>
-            <p className="font-medium">${payment.amount.toFixed(2)}</p>
+            <p className="font-medium">
+              ${formatCurrency(Number(payment.amount))}
+            </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Payment Type</p>

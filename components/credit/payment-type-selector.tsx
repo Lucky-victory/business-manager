@@ -22,7 +22,6 @@ export function PaymentTypeSelector({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="cash">Cash</SelectItem>
-        <SelectItem value="card">Card</SelectItem>
         <SelectItem value="transfer">Bank Transfer</SelectItem>
         <SelectItem value="pos">POS</SelectItem>
       </SelectContent>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { SheetFooter } from "@/components/ui/sheet";
 import { FormField } from "./form-field";
 import { authClient, useAuth } from "@/lib/auth-client";
+import { DebtorSelector } from "./debtor-selector";
 
 type PurchaseFormProps = {
   defaultDebtorId?: string;
@@ -62,13 +63,15 @@ export function PurchaseForm({
   return (
     <form onSubmit={handlePurchaseSubmit} className="space-y-4 py-4">
       <FormField id="debtorName" label="Debtor Name" required>
-        <Input
-          placeholder="Enter debtor name"
-          value={purchaseData.debtorName}
-          onChange={(e) =>
-            setPurchaseData({ ...purchaseData, debtorName: e.target.value })
-          }
-          required
+        <DebtorSelector
+          debtorId={purchaseData.debtorId}
+          onSelect={(value, debtorName) => {
+            setPurchaseData({
+              ...purchaseData,
+              debtorId: value,
+              debtorName: debtorName,
+            });
+          }}
         />
       </FormField>
 

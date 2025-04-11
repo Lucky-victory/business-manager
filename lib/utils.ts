@@ -8,3 +8,13 @@ export const IS_DEV = process.env.NODE_ENV !== "production";
 export const generateUUID = () => uuidv4();
 export const formatCurrency = (val: number) =>
   val && typeof val === "number" ? val.toLocaleString() : "0.00";
+export const getCurrentDateTime = (date: string | Date) => {
+  const currentDate = new Date(date as Date);
+  const now = new Date();
+  currentDate.setHours(now.getHours());
+  currentDate.setMinutes(now.getMinutes());
+  currentDate.setSeconds(now.getSeconds());
+  currentDate.setMilliseconds(now.getMilliseconds());
+
+  return currentDate;
+};

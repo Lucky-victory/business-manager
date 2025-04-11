@@ -8,6 +8,8 @@ import { FormField } from "./form-field";
 import { useAuth } from "@/lib/auth-client";
 import { DebtorSelector } from "./debtor-selector";
 import { PaymentTypeSelector } from "./payment-type-selector";
+import { DatePickerField } from "../ui/date-picker";
+import { getCurrentDateTime } from "@/lib/utils";
 
 type PaymentFormProps = {
   defaultDebtorId?: string;
@@ -56,7 +58,11 @@ export function PaymentForm({
   };
 
   return (
-    <form onSubmit={handlePaymentSubmit} className="space-y-4 py-4">
+    <form
+      onSubmit={handlePaymentSubmit}
+      className="space-y-4 py-4"
+      id="payment-form"
+    >
       <FormField id="paymentDebtorName" label="Debtor Name" required>
         {defaultDebtorId ? (
           <Input value={paymentData.debtorName} disabled />
@@ -78,7 +84,7 @@ export function PaymentForm({
         <Input
           type="number"
           min="0"
-          step="0.01"
+          step="5"
           value={paymentData.amount}
           onChange={(e) =>
             setPaymentData({
@@ -99,16 +105,17 @@ export function PaymentForm({
         />
       </FormField>
 
-      <FormField id="paymentDate" label="Date" required>
-        <Input
-          type="date"
-          value={paymentData.date}
-          onChange={(e) =>
-            setPaymentData({ ...paymentData, date: e.target.value })
-          }
-          required
-        />
-      </FormField>
+      {/* <FormField id="paymentDate" label="Date" required> */}
+      <DatePickerField
+        date={paymentData.date}
+        onDateChange={(date) =>
+          setPaymentData({
+            ...paymentData,
+            date: getCurrentDateTime(date as Date).toISOString(),
+          })
+        }
+      />
+      {/* </FormField> */}
 
       <SheetFooter className="pt-4">
         <Button type="submit">Record Payment</Button>

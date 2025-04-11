@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatCurrency } from "@/lib/utils";
 
 type PurchaseCardProps = {
   purchase: any;
@@ -84,21 +85,13 @@ export function PurchaseCard({
           <div>
             <p className="text-sm text-muted-foreground">Price</p>
             <p className="font-medium">
-              ₦
-              {parseInt(
-                purchase.price ? purchase?.price + "" : "0",
-                10
-              ).toFixed(2)}
+              ₦{formatCurrency(Number(purchase?.price))}
             </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total</p>
             <p className="font-medium">
-              ₦
-              {parseInt(
-                purchase.amount ? purchase?.amount + "" : "0",
-                10
-              ).toFixed(2)}
+              ₦{formatCurrency(Number(purchase.amount))}
             </p>
           </div>
           <div className="md:col-span-2">

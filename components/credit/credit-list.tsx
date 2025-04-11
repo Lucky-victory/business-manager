@@ -64,7 +64,7 @@ export function CreditList() {
       if (!acc[credit.debtorId]) {
         acc[credit.debtorId] = {
           debtorId: credit.debtorId,
-          debtorName: debtors[credit.debtorId]?.name || "Unknown Debtor",
+          debtorName: debtors[credit.debtorId as any]?.name || "Unknown Debtor",
           totalAmount: 0,
           paidAmount: 0,
           unpaidAmount: 0,

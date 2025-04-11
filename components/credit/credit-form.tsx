@@ -12,6 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PurchaseForm } from "./purchase-form";
 import { PaymentForm } from "./payment-form";
+import { DrawerOrModal } from "../ui/drawer-or-modal";
 
 export function CreditForm({
   open,
@@ -24,50 +25,59 @@ export function CreditForm({
   defaultDebtorId?: string;
   defaultDebtorName?: string;
 }) {
-  const tabs = ["purchase", "payment"] as const;
+  const tabs = ["purchase", "payment", "add_debtor"] as const;
   const [tabQueryState, setTabQueryState] = useQueryState(
     "c_tab",
     parseAsStringLiteral(tabs).withDefault("purchase")
   );
+
+  function handleOpenChange(open: boolean) {
+    // setTabQueryState('purchase')
+    onOpenChange(open);
+  }
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>Manage Credit</SheetTitle>
-          <SheetDescription>
-            Add a new purchase on credit or record a payment.
-          </SheetDescription>
-        </SheetHeader>
+    <DrawerOrModal
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={"Manage Credit"}
+      description={" Add a new purchase on credit or record a payment."}
+    >
+      <Tabs
+        value={tabQueryState}
+        onValueChange={(value) =>
+          setTabQueryState(value as "purchase" | "payment")
+        }
+        className="mt-6"
+      >
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="purchase">Purchase</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="add_debtor">Add Debtor</TabsTrigger>
+        </TabsList>
 
-        <Tabs
-          value={tabQueryState}
-          onValueChange={(value) =>
-            setTabQueryState(value as "purchase" | "payment")
-          }
-          className="mt-6"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="purchase">Purchase</TabsTrigger>
-            <TabsTrigger value="payment">Payment</TabsTrigger>
-          </TabsList>
+        <TabsContent value="purchase">
+          <PurchaseForm
+            defaultDebtorId={defaultDebtorId}
+            defaultDebtorName={defaultDebtorName}
+            onSuccess={() => onOpenChange(false)}
+          />
+        </TabsContent>
 
-          <TabsContent value="purchase">
-            <PurchaseForm
-              defaultDebtorId={defaultDebtorId}
-              defaultDebtorName={defaultDebtorName}
-              onSuccess={() => onOpenChange(false)}
-            />
-          </TabsContent>
-
-          <TabsContent value="payment">
-            <PaymentForm
-              defaultDebtorId={defaultDebtorId}
-              defaultDebtorName={defaultDebtorName}
-              onSuccess={() => onOpenChange(false)}
-            />
-          </TabsContent>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
+        <TabsContent value="payment">
+          <PaymentForm
+            defaultDebtorId={defaultDebtorId}
+            defaultDebtorName={defaultDebtorName}
+            onSuccess={() => onOpenChange(false)}
+          />
+        </TabsContent>
+        <TabsContent value="add_debtor">
+          <PaymentForm
+            defaultDebtorId={defaultDebtorId}
+            defaultDebtorName={defaultDebtorName}
+            onSuccess={() => onOpenChange(false)}
+          />
+        </TabsContent>
+      </Tabs>
+    </DrawerOrModal>
   );
 }

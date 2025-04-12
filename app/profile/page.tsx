@@ -10,14 +10,20 @@ import { z } from "zod";
 
 // Define the profile schema
 const profileSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  username: z.string().optional(),
-  displayUsername: z.string().optional(),
-  companyName: z.string().optional(),
-  companyAddress: z.string().optional(),
-  companyPhone: z.string().optional(),
-  companyEmail: z.string().email("Invalid email address").optional(),
-  image: z.string().optional(),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  username: z.string().optional().or(z.literal("")),
+  displayUsername: z.string().optional().or(z.literal("")),
+  image: z.string().optional().or(z.literal("")),
+  companyName: z.string().optional().or(z.literal("")),
+  companyAddress: z.string().optional().or(z.literal("")),
+  companyPhone: z.string().optional().or(z.literal("")),
+  companyEmail: z
+    .string()
+    .email({ message: "Invalid email address" })
+    .optional()
+    .or(z.literal("")),
 });
 
 type ProfileData = z.infer<typeof profileSchema>;

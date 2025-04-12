@@ -1,4 +1,5 @@
 import React from "react";
+import { Input } from "./input";
 
 type FormFieldProps = {
   id: string;
@@ -35,14 +36,12 @@ export function FormField({
       >
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={name}
         type={type}
         required={required}
-        className={`flex h-10 w-full rounded-md border ${
-          error ? "border-destructive" : "border-input"
-        } bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+        className={` border ${error ? "border-destructive" : "border-input"} `}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

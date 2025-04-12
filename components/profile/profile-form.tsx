@@ -1,34 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { FormField } from "@/components/ui/form-field";
 
 // Define the profile schema
 const profileSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  username: z.string().optional(),
-  displayUsername: z.string().optional(),
-  companyName: z.string().optional(),
-  companyAddress: z.string().optional(),
-  companyPhone: z.string().optional(),
-  companyEmail: z.string().email("Invalid email address").optional(),
-  image: z.string().optional(),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  username: z.string().optional().or(z.literal("")),
+  displayUsername: z.string().optional().or(z.literal("")),
+  image: z.string().optional().or(z.literal("")),
+  companyName: z.string().optional().or(z.literal("")),
+  companyAddress: z.string().optional().or(z.literal("")),
+  companyPhone: z.string().optional().or(z.literal("")),
+  companyEmail: z
+    .string()
+    .email({ message: "Invalid email address" })
+    .optional()
+    .or(z.literal("")),
 });
 
 type ProfileData = z.infer<typeof profileSchema>;
-
-type ValidationErrors = {
-  name?: string;
-  username?: string;
-  displayUsername?: string;
-  companyName?: string;
-  companyAddress?: string;
-  companyPhone?: string;
-  companyEmail?: string;
-  image?: string;
-};
 
 type ProfileFormProps = {
   initialData: ProfileData;
@@ -41,217 +47,217 @@ export function ProfileForm({
   isSubmitting,
   onSubmit,
 }: ProfileFormProps) {
-  const [formData, setFormData] = useState<ProfileData>(initialData);
-  const [errors, setErrors] = useState<ValidationErrors>({});
+  const form = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: initialData.name || "",
+      username: initialData.username || "",
+      displayUsername: initialData.displayUsername || "",
+      image: initialData.image || "",
+      companyName: initialData.companyName || "",
+      companyAddress: initialData.companyAddress || "",
+      companyPhone: initialData.companyPhone || "",
+      companyEmail: initialData.companyEmail || "",
+    },
+  });
 
-  // Handle form input changes with validation
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Validate each field on change
-    try {
-      if (name === "name") {
-        z.string().min(2, "Name must be at least 2 characters").parse(value);
-        setErrors((prev) => ({ ...prev, name: undefined }));
-      } else if (name === "companyEmail" && value) {
-        z.string().email("Invalid email address").parse(value);
-        setErrors((prev) => ({ ...prev, companyEmail: undefined }));
-      } else {
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors((prev) => ({ ...prev, [name]: error.errors[0].message }));
-      }
-    }
-  };
-
-  // Handle form blur for validation feedback
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    try {
-      if (name === "name") {
-        z.string().min(2, "Name must be at least 2 characters").parse(value);
-      } else if (name === "companyEmail" && value) {
-        z.string().email("Invalid email address").parse(value);
-      }
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors((prev) => ({ ...prev, [name]: error.errors[0].message }));
-      }
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // Validate all form data at once
-      const validatedData = profileSchema.parse(formData);
-      await onSubmit(validatedData);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Update all field errors from validation
-        const newErrors: ValidationErrors = {};
-        error.errors.forEach((err) => {
-          const path = err.path[0] as keyof ValidationErrors;
-          newErrors[path] = err.message;
-        });
-        setErrors(newErrors);
-      }
-    }
-  };
+  async function handleSubmit(values: z.infer<typeof profileSchema>) {
+    await onSubmit(values);
+  }
 
   return (
-    <form className="mt-6 space-y-4 max-w-xl" onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        {/* Personal Information Section */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-          <div className="space-y-4">
-            {/* Name Field */}
-            <FormField
-              id="name"
-              name="name"
-              label="Name"
-              type="text"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.name}
-              required
-            />
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="mt-6 space-y-4 max-w-xl"
+      >
+        <div className="space-y-4">
+          {/* Personal Information Section */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
+            <div className="space-y-4">
+              {/* Name Field */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your full name"
+                        {...field}
+                        disabled={isSubmitting}
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Username Field */}
-            <FormField
-              id="username"
-              name="username"
-              label="Username"
-              type="text"
-              placeholder="Enter your username"
-              value={formData.username || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.username}
-            />
+              {/* Username Field */}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your username"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Display Username Field */}
-            <FormField
-              id="displayUsername"
-              name="displayUsername"
-              label="Display Name"
-              type="text"
-              placeholder="Enter your display name"
-              value={formData.displayUsername || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.displayUsername}
-            />
+              {/* Display Username Field */}
+              <FormField
+                control={form.control}
+                name="displayUsername"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Display Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your display name"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Profile Image URL Field */}
-            <FormField
-              id="image"
-              name="image"
-              label="Profile Image URL"
-              type="text"
-              placeholder="Enter your profile image URL"
-              value={formData.image || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.image}
-            />
+              {/* Profile Image URL Field */}
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profile Image URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your profile image URL"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Company Information Section */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Company Information</h2>
+            <div className="space-y-4">
+              {/* Company Name Field */}
+              <FormField
+                control={form.control}
+                name="companyName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your company name"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Company Address Field */}
+              <FormField
+                control={form.control}
+                name="companyAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Address</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter your company address"
+                        {...field}
+                        disabled={isSubmitting}
+                        rows={2}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Company Phone Field */}
+              <FormField
+                control={form.control}
+                name="companyPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Phone</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your company phone"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Company Email Field */}
+              <FormField
+                control={form.control}
+                name="companyEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter your company email"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Company Information Section */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Company Information</h2>
-          <div className="space-y-4">
-            {/* Company Name Field */}
-            <FormField
-              id="companyName"
-              name="companyName"
-              label="Company Name"
-              type="text"
-              placeholder="Enter your company name"
-              value={formData.companyName || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.companyName}
-            />
-
-            {/* Company Address Field */}
-            <FormField
-              id="companyAddress"
-              name="companyAddress"
-              label="Company Address"
-              type="text"
-              placeholder="Enter your company address"
-              value={formData.companyAddress || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.companyAddress}
-            />
-
-            {/* Company Phone Field */}
-            <FormField
-              id="companyPhone"
-              name="companyPhone"
-              label="Company Phone"
-              type="text"
-              placeholder="Enter your company phone"
-              value={formData.companyPhone || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.companyPhone}
-            />
-
-            {/* Company Email Field */}
-            <FormField
-              id="companyEmail"
-              name="companyEmail"
-              label="Company Email"
-              type="email"
-              placeholder="Enter your company email"
-              value={formData.companyEmail || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              error={errors.companyEmail}
-            />
-          </div>
+        {/* Submit Button */}
+        <div className="mt-6">
+          <Button
+            type="submit"
+            className="max-sm:w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
         </div>
-      </div>
-
-      {/* Submit Button */}
-      <div className="mt-6">
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Save Changes"
-          )}
-        </button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

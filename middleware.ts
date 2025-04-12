@@ -8,13 +8,7 @@ export async function middleware(request: NextRequest) {
   // Define public paths that don't require authentication
   const isAuthPath = path.startsWith("/auth");
   const isPublicPath = isAuthPath || ["/", "/terms", "/privacy"].includes(path);
-  console.log({
-    isAuthPath,
-    isPublicPath,
-    path,
-  });
 
-  // Get the user's session
   const session = await auth.api.getSession({
     headers: request.headers,
   });
@@ -30,11 +24,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 
-  // Otherwise, continue with the request
   return NextResponse.next();
 }
 
-// Configure which paths the middleware should run on
 export const config = {
   matcher: [
     /*

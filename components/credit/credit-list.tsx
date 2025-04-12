@@ -215,7 +215,7 @@ export function CreditList() {
                 </span>
               </div>
             </CardContent>
-            <CardFooter className="pt-0">
+            {/* <CardFooter className="pt-0">
               <div className="flex gap-2 w-full justify-end">
                 <Button
                   variant="outline"
@@ -229,7 +229,7 @@ export function CreditList() {
                   Invoice
                 </Button>
               </div>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
         ))}
 

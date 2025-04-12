@@ -70,12 +70,12 @@ export function SalesList() {
             className="cursor-pointer hover:bg-muted/50 transition-colors"
             onClick={() => router.push(`/sales/${saleDay.date}`)}
           >
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 px-4">
               <CardTitle>
                 {format(new Date(saleDay.date), "MMMM d, yyyy")}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total Sales:</span>
                 <span className="font-medium flex items-center">

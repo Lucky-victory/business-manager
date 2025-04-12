@@ -20,8 +20,12 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
   username: varchar("username", { length: 255 }).unique(),
-  role: mysqlEnum("role", ["admin", "user"]).default("user").notNull(),
   displayUsername: text("display_username"),
+  companyName: text("company_name"),
+  companyAddress: text("company_address"),
+  companyPhone: text("company_phone"),
+  companyEmail: varchar("company_email", { length: 255 }),
+  role: text("role"),
 });
 
 export const session = mysqlTable("session", {

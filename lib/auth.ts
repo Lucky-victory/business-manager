@@ -1,12 +1,36 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db"; // your drizzle instance
+import { db } from "./db";
 import { username } from "better-auth/plugins";
 
 export const auth = betterAuth({
   user: {
     modelName: "users",
     additionalFields: {
+      companyName: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+        input: true,
+      },
+      companyAddress: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+        input: true,
+      },
+      companyPhone: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+        input: true,
+      },
+      companyEmail: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+        input: true,
+      },
       role: {
         type: "string",
         required: false,

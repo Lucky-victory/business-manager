@@ -60,10 +60,10 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-4">
             <Button asChild variant="outline" className="hidden md:flex">
-              <Link href="/login">Log in</Link>
+              <Link href="/auth/login">Log in</Link>
             </Button>
             <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-              <Link href="/register">Get Started</Link>
+              <Link href="/auth/register">Get Started</Link>
             </Button>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function Home() {
                     size={"lg"}
                     className="bg-emerald-600 hover:bg-emerald-700 px-8"
                   >
-                    <Link href="/register">
+                    <Link href="/auth/register">
                       Get Started
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -606,7 +606,7 @@ export default function Home() {
                   asChild
                   className="bg-white text-emerald-600 hover:bg-gray-100 px-8"
                 >
-                  <Link href="/register">Get Started Now</Link>
+                  <Link href="/auth/register">Get Started Now</Link>
                 </Button>
               </div>
               <p className="text-sm text-emerald-100">

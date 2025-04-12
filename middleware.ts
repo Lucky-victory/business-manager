@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If the user is authenticated and trying to access auth pages, redirect to home
-  if ((isAuthenticated && isAuthPath) || (isAuthenticated && path === "/")) {
+  if (isAuthenticated && isAuthPath) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 
@@ -44,7 +44,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - asset files (.svg, .png, .jpg, .jpeg, .gif, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|google.svg).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|png|jpg|jpeg|gif|webp|ico).*)",
   ],
 };

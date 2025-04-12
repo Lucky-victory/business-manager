@@ -91,6 +91,7 @@ export default function Home() {
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button
                     asChild
+                    size={"lg"}
                     className="bg-emerald-600 hover:bg-emerald-700 px-8"
                   >
                     <Link href="/register">
@@ -98,15 +99,17 @@ export default function Home() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button variant="outline">Book a Demo</Button>
+                  <Button variant="outline" size={"lg"}>
+                    Book a Demo
+                  </Button>
                 </div>
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-4 text-md">
                   <div className="flex items-center gap-1">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
                     <span>Completely free</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
                     <span>No hidden fees</span>
                   </div>
                 </div>
@@ -599,6 +602,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Button
+                  size={"lg"}
                   asChild
                   className="bg-white text-emerald-600 hover:bg-gray-100 px-8"
                 >

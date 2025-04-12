@@ -34,10 +34,7 @@ export function SalesList() {
     acc[date].count += 1;
     return acc;
   }, {} as Record<string, { date: string; totalAmount: number; count: number }>);
-  console.log({
-    salesByDate,
-    sales,
-  });
+
   const allTimeSalesAmount = Object.keys(salesByDate).reduce(
     (sum, sale) => sum + salesByDate[sale].totalAmount,
     0

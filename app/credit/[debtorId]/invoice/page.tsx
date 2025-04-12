@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { formatCurrency } from "@/lib/utils";
 
 export default function InvoicePage({
   params,
@@ -27,7 +28,7 @@ export default function InvoicePage({
 }) {
   const router = useRouter();
   const _params = use<{ debtorId: string }>(params as any);
-  const { credits, fetchCredits } = useStore();
+  const { credits, fetchCredits, debtors } = useStore();
   const [invoiceNumber, setInvoiceNumber] = useState(
     `INV-${Date.now().toString().slice(-6)}`
   );
@@ -45,10 +46,10 @@ export default function InvoicePage({
   const debtorCredits = credits.filter(
     (credit) => credit.debtorId === debtorId
   );
-
-  // Get debtor name
-  const debtorName =
-    debtorCredits.length > 0 ? debtorCredits[0].debtorName : "Unknown Debtor";
+  const debtor = debtors.find(
+    (debtor) => debtor.id === debtorCredits?.[0]?.debtorId
+  );
+  const debtorName = debtor?.name || "Unknown Debtor";
 
   // Get unpaid purchases
   const unpaidPurchases = debtorCredits.filter(
@@ -179,10 +180,10 @@ export default function InvoicePage({
                   <td className="py-2">{purchase.item}</td>
                   <td className="py-2 text-right">{purchase.quantity}</td>
                   <td className="py-2 text-right">
-                    ${parseInt(purchase.price + "", 10).toFixed(2)}
+                    ₦{formatCurrency(Number(purchase.price))}
                   </td>
                   <td className="py-2 text-right">
-                    ${parseInt(purchase.amount + "", 10).toFixed(2)}
+                    ₦{formatCurrency(Number(purchase.amount))}
                   </td>
                 </tr>
               ))}
@@ -193,7 +194,7 @@ export default function InvoicePage({
             <div className="w-1/2 space-y-2">
               <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
-                <span>₦{totalDue.toFixed(2)}</span>
+                <span>₦{formatCurrency(Number(totalDue))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Tax (0%):</span>

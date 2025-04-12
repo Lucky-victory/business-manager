@@ -130,7 +130,7 @@ export function AddDebtorForm({ onSuccess }: { onSuccess?: () => void }) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter address" {...field} />
+                <Textarea placeholder="Enter address" {...field} rows={2} />
               </FormControl>
               <FormMessage />
             </FormItem>

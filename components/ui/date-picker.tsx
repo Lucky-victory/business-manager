@@ -21,36 +21,34 @@ export const DatePickerField = memo(
     const popoverTriggerBtnRef = useRef<HTMLButtonElement | null>(null);
 
     return (
-      <div className="space-y-2">
-        <Popover modal={true}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              ref={popoverTriggerBtnRef}
-              className={cn(
-                "w-[240px] pl-3 text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              {date ? format(new Date(date), "PPP") : <span>Pick a date</span>}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0">
-            <Calendar
-              mode="single"
-              required
-              id="date"
-              selected={new Date(date)}
-              onSelect={(selectedDate) => {
-                if (selectedDate) onDateChange(selectedDate);
-                popoverTriggerBtnRef.current?.click();
-              }}
-              className="rounded-md border"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
+      <Popover modal={true}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            ref={popoverTriggerBtnRef}
+            className={cn(
+              "w-[240px] pl-3 text-left font-normal",
+              !date && "text-muted-foreground"
+            )}
+          >
+            {date ? format(new Date(date), "PPP") : <span>Pick a date</span>}
+            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0 bg-white">
+          <Calendar
+            mode="single"
+            required
+            id="date"
+            selected={new Date(date)}
+            onSelect={(selectedDate) => {
+              if (selectedDate) onDateChange(selectedDate);
+              popoverTriggerBtnRef.current?.click();
+            }}
+            className="rounded-md border"
+          />
+        </PopoverContent>
+      </Popover>
     );
   }
 );

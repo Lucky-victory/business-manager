@@ -46,7 +46,7 @@
     "dexie": "^4.0.11",
     "dotenv": "latest",
     "drizzle-kit": "latest",
-    "drizzle-orm": "latest",
+    "drizzle-orm": "^0.41.0",
     "embla-carousel-react": "8.5.1",
     "input-otp": "1.4.1",
     "just-is-empty": "^3.4.1",

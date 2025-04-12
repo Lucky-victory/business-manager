@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql2 from "mysql2/promise";
+import { connect } from "@tidbcloud/serverless";
+import { drizzle } from "drizzle-orm/tidb-serverless";
 import * as schema from "./schema";
 import isEmpty from "just-is-empty";
 
@@ -24,5 +24,6 @@ export const dbDetails = {
 export const connectionUri = isEmpty(DATABASE_URL)
   ? `mysql://${DB_USER_NAME}:${DB_USER_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?ssl=${DB_SSL_CONFIG}`
   : (`${DATABASE_URL}?ssl={"rejectUnauthorized":true}` as string);
-const poolConnection = mysql2.createPool(connectionUri);
-export const db = drizzle(poolConnection, { mode: "planetscale", schema });
+
+const client = connect({ url: connectionUri });
+export const db = drizzle({ client, schema });

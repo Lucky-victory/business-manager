@@ -130,13 +130,13 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <div className="relative w-full max-w-[500px] aspect-video overflow-hidden rounded-xl border bg-background shadow-xl">
+                <div className="relative w-full max-w-[700px] aspect-video overflow-hidden rounded-xl border bg-background shadow-xl">
                   <Image
-                    src="/placeholder.svg?height=720&width=1280"
+                    src="/biz-manager-sales.png"
                     alt="Biz Manager Dashboard"
                     width={1280}
                     height={720}
-                    className="object-cover"
+                    className="object-cover max-w-full inline"
                   />
                 </div>
               </motion.div>
@@ -510,13 +510,13 @@ export default function Home() {
                 <Card className="border-2 border-transparent hover:border-emerald-600/20 transition-all h-full">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <Image
+                      {/* <Image
                         src="/placeholder.svg?height=100&width=100"
                         alt="Prisca Daniel"
                         width={50}
                         height={50}
                         className="rounded-full"
-                      />
+                      /> */}
                       <div>
                         <CardTitle className="text-lg">Prisca Daniel</CardTitle>
                         <CardDescription>Boutique Owner</CardDescription>
@@ -537,13 +537,13 @@ export default function Home() {
                 <Card className="border-2 border-transparent hover:border-emerald-600/20 transition-all h-full">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <Image
+                      {/* <Image
                         src="/placeholder.svg?height=100&width=100"
                         alt="Samuel Nnaemeka"
                         width={50}
                         height={50}
                         className="rounded-full"
-                      />
+                      /> */}
                       <div>
                         <CardTitle className="text-lg">
                           Samuel Nnaemeka
@@ -565,13 +565,13 @@ export default function Home() {
                 <Card className="border-2 border-transparent hover:border-emerald-600/20 transition-all h-full">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <Image
+                      {/* <Image
                         src="/placeholder.svg?height=100&width=100"
                         alt="Emeka Onuoha"
                         width={50}
                         height={50}
                         className="rounded-full"
-                      />
+                      /> */}
                       <div>
                         <CardTitle className="text-lg">Emeka Onuoha</CardTitle>
                         <CardDescription>Foam/Mattress Seller</CardDescription>

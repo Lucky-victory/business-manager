@@ -7,7 +7,8 @@ export async function middleware(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isAuthPath = path.startsWith("/auth");
-  const isPublicPath = isAuthPath || ["/", "/terms", "/privacy"].includes(path);
+  const isPublicPath =
+    isAuthPath || ["/", "/terms", "/privacy", "/landing"].includes(path);
 
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -38,6 +39,6 @@ export const config = {
      * - public folder
      * - asset files (.svg, .png, .jpg, .jpeg, .gif, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|png|jpg|jpeg|gif|webp|ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|jpg|jpeg|gif|webp|ico).*)",
   ],
 };

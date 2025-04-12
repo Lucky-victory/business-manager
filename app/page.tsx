@@ -35,10 +35,16 @@ export default function Home() {
   );
   return (
     <main className="container mx-auto px-4 py-6">
-      <div className="mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <span className="text-bold text-3xl">
-          Hi,{data?.user?.name.split(" ")[0]}
+          Hi, {data?.user?.name.split(" ")[0]}
         </span>
+        <a
+          href="/profile"
+          className="text-sm text-primary hover:underline flex items-center gap-1"
+        >
+          <span>Profile Settings</span>
+        </a>
       </div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold mb-6">Business Management</h1>

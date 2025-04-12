@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { credits, debtors, sales, users } from "./db/schema";
 
-// Types
 export type SaleSelect = typeof sales.$inferSelect;
 export type SaleInsert = typeof sales.$inferInsert;
 export type CreditSelect = typeof credits.$inferSelect;
@@ -100,7 +99,7 @@ export const useStore = create<State>()(
       formatCurrency: (amount: number | string) => {
         const amountNumber =
           typeof amount === "string" ? parseFloat(amount) : amount;
-        const userCurrencySymbol = get().user?.currencySymbol;
+        const userCurrencySymbol = get().user?.currencySymbol || "₦";
         const formatted = amountNumber.toLocaleString("en-US");
         return `${userCurrencySymbol}${formatted}`;
       },
@@ -653,6 +652,7 @@ export const useStore = create<State>()(
       name: "business-management-storage",
       partialize: (state) => ({
         // Only persist these parts of the state to localStorage
+        user: state.user,
         sales: state.sales,
         credits: state.credits,
         debtors: state.debtors,

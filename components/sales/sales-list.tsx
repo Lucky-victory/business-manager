@@ -13,7 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SalesList() {
   const router = useRouter();
-  const { sales, fetchSales } = useStore();
+  const { sales, fetchSales, formatCurrency } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const isMobile = useIsMobile();
   useEffect(() => {
@@ -48,7 +48,7 @@ export function SalesList() {
           <p className="text-muted-foreground">
             Total Sales:
             <span className="font-bold text-2xl">
-              {allTimeSalesAmount.toLocaleString("en-US") as string}
+              {formatCurrency(allTimeSalesAmount)}
             </span>
           </p>
           <p className="text-muted-foreground">
@@ -80,7 +80,7 @@ export function SalesList() {
                 <span className="text-muted-foreground">Total Sales:</span>
                 <span className="font-medium flex items-center">
                   <span className="font-bold text-2xl">
-                    {saleDay.totalAmount.toLocaleString("en-US") as string}
+                    {formatCurrency(saleDay.totalAmount)}
                   </span>
                 </span>
               </div>

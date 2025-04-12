@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isAuthPath = path.startsWith("/auth");
-  const isPublicPath = isAuthPath || path.startsWith("/landing");
+  const isPublicPath = isAuthPath || path === "/";
 
   // Get the user's session
   const session = await auth.api.getSession({
@@ -21,8 +21,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // If the user is authenticated and trying to access auth pages, redirect to home
-  if (isAuthenticated && isAuthPath) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if ((isAuthenticated && isAuthPath) || (isAuthenticated && path === "/")) {
+    return NextResponse.redirect(new URL("/app", request.url));
   }
 
   // Otherwise, continue with the request

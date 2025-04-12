@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
 import { useState } from "react";
-import { formatCurrency } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -37,7 +36,7 @@ export default function SalesDetailPage({
 }) {
   const router = useRouter();
   const _params = use<{ date: string }>(params as any);
-  const { sales, fetchSales, deleteSale } = useStore();
+  const { sales, fetchSales, deleteSale, formatCurrency } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [actionType, setActionType] = useState<"create" | "edit">("create");
   const [isLoading, setIsLoading] = useState(true);
@@ -127,7 +126,6 @@ export default function SalesDetailPage({
           <p className="text-muted-foreground">
             Total Sales:{" "}
             <span className="font-medium text-foreground ">
-              ₦
               <span className="text-2xl font-bold">
                 {formatCurrency(totalAmount)}
               </span>
@@ -136,7 +134,6 @@ export default function SalesDetailPage({
           <p className="text-muted-foreground">
             Total Profit:{" "}
             <span className="font-medium text-foreground ">
-              ₦
               <span className="text-2xl font-bold">
                 {formatCurrency(totalProfit)}
               </span>
@@ -186,13 +183,13 @@ export default function SalesDetailPage({
                       </TableCell>
                       <TableCell>{sale.item}</TableCell>
                       <TableCell>
-                        ₦{formatCurrency(parseInt(sale.price, 10))}
+                        {formatCurrency(parseInt(sale.price, 10))}
                       </TableCell>
                       <TableCell>
-                        ₦{formatCurrency(parseInt(sale.amount, 10))}
+                        {formatCurrency(parseInt(sale.amount, 10))}
                       </TableCell>
                       <TableCell>
-                        ₦{formatCurrency(parseInt(sale.profit, 10))}
+                        {formatCurrency(parseInt(sale.profit, 10))}
                       </TableCell>
                       <TableCell>
                         {format(new Date(sale.date), "h:mm a")}
@@ -261,15 +258,15 @@ export default function SalesDetailPage({
                       </div>
                       <div>
                         <p className="text-muted-foreground">Price:</p>
-                        <p>₦{formatCurrency(parseInt(sale.price, 10))}</p>
+                        <p>{formatCurrency(parseInt(sale.price, 10))}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Total:</p>
-                        <p>₦{formatCurrency(parseInt(sale.amount, 10))}</p>
+                        <p>{formatCurrency(parseInt(sale.amount, 10))}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Profit:</p>
-                        <p>₦{formatCurrency(parseInt(sale.profit, 10))}</p>
+                        <p>{formatCurrency(parseInt(sale.profit, 10))}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Time:</p>

@@ -46,7 +46,7 @@ export function SalesList() {
         <div className="flex flex-col">
           <h2 className="text-xl font-semibold">Sales</h2>
           <p className="text-muted-foreground">
-            Total Sales: ₦
+            Total Sales:
             <span className="font-bold text-2xl">
               {allTimeSalesAmount.toLocaleString("en-US") as string}
             </span>
@@ -79,7 +79,6 @@ export function SalesList() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total Sales:</span>
                 <span className="font-medium flex items-center">
-                  ₦
                   <span className="font-bold text-2xl">
                     {saleDay.totalAmount.toLocaleString("en-US") as string}
                   </span>

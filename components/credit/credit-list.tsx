@@ -30,12 +30,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreditReportDialog } from "@/components/credit/credit-report-dialog";
-import { formatCurrency } from "@/lib/utils";
 
 export function CreditList() {
   const router = useRouter();
-  const { credits, fetchCredits, debtors, getTotalOutstandingCredit } =
-    useStore();
+  const {
+    credits,
+    fetchCredits,
+    fetchDebtors,
+    debtors,
+    getTotalOutstandingCredit,
+    formatCurrency,
+  } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">(
@@ -46,7 +51,8 @@ export function CreditList() {
 
   useEffect(() => {
     fetchCredits();
-  }, [fetchCredits]);
+    fetchDebtors();
+  }, [fetchCredits, fetchDebtors]);
 
   useEffect(() => {
     // Apply status filter
@@ -119,7 +125,7 @@ export function CreditList() {
           <p className="text-muted-foreground">
             Total Outstanding:{" "}
             <span className="font-medium text-red-500">
-              ₦{totalOutstandingCredit.toFixed(2)}
+              {formatCurrency(Number(totalOutstandingCredit))}
             </span>
           </p>
         </div>
@@ -187,7 +193,7 @@ export function CreditList() {
                       : "text-green-500"
                   }`}
                 >
-                  ₦{formatCurrency(Number(debtorCredit.totalAmount))}
+                  {formatCurrency(Number(debtorCredit.totalAmount))}
                 </span>
               </div>
               {statusFilter === "all" && (
@@ -195,7 +201,7 @@ export function CreditList() {
                   <div className="flex justify-between mt-2">
                     <span className="text-muted-foreground">Paid Amount:</span>
                     <span className="font-medium text-green-500">
-                      ₦{formatCurrency(Number(debtorCredit.paidAmount))}
+                      {formatCurrency(Number(debtorCredit.paidAmount))}
                     </span>
                   </div>
                   <div className="flex justify-between mt-2">
@@ -203,7 +209,7 @@ export function CreditList() {
                       Unpaid Amount:
                     </span>
                     <span className="font-medium text-red-500">
-                      ₦{formatCurrency(Number(debtorCredit.unpaidAmount))}
+                      {formatCurrency(Number(debtorCredit.unpaidAmount))}
                     </span>
                   </div>
                 </>

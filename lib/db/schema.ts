@@ -28,7 +28,7 @@ export const users = mysqlTable("users", {
   companyEmail: varchar("company_email", { length: 255 }),
   role: text("role"),
   currencyCode: varchar("currency_code", { length: 5 }).default("NGN"),
-  currencySymbol: varchar("currency_symbol", { length: 5 }).default("₦"),
+  currencySymbol: varchar("currency_symbol", { length: 5 }).default(""),
   currencyName: varchar("currency_name", { length: 50 }).default("Naira"),
 });
 

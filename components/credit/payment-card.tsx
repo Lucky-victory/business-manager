@@ -3,13 +3,14 @@
 
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
+import { useStore } from "@/lib/store";
 
 type PaymentCardProps = {
   payment: any;
 };
 
 export function PaymentCard({ payment }: PaymentCardProps) {
+  const { formatCurrency } = useStore();
   return (
     <Card>
       <CardContent className="p-4">
@@ -17,7 +18,7 @@ export function PaymentCard({ payment }: PaymentCardProps) {
           <div>
             <p className="text-sm text-muted-foreground">Amount</p>
             <p className="font-medium">
-              ₦{formatCurrency(Number(payment.amount))}
+              {formatCurrency(Number(payment.amount))}
             </p>
           </div>
           <div>

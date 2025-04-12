@@ -43,6 +43,9 @@ export async function GET(request: Request) {
       companyPhone,
       companyEmail,
       role,
+      currencyCode,
+      currencySymbol,
+      currencyName,
     } = user;
 
     return NextResponse.json(
@@ -59,6 +62,9 @@ export async function GET(request: Request) {
           companyPhone,
           companyEmail,
           role,
+          currencyCode,
+          currencySymbol,
+          currencyName,
         },
         message: "Profile fetched successfully",
       },

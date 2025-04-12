@@ -16,7 +16,7 @@ import {
 
 export default function CreditSummaryPage() {
   const router = useRouter();
-  const { credits, debtors } = useStore();
+  const { credits, debtors, formatCurrency } = useStore();
   const [timeframe, setTimeframe] = useState<"week" | "month" | "year">(
     "month"
   );
@@ -115,7 +115,7 @@ export default function CreditSummaryPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalOutstanding.toFixed(2)}
+              {formatCurrency(Number(totalOutstanding))}
             </div>
             <p className="text-xs text-muted-foreground">
               Across {debtors.length} debtors
@@ -128,7 +128,9 @@ export default function CreditSummaryPage() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalPaid.toFixed(2)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(Number(totalPaid))}
+            </div>
             <p className="text-xs text-muted-foreground">
               {((totalPaid / (totalPaid + totalOutstanding)) * 100).toFixed(1)}%
               of total credit
@@ -144,7 +146,7 @@ export default function CreditSummaryPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalPayments.toFixed(2)}
+              {formatCurrency(Number(totalPayments))}
             </div>
             <p className="text-xs text-muted-foreground">
               {((totalPayments / totalPaid) * 100).toFixed(1)}% of paid amount
@@ -164,7 +166,7 @@ export default function CreditSummaryPage() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-medium">{debtor.name}</div>
                   <div className="font-medium">
-                    ${debtor.outstanding.toFixed(2)}
+                    {formatCurrency(Number(debtor.outstanding))}
                   </div>
                 </div>
                 <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
@@ -178,8 +180,10 @@ export default function CreditSummaryPage() {
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>Outstanding: ${debtor.outstanding.toFixed(2)}</span>
-                  <span>Paid: ${debtor.paid.toFixed(2)}</span>
+                  <span>
+                    Outstanding: {formatCurrency(Number(debtor.outstanding))}
+                  </span>
+                  <span>Paid: {formatCurrency(Number(debtor.paid))}</span>
                 </div>
               </div>
             ))}

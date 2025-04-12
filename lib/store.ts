@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { credits, debtors, sales } from "./db/schema";
+import { credits, debtors, sales, users } from "./db/schema";
 
 // Types
 export type SaleSelect = typeof sales.$inferSelect;
@@ -10,6 +10,7 @@ export type CreditInsert = typeof credits.$inferInsert;
 
 export type DebtorSelect = typeof debtors.$inferSelect;
 export type DebtorInsert = typeof debtors.$inferInsert;
+export type UserSelect = Omit<typeof users.$inferSelect, "password">;
 export type SearchResult = {
   id: string;
   type: "sale" | "credit";
@@ -25,11 +26,14 @@ type State = {
   credits: CreditSelect[];
   debtors: DebtorSelect[];
   searchResults: SearchResult[];
+  user: UserSelect;
+  formatCurrency: (amount: number | string) => string;
   isLoading: {
     sales: boolean;
     credits: boolean;
     debtors: boolean;
     search: boolean;
+    user: boolean;
   };
   error: string | null;
 
@@ -42,6 +46,8 @@ type State = {
   ) => Promise<SaleSelect | null>;
   deleteSale: (saleId: string) => Promise<void>;
 
+  fetchUser: () => Promise<void>;
+  removeUser: () => void;
   // Credit operations
   fetchCredits: () => Promise<void>;
   addCredit: (credit: CreditInsert) => Promise<CreditSelect | null>;
@@ -82,14 +88,43 @@ export const useStore = create<State>()(
       credits: [],
       debtors: [],
       searchResults: [],
+      user: {} as UserSelect,
       isLoading: {
         sales: false,
         credits: false,
         debtors: false,
         search: false,
+        user: false,
       },
       error: null,
-
+      formatCurrency: (amount: number | string) => {
+        const amountNumber =
+          typeof amount === "string" ? parseFloat(amount) : amount;
+        const userCurrencySymbol = get().user?.currencySymbol;
+        const formatted = amountNumber.toLocaleString("en-US");
+        return `${userCurrencySymbol}${formatted}`;
+      },
+      fetchUser: async () => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, user: true },
+            error: null,
+          }));
+          const response = await fetch("/api/profile");
+          if (!response.ok) throw new Error("Failed to fetch user");
+          const { data } = await response.json();
+          set((state) => ({
+            user: data,
+            isLoading: { ...state.isLoading, user: false },
+          }));
+        } catch (error: any) {
+          console.error("Error fetching user:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, user: false },
+          }));
+        }
+      },
       // Sales operations
       fetchSales: async () => {
         try {
@@ -205,7 +240,9 @@ export const useStore = create<State>()(
           }));
         }
       },
-
+      removeUser: () => {
+        set({ user: {} as UserSelect });
+      },
       // Credit operations
       fetchCredits: async () => {
         try {

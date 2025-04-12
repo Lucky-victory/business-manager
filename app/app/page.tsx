@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +16,7 @@ import { parseAsStringLiteral, useQueryState } from "nuqs";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const { searchResults, searchSalesAndCredit } = useStore();
+  const { searchResults, searchSalesAndCredit, fetchUser } = useStore();
   const { useSession } = authClient;
   const { data } = useSession();
 
@@ -25,6 +25,10 @@ export default function Home() {
     "tab",
     parseAsStringLiteral(tabs).withDefault("sales")
   );
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {

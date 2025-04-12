@@ -105,12 +105,8 @@
           "name": "account_user_id_users_id_fk",
           "tableFrom": "account",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -118,9 +114,7 @@
       "compositePrimaryKeys": {
         "account_id": {
           "name": "account_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -248,58 +242,42 @@
       "indexes": {
         "credits_debtor_id_idx": {
           "name": "credits_debtor_id_idx",
-          "columns": [
-            "debtor_id"
-          ],
+          "columns": ["debtor_id"],
           "isUnique": false
         },
         "credits_type_idx": {
           "name": "credits_type_idx",
-          "columns": [
-            "type"
-          ],
+          "columns": ["type"],
           "isUnique": false
         },
         "credits_item_idx": {
           "name": "credits_item_idx",
-          "columns": [
-            "item"
-          ],
+          "columns": ["item"],
           "isUnique": false
         },
         "credits_user_id_idx": {
           "name": "credits_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "credits_is_paid_idx": {
           "name": "credits_is_paid_idx",
-          "columns": [
-            "is_paid"
-          ],
+          "columns": ["is_paid"],
           "isUnique": false
         },
         "credits_date_idx": {
           "name": "credits_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "credits_invoice_id_idx": {
           "name": "credits_invoice_id_idx",
-          "columns": [
-            "invoice_id"
-          ],
+          "columns": ["invoice_id"],
           "isUnique": false
         },
         "credits_paid_date_idx": {
           "name": "credits_paid_date_idx",
-          "columns": [
-            "paid_date"
-          ],
+          "columns": ["paid_date"],
           "isUnique": false
         }
       },
@@ -308,12 +286,8 @@
           "name": "credits_user_id_users_id_fk",
           "tableFrom": "credits",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -321,9 +295,7 @@
       "compositePrimaryKeys": {
         "credits_id": {
           "name": "credits_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -394,30 +366,22 @@
       "indexes": {
         "debtors_name_idx": {
           "name": "debtors_name_idx",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": false
         },
         "debtors_email_idx": {
           "name": "debtors_email_idx",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": false
         },
         "debtors_phone_idx": {
           "name": "debtors_phone_idx",
-          "columns": [
-            "phone"
-          ],
+          "columns": ["phone"],
           "isUnique": false
         },
         "debtors_created_at_idx": {
           "name": "debtors_created_at_idx",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -426,12 +390,8 @@
           "name": "debtors_user_id_users_id_fk",
           "tableFrom": "debtors",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -439,9 +399,7 @@
       "compositePrimaryKeys": {
         "debtors_id": {
           "name": "debtors_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -534,44 +492,32 @@
       "indexes": {
         "invoices_debtor_id_idx": {
           "name": "invoices_debtor_id_idx",
-          "columns": [
-            "debtor_id"
-          ],
+          "columns": ["debtor_id"],
           "isUnique": false
         },
         "invoices_status_idx": {
           "name": "invoices_status_idx",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "invoices_issue_date_idx": {
           "name": "invoices_issue_date_idx",
-          "columns": [
-            "issue_date"
-          ],
+          "columns": ["issue_date"],
           "isUnique": false
         },
         "invoices_due_date_idx": {
           "name": "invoices_due_date_idx",
-          "columns": [
-            "due_date"
-          ],
+          "columns": ["due_date"],
           "isUnique": false
         },
         "invoices_user_id_idx": {
           "name": "invoices_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "invoices_invoice_number_idx": {
           "name": "invoices_invoice_number_idx",
-          "columns": [
-            "invoice_number"
-          ],
+          "columns": ["invoice_number"],
           "isUnique": false
         }
       },
@@ -580,12 +526,8 @@
           "name": "invoices_user_id_users_id_fk",
           "tableFrom": "invoices",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -593,9 +535,7 @@
       "compositePrimaryKeys": {
         "invoices_id": {
           "name": "invoices_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -675,23 +615,17 @@
       "indexes": {
         "products_user_id_idx": {
           "name": "products_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "products_name_idx": {
           "name": "products_name_idx",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": false
         },
         "products_stock_quantity_idx": {
           "name": "products_stock_quantity_idx",
-          "columns": [
-            "stock_quantity"
-          ],
+          "columns": ["stock_quantity"],
           "isUnique": false
         }
       },
@@ -700,12 +634,8 @@
           "name": "products_user_id_users_id_fk",
           "tableFrom": "products",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -713,9 +643,7 @@
       "compositePrimaryKeys": {
         "products_id": {
           "name": "products_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -821,52 +749,37 @@
       "indexes": {
         "sales_user_date_idx": {
           "name": "sales_user_date_idx",
-          "columns": [
-            "user_id",
-            "date"
-          ],
+          "columns": ["user_id", "date"],
           "isUnique": false
         },
         "sales_user_id_idx": {
           "name": "sales_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "sales_product_id_idx": {
           "name": "sales_product_id_idx",
-          "columns": [
-            "product_id"
-          ],
+          "columns": ["product_id"],
           "isUnique": false
         },
         "sales_item_idx": {
           "name": "sales_item_idx",
-          "columns": [
-            "item"
-          ],
+          "columns": ["item"],
           "isUnique": false
         },
         "sales_payment_type_idx": {
           "name": "sales_payment_type_idx",
-          "columns": [
-            "payment_type"
-          ],
+          "columns": ["payment_type"],
           "isUnique": false
         },
         "sales_quantity_idx": {
           "name": "sales_quantity_idx",
-          "columns": [
-            "quantity"
-          ],
+          "columns": ["quantity"],
           "isUnique": false
         },
         "sales_date_idx": {
           "name": "sales_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -875,12 +788,8 @@
           "name": "sales_user_id_users_id_fk",
           "tableFrom": "sales",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -888,9 +797,7 @@
       "compositePrimaryKeys": {
         "sales_id": {
           "name": "sales_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -959,16 +866,12 @@
       "indexes": {
         "session_expires_at_idx": {
           "name": "session_expires_at_idx",
-          "columns": [
-            "expires_at"
-          ],
+          "columns": ["expires_at"],
           "isUnique": false
         },
         "session_user_id_idx": {
           "name": "session_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -977,12 +880,8 @@
           "name": "session_user_id_users_id_fk",
           "tableFrom": "session",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -990,17 +889,13 @@
       "compositePrimaryKeys": {
         "session_id": {
           "name": "session_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "checkConstraint": {}
@@ -1120,7 +1015,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'₦'"
+          "default": "''"
         },
         "currency_name": {
           "name": "currency_name",
@@ -1136,23 +1031,17 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_username_unique": {
           "name": "users_username_unique",
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "checkConstraint": {}
@@ -1208,9 +1097,7 @@
       "compositePrimaryKeys": {
         "verification_id": {
           "name": "verification_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},

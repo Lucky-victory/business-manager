@@ -1,14 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import Link from "next/link";
+import { useStore } from "@/lib/store";
 
 type SearchResult = {
   id: string;
@@ -29,7 +28,7 @@ export function SearchResults({
   onClear: () => void;
   isSearching: boolean;
 }) {
-  const router = useRouter();
+  const { formatCurrency } = useStore();
   const tabs = ["sales", "credit", "search"] as const;
   const [tabQueryState, setTabQueryState] = useQueryState(
     "tab",
@@ -89,7 +88,7 @@ export function SearchResults({
                       </div>
                       <div className="text-right">
                         <p className="font-medium">
-                          ₦{formatCurrency(Number(result.amount))}
+                          {formatCurrency(Number(result.amount))}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(result.date), "MMM d, yyyy")}

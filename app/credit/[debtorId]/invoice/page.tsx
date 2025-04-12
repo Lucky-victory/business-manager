@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { formatCurrency } from "@/lib/utils";
 
 export default function InvoicePage({
   params,
@@ -28,7 +27,7 @@ export default function InvoicePage({
 }) {
   const router = useRouter();
   const _params = use<{ debtorId: string }>(params as any);
-  const { credits, fetchCredits, debtors } = useStore();
+  const { credits, fetchCredits, debtors, formatCurrency } = useStore();
   const [invoiceNumber, setInvoiceNumber] = useState(
     `INV-${Date.now().toString().slice(-6)}`
   );
@@ -180,10 +179,10 @@ export default function InvoicePage({
                   <td className="py-2">{purchase.item}</td>
                   <td className="py-2 text-right">{purchase.quantity}</td>
                   <td className="py-2 text-right">
-                    ₦{formatCurrency(Number(purchase.price))}
+                    {formatCurrency(Number(purchase.price))}
                   </td>
                   <td className="py-2 text-right">
-                    ₦{formatCurrency(Number(purchase.amount))}
+                    {formatCurrency(Number(purchase.amount))}
                   </td>
                 </tr>
               ))}
@@ -194,16 +193,16 @@ export default function InvoicePage({
             <div className="w-1/2 space-y-2">
               <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
-                <span>₦{formatCurrency(Number(totalDue))}</span>
+                <span>{formatCurrency(Number(totalDue))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Tax (0%):</span>
-                <span>₦0.00</span>
+                <span>0.00</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Due:</span>
-                <span>₦{totalDue.toFixed(2)}</span>
+                <span>{totalDue.toFixed(2)}</span>
               </div>
             </div>
           </div>

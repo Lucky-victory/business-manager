@@ -7,6 +7,24 @@ export const auth = betterAuth({
   user: {
     modelName: "users",
     additionalFields: {
+      currencyName: {
+        type: "string",
+        required: false,
+        defaultValue: "Naira",
+        input: true,
+      },
+      currencyCode: {
+        type: "string",
+        required: false,
+        defaultValue: "NGN",
+        input: true,
+      },
+      currencySymbol: {
+        type: "string",
+        required: false,
+        defaultValue: "₦",
+        input: true,
+      },
       companyName: {
         type: "string",
         required: false,

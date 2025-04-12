@@ -6,13 +6,13 @@ export default function PrivacyPage() {
     <div className="container max-w-4xl py-12">
       <Link
         href="/"
-        className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700 mb-8"
+        className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Home
       </Link>
 
-      <div className="space-y-8">
+      <div className="prose">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
           <p className="mt-4 text-gray-500">Last updated: April 12, 2025</p>

@@ -7,7 +7,12 @@ export async function middleware(request: NextRequest) {
 
   // Define public paths that don't require authentication
   const isAuthPath = path.startsWith("/auth");
-  const isPublicPath = isAuthPath || path === "/";
+  const isPublicPath = isAuthPath || ["/", "/terms", "/privacy"].includes(path);
+  console.log({
+    isAuthPath,
+    isPublicPath,
+    path,
+  });
 
   // Get the user's session
   const session = await auth.api.getSession({
@@ -40,6 +45,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|google.svg).*)",
   ],
 };

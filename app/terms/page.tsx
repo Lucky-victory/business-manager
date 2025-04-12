@@ -12,7 +12,7 @@ export default function TermsPage() {
         Back to Home
       </Link>
 
-      <div className="space-y-8">
+      <div className="prose">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
             Terms of Service

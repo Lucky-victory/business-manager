@@ -19,6 +19,9 @@ export async function middleware(request: NextRequest) {
   if (!isAuthenticated && !isPublicPath) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
+  if (isAuthenticated && path === "/") {
+    return NextResponse.redirect(new URL("/app", request.url));
+  }
 
   // If the user is authenticated and trying to access auth pages, redirect to home
   if (isAuthenticated && isAuthPath) {
@@ -39,6 +42,6 @@ export const config = {
      * - public folder
      * - asset files (.svg, .png, .jpg, .jpeg, .gif, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|jpg|jpeg|gif|webp|ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico).*)",
   ],
 };

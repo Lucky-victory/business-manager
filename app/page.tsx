@@ -28,8 +28,10 @@ import {
   staggerContainer,
   cardVariants,
 } from "@/components/ui/animations";
+import { useAuth } from "@/lib/auth-client";
 
 export default function Home() {
+  const auth = useAuth();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,12 +61,20 @@ export default function Home() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild variant="outline" className="hidden md:flex">
-              <Link href="/auth/login">Log in</Link>
-            </Button>
-            <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-              <Link href="/auth/register">Get Started</Link>
-            </Button>
+            {!auth?.user ? (
+              <>
+                <Button asChild variant="outline" className="hidden md:flex">
+                  <Link href="/auth/login">Log in</Link>
+                </Button>
+                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                  <Link href="/auth/register">Get Started</Link>
+                </Button>
+              </>
+            ) : (
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                <Link href="/app">Go to app</Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>

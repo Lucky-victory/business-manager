@@ -50,6 +50,13 @@
       "when": 1744424255903,
       "tag": "0006_overrated_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1744459855465,
+      "tag": "0007_bent_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

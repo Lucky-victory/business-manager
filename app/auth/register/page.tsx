@@ -43,7 +43,7 @@ export default function Register() {
         setSubmitError(result.error?.message || "Registration failed");
       } else {
         // If successful, redirect to dashboard
-        router.push("/");
+        router.push("/app");
       }
     } catch (error) {
       setSubmitError("An unexpected error occurred during registration");
@@ -59,6 +59,7 @@ export default function Register() {
       setIsSubmitting(true);
       await authClient.signIn.social({
         provider: "google",
+        callbackURL: "/app",
       });
     } catch (error) {
       setSubmitError("Google sign-in failed. Please try again.");

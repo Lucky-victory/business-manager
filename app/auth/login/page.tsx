@@ -23,6 +23,7 @@ export default function SignIn() {
         email,
         password,
         rememberMe: true,
+        callbackURL: "/app",
       });
 
       if (result?.error) {
@@ -40,6 +41,7 @@ export default function SignIn() {
       setIsSubmitting(true);
       await authClient.signIn.social({
         provider: "google",
+        callbackURL: "/app",
       });
     } catch (error) {
       setSubmitError("Google sign-in failed. Please try again.");

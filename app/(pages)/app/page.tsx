@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
-import { Search, User } from "lucide-react";
+import { Search, User, LogOut, Settings, ChevronDown } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -59,90 +59,114 @@ export default function Home() {
     });
   }
 
-  const userInitials = auth?.user?.name
-    ? auth.user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : "U";
+  // Get user's initials for avatar
+  const getUserInitials = () => {
+    if (!auth?.user?.name) return "U";
+    const names = auth.user.name.split(" ");
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (
+      names[0].charAt(0) + names[names.length - 1].charAt(0)
+    ).toUpperCase();
+  };
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <div className="mb-8 flex items-center justify-between">
-        <span className="text-bold text-3xl">
-          {greetUser(auth?.user?.name.split(" ")[0] || "there")}
-        </span>
+      <header className="mb-8 flex items-center justify-between bg-white dark:bg-gray-950 py-3 px-1 rounded-lg shadow-sm">
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {greetUser(auth?.user?.name?.split(" ")[0] || "there")}
+        </h1>
+
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" className="h-10 w-10 rounded-full">
-              <Avatar>
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 h-10 px-3"
+            >
+              <Avatar className="h-8 w-8 border-2 border-emerald-100">
                 <AvatarImage src={auth?.user?.image || ""} alt="User Avatar" />
-                <AvatarFallback>{userInitials}</AvatarFallback>
+
+                <AvatarFallback className="bg-emerald-600 text-white">
+                  {getUserInitials()}
+                </AvatarFallback>
               </Avatar>
+              <span className="hidden md:inline">My Account</span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56" align="end">
-            <div className="space-y-2">
+          <PopoverContent className="w-56 p-2" align="end">
+            <div className="space-y-1">
+              <div className="px-2 py-1.5 text-sm font-medium">
+                {auth?.user?.name || "User"}
+              </div>
+              <div className="px-2 py-1 text-xs text-muted-foreground">
+                {auth?.user?.email || ""}
+              </div>
+              <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
               <Button
                 variant="ghost"
-                className="w-full justify-start"
+                size="sm"
+                className="w-full justify-start text-left px-2 py-1.5"
                 onClick={() => router.push("/profile")}
               >
-                <User className="mr-2 h-4 w-4" />
+                <Settings className="mr-2 h-4 w-4" />
                 Profile Settings
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
+                size="sm"
+                className="w-full justify-start text-left px-2 py-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                 onClick={handleLogout}
               >
+                <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Button>
             </div>
           </PopoverContent>
         </Popover>
-      </div>
+      </header>
 
-      <form onSubmit={handleSearch} className="relative mb-6">
+      <form onSubmit={handleSearch} className="relative mb-8">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           placeholder="Search sales or credit..."
-          className="pl-10"
+          className="pl-10 h-11 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </form>
 
-      {tabQueryState === "search" ? (
-        <SearchResults
-          results={searchResults}
-          isSearching={isSearching}
-          onClear={() => {
-            setIsSearching(false);
-            setSearchQuery("");
-          }}
-        />
-      ) : (
-        <Tabs
-          value={tabQueryState}
-          onValueChange={(value) =>
-            setTabQueryState(value as "sales" | "credit")
-          }
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="sales">Sales</TabsTrigger>
-            <TabsTrigger value="credit">Credit</TabsTrigger>
-          </TabsList>
-          <TabsContent value="sales">
-            <SalesList />
-          </TabsContent>
-          <TabsContent value="credit">
-            <CreditList />
-          </TabsContent>
-        </Tabs>
-      )}
+      <div className="bg-white dark:bg-gray-950 rounded-lg p-4 shadow-sm">
+        {tabQueryState === "search" ? (
+          <SearchResults
+            results={searchResults}
+            isSearching={isSearching}
+            onClear={() => {
+              setIsSearching(false);
+              setSearchQuery("");
+              setTabQueryState("sales");
+            }}
+          />
+        ) : (
+          <Tabs
+            value={tabQueryState}
+            onValueChange={(value) =>
+              setTabQueryState(value as "sales" | "credit")
+            }
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="sales">Sales</TabsTrigger>
+              <TabsTrigger value="credit">Credit</TabsTrigger>
+            </TabsList>
+            <TabsContent value="sales" className="pt-2">
+              <SalesList />
+            </TabsContent>
+            <TabsContent value="credit" className="pt-2">
+              <CreditList />
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
     </main>
   );
 }

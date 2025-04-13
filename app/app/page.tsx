@@ -7,19 +7,20 @@ import { Search } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { SalesList } from "@/components/sales/sales-list";
 import { CreditList } from "@/components/credit/credit-list";
 import { SearchResults } from "@/components/search/search-results";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useAuth } from "@/lib/auth-client";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const { searchResults, searchSalesAndCredit, fetchUser } = useStore();
-  const { useSession } = authClient;
-  const { data } = useSession();
-
+  const auth = useAuth();
+  const router = useRouter();
   const tabs = ["sales", "credit", "search"] as const;
   const [tabQueryState, setTabQueryState] = useQueryState(
     "tab",
@@ -41,18 +42,29 @@ export default function Home() {
       setIsSearching(false);
     }
   };
+
+  function handleLogout() {
+    authClient.signOut().then(() => {
+      router.push("/");
+    });
+  }
   return (
     <main className="container mx-auto px-4 py-6">
       <div className="mb-8 flex items-center justify-between">
         <span className="text-bold text-3xl">
-          Hi, {data?.user?.name.split(" ")[0]}
+          Hi, {auth?.user?.name.split(" ")[0] || "there!"}
         </span>
-        <a
-          href="/profile"
-          className="text-sm text-primary hover:underline flex items-center gap-1"
-        >
-          <span>Profile Settings</span>
-        </a>
+        <div className="items-center">
+          <Button variant="outline" onClick={() => handleLogout()}>
+            Logout
+          </Button>
+          <a
+            href="/profile"
+            className="text-sm text-primary hover:underline flex items-center gap-1"
+          >
+            <span>Profile Settings</span>
+          </a>
+        </div>
       </div>
 
       <form onSubmit={handleSearch} className="relative mb-6">

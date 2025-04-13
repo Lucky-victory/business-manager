@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { roboto } from "@/lib/font";
 export const metadata: Metadata = {
   title: "Business Manager",
   description:
@@ -14,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={roboto.variable}>
         <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>

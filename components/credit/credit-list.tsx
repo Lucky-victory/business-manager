@@ -30,6 +30,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreditReportDialog } from "@/components/credit/credit-report-dialog";
+import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
+import { cn } from "@/lib/utils";
 
 export function CreditList() {
   const router = useRouter();
@@ -40,6 +42,7 @@ export function CreditList() {
     debtors,
     getTotalOutstandingCredit,
     formatCurrency,
+    isLoading,
   } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -173,57 +176,65 @@ export function CreditList() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Object.values(creditsByDebtor).map((debtorCredit) => (
-          <Card
-            key={debtorCredit.debtorId}
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => router.push(`/credit/${debtorCredit.debtorId}`)}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle>{debtorCredit.debtorName}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Owed:</span>
-                <span
-                  className={`font-medium ${
-                    debtorCredit.totalAmount > 0
-                      ? "text-red-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {formatCurrency(Number(debtorCredit.totalAmount))}
-                </span>
-              </div>
-              {statusFilter === "all" && (
-                <>
-                  <div className="flex justify-between mt-2">
-                    <span className="text-muted-foreground">Paid Amount:</span>
-                    <span className="font-medium text-green-500">
-                      {formatCurrency(Number(debtorCredit.paidAmount))}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <span className="text-muted-foreground">
-                      Unpaid Amount:
-                    </span>
-                    <span className="font-medium text-red-500">
-                      {formatCurrency(Number(debtorCredit.unpaidAmount))}
-                    </span>
-                  </div>
-                </>
-              )}
-              <div className="flex justify-between mt-2">
-                <span className="text-muted-foreground">Last Update:</span>
-                <span className="font-medium">
-                  {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}
-                </span>
-              </div>
-            </CardContent>
-            {/* <CardFooter className="pt-0">
+      <div
+        className={cn(
+          isLoading.credits && "",
+          !isLoading?.credits && "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        )}
+      >
+        <LoadingStateWrapper isLoading={isLoading.credits}>
+          {Object.values(creditsByDebtor).map((debtorCredit) => (
+            <Card
+              key={debtorCredit.debtorId}
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => router.push(`/credit/${debtorCredit.debtorId}`)}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle>{debtorCredit.debtorName}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Owed:</span>
+                  <span
+                    className={`font-medium ${
+                      debtorCredit.totalAmount > 0
+                        ? "text-red-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {formatCurrency(Number(debtorCredit.totalAmount))}
+                  </span>
+                </div>
+                {statusFilter === "all" && (
+                  <>
+                    <div className="flex justify-between mt-2">
+                      <span className="text-muted-foreground">
+                        Paid Amount:
+                      </span>
+                      <span className="font-medium text-green-500">
+                        {formatCurrency(Number(debtorCredit.paidAmount))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between mt-2">
+                      <span className="text-muted-foreground">
+                        Unpaid Amount:
+                      </span>
+                      <span className="font-medium text-red-500">
+                        {formatCurrency(Number(debtorCredit.unpaidAmount))}
+                      </span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between mt-2">
+                  <span className="text-muted-foreground">Last Update:</span>
+                  <span className="font-medium">
+                    {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}
+                  </span>
+                </div>
+              </CardContent>
+              {/* <CardFooter className="pt-0">
               <div className="flex gap-2 w-full justify-end">
-                <Button
+              <Button
                   variant="outline"
                   size="sm"
                   onClick={(e) => {
@@ -233,11 +244,12 @@ export function CreditList() {
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Invoice
-                </Button>
+                  </Button>
               </div>
             </CardFooter> */}
-          </Card>
-        ))}
+            </Card>
+          ))}
+        </LoadingStateWrapper>
 
         {filteredCredits.length === 0 && (
           <div className="col-span-full text-center py-10 text-muted-foreground">

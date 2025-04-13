@@ -1,9 +1,12 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ArrowLeft, Download, Printer, Send } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import "./print-styles.css";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,16 +70,73 @@ export default function InvoicePage({
     0
   );
 
-  const handleDownloadInvoice = () => {
-    // In a real app, this would generate a PDF and download it
-    toast({
-      title: "Invoice downloaded",
-      description: "Invoice has been downloaded as a PDF.",
-    });
+  const invoiceRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadInvoice = async () => {
+    if (!invoiceRef.current) return;
+
+    try {
+      // Show loading toast
+      toast({
+        title: "Generating PDF",
+        description: "Please wait while we generate your invoice...",
+      });
+
+      // Hide buttons during capture
+      const printButtons = document.querySelector(".print-buttons");
+      if (printButtons) {
+        printButtons.classList.add("hidden");
+      }
+
+      // Capture the invoice element as an image
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Show buttons again
+      if (printButtons) {
+        printButtons.classList.remove("hidden");
+      }
+
+      // Calculate PDF dimensions (A4 format)
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Create PDF
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+
+      // Add image to PDF
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      // Save PDF
+      pdf.save(`Invoice-${invoiceNumber}.pdf`);
+
+      // Show success toast
+      toast({
+        title: "Invoice downloaded",
+        description: "Invoice has been downloaded as a PDF.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+
+      // Show buttons again in case of error
+      const printButtons = document.querySelector(".print-buttons");
+      if (printButtons) {
+        printButtons.classList.remove("hidden");
+      }
+    }
   };
 
   const handlePrintInvoice = () => {
-    // In a real app, this would open the print dialog
     window.print();
   };
 
@@ -116,7 +176,8 @@ export default function InvoicePage({
             <Label htmlFor="dueDate">Due Date</Label>
 
             <DatePickerField
-              date={dueDate} minDate={new Date()}
+              date={dueDate}
+              minDate={new Date()}
               onDateChange={(date) =>
                 setDueDate(getCurrentDateTime(date).toISOString())
               }
@@ -134,7 +195,10 @@ export default function InvoicePage({
         </div>
       </div>
 
-      <Card className="mb-6 print:shadow-none print:border-none">
+      <Card
+        className="mb-6 print:shadow-none print:border-none"
+        ref={invoiceRef}
+      >
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-2xl">INVOICE</CardTitle>
@@ -162,7 +226,7 @@ export default function InvoicePage({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 print:gap-2 mb-6">
             <div>
               <h3 className="font-semibold mb-1">Bill To:</h3>
               <p>{debtorName}</p>
@@ -238,28 +302,28 @@ export default function InvoicePage({
           </div>
         </CardContent>
         <CardFooter className="flex justify-between border-t pt-6 print:hidden">
-          <p className="text-sm text-muted-foreground">
-            Payment is due by {format(new Date(dueDate), "MMMM d, yyyy")}
+          <p className="text-sm font-semibold text-muted-foreground">
+            Powered by bizmanager.africa
           </p>
           <p className="text-sm text-muted-foreground">
-            Thank you for your business!
+            Thank you for your patronage!
           </p>
         </CardFooter>
       </Card>
 
-      <div className="flex justify-end gap-2 print:hidden">
-        <Button variant="outline" onClick={handlePrintInvoice}>
+      <div className="flex justify-end gap-2 print:hidden print-buttons">
+        {/* <Button variant="outline" onClick={handlePrintInvoice}>
           <Printer className="mr-2 h-4 w-4" />
           Print
-        </Button>
-        <Button variant="outline" onClick={handleDownloadInvoice}>
+        </Button> */}
+        <Button onClick={handleDownloadInvoice}>
           <Download className="mr-2 h-4 w-4" />
           Download PDF
         </Button>
-        <Button onClick={handleSendInvoice}>
+        {/* <Button onClick={handleSendInvoice}>
           <Send className="mr-2 h-4 w-4" />
           Send Invoice
-        </Button>
+        </Button> */}
       </div>
 
       <Toaster />

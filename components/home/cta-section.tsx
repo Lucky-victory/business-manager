@@ -18,8 +18,8 @@ export const CTASection = () => {
               Ready to Transform Your Business?
             </h2>
             <p className="max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Join thousands of small business owners who have streamlined their
-              operations with Biz Manager.
+              Join thousands of business owners who now run their companies
+              better with Biz Manager.
             </p>
           </div>
           <div>

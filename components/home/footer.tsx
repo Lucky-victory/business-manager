@@ -10,7 +10,7 @@ export const Footer = () => {
           <span>Biz Manager</span>
         </div>
         <p className="text-center text-sm leading-loose text-gray-500 md:text-left">
-          © 2023 Biz Manager. All rights reserved.
+          © 2024 - {new Date().getFullYear()} Biz Manager. All rights reserved.
         </p>
         <div className="flex items-center gap-4">
           <Link

@@ -14,11 +14,13 @@ import { SearchResults } from "@/components/search/search-results";
 import { authClient, useAuth } from "@/lib/auth-client";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
+import { greetUser } from "@/lib/utils";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const { searchResults, searchSalesAndCredit, fetchUser } = useStore();
+  const { searchResults, searchSalesAndCredit, fetchUser, clearState } =
+    useStore();
   const auth = useAuth();
   const router = useRouter();
   const tabs = ["sales", "credit", "search"] as const;
@@ -45,6 +47,7 @@ export default function Home() {
 
   function handleLogout() {
     authClient.signOut().then(() => {
+      clearState();
       router.push("/");
     });
   }
@@ -52,7 +55,7 @@ export default function Home() {
     <main className="container mx-auto px-4 py-6">
       <div className="mb-8 flex items-center justify-between">
         <span className="text-bold text-3xl">
-          Hi, {auth?.user?.name.split(" ")[0] || "there!"}
+          {greetUser(auth?.user?.name.split(" ")[0] || "there")}
         </span>
         <div className="items-center">
           <Button variant="outline" onClick={() => handleLogout()}>

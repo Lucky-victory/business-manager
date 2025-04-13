@@ -10,10 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesForm } from "@/components/sales/sales-form";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
+import { cn } from "@/lib/utils";
 
 export function SalesList() {
   const router = useRouter();
-  const { sales, fetchSales, formatCurrency } = useStore();
+  const { sales, fetchSales, formatCurrency, isLoading } = useStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const isMobile = useIsMobile();
   useEffect(() => {
@@ -63,36 +65,46 @@ export function SalesList() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Object.values(salesByDate).map((saleDay) => (
-          <Card
-            key={saleDay.date}
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => router.push(`/sales/${saleDay.date}`)}
-          >
-            <CardHeader className="pb-2 px-4">
-              <CardTitle>
-                {format(new Date(saleDay.date), "MMMM d, yyyy")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Sales:</span>
-                <span className="font-medium flex items-center">
-                  <span className="font-bold text-2xl">
-                    {formatCurrency(saleDay.totalAmount)}
+      <div
+        className={cn(
+          isLoading.sales && "",
+          !isLoading?.sales && "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        )}
+      >
+        <LoadingStateWrapper
+          isLoading={isLoading.sales}
+          loadingText="Loading sales..."
+        >
+          {Object.values(salesByDate).map((saleDay) => (
+            <Card
+              key={saleDay.date}
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => router.push(`/sales/${saleDay.date}`)}
+            >
+              <CardHeader className="pb-2 px-4">
+                <CardTitle>
+                  {format(new Date(saleDay.date), "MMMM d, yyyy")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Sales:</span>
+                  <span className="font-medium flex items-center">
+                    <span className="font-bold text-2xl">
+                      {formatCurrency(saleDay.totalAmount)}
+                    </span>
                   </span>
-                </span>
-              </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-muted-foreground">Items Sold:</span>
-                <span className="font-medium">{saleDay.count}</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-muted-foreground">Items Sold:</span>
+                  <span className="font-medium">{saleDay.count}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </LoadingStateWrapper>
 
-        {sales.length === 0 && (
+        {!isLoading.sales && sales.length === 0 && (
           <div className="col-span-full text-center py-10 text-muted-foreground">
             No sales recorded yet. Add your first sale!
           </div>

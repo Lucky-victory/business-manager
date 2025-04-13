@@ -78,6 +78,7 @@ type State = {
 
   // State management
   clearError: () => void;
+  clearState: () => void;
 };
 
 export const useStore = create<State>()(
@@ -89,11 +90,11 @@ export const useStore = create<State>()(
       searchResults: [],
       user: {} as UserSelect,
       isLoading: {
-        sales: false,
-        credits: false,
-        debtors: false,
+        sales: true,
+        credits: true,
+        debtors: true,
         search: false,
-        user: false,
+        user: true,
       },
       error: null,
       formatCurrency: (amount: number | string) => {
@@ -646,6 +647,23 @@ export const useStore = create<State>()(
       // State management
       clearError: () => {
         set({ error: null });
+      },
+      clearState: () => {
+        set({
+          user: {} as UserSelect,
+          sales: [],
+          credits: [],
+          debtors: [],
+          searchResults: [],
+          error: null,
+          isLoading: {
+            sales: false,
+            credits: false,
+            debtors: false,
+            search: false,
+            user: false,
+          },
+        });
       },
     }),
     {

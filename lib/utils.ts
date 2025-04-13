@@ -36,3 +36,21 @@ export function calculateProfitMargin(
   const profitMargin = (totalProfit / totalSales) * 100;
   return profitMargin;
 }
+/**
+ * Returns a time-based greeting message for a user
+ * @param userName The name of the user to greet
+ * @returns A greeting string appropriate for the current time of day
+ */
+export function greetUser(userName: string): string {
+  const currentHour = new Date().getHours();
+
+  if (currentHour >= 5 && currentHour < 12) {
+    return `Good morning, ${userName}!`;
+  } else if (currentHour >= 12 && currentHour < 18) {
+    return `Good afternoon, ${userName}!`;
+  } else if (currentHour >= 18 && currentHour < 22) {
+    return `Good evening, ${userName}!`;
+  } else {
+    return `Good night, ${userName}!`;
+  }
+}

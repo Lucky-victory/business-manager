@@ -19,6 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { generateUUID, getCurrentDateTime } from "@/lib/utils";
+import { DatePickerField } from "@/components/ui/date-picker";
 
 export default function InvoicePage({
   params,
@@ -27,9 +29,10 @@ export default function InvoicePage({
 }) {
   const router = useRouter();
   const _params = use<{ debtorId: string }>(params as any);
-  const { credits, fetchCredits, debtors, formatCurrency } = useStore();
+  const { credits, fetchCredits, debtors, formatCurrency, user, fetchUser } =
+    useStore();
   const [invoiceNumber, setInvoiceNumber] = useState(
-    `INV-${Date.now().toString().slice(-6)}`
+    `INV-${generateUUID().slice(-16).toUpperCase()}`
   );
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
@@ -37,6 +40,9 @@ export default function InvoicePage({
   const [notes, setNotes] = useState("Thank you for your business!");
 
   useEffect(() => {
+    if (Object.keys(user).length === 0) {
+      fetchUser();
+    }
     fetchCredits();
   }, [fetchCredits]);
 
@@ -108,11 +114,12 @@ export default function InvoicePage({
           </div>
           <div className="space-y-2">
             <Label htmlFor="dueDate">Due Date</Label>
-            <Input
-              id="dueDate"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+
+            <DatePickerField
+              date={dueDate} minDate={new Date()}
+              onDateChange={(date) =>
+                setDueDate(getCurrentDateTime(date).toISOString())
+              }
             />
           </div>
         </div>
@@ -134,12 +141,24 @@ export default function InvoicePage({
             <p className="text-muted-foreground">{invoiceNumber}</p>
           </div>
           <div className="text-right">
-            <p className="font-bold">Your Company Name</p>
-            <p className="text-sm text-muted-foreground">123 Business St.</p>
-            <p className="text-sm text-muted-foreground">City, State 12345</p>
-            <p className="text-sm text-muted-foreground">
-              contact@yourcompany.com
-            </p>
+            {user?.companyName && (
+              <p className="font-bold">{user?.companyName}</p>
+            )}
+            {user?.companyAddress && (
+              <p className="text-sm text-muted-foreground">
+                {user?.companyAddress}
+              </p>
+            )}
+            {user?.companyPhone && (
+              <p className="text-sm text-muted-foreground">
+                {user?.companyPhone}
+              </p>
+            )}
+            {user?.companyEmail && (
+              <p className="text-sm text-muted-foreground">
+                {user?.companyEmail}
+              </p>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -147,8 +166,14 @@ export default function InvoicePage({
             <div>
               <h3 className="font-semibold mb-1">Bill To:</h3>
               <p>{debtorName}</p>
-              <p className="text-sm text-muted-foreground">Client Address</p>
-              <p className="text-sm text-muted-foreground">City, State 12345</p>
+              {debtor?.address && (
+                <p className="text-sm text-muted-foreground">
+                  {debtor?.address}
+                </p>
+              )}
+              {debtor?.phone && (
+                <p className="text-sm text-muted-foreground">{debtor?.phone}</p>
+              )}
             </div>
             <div className="text-right">
               <div className="space-y-1">

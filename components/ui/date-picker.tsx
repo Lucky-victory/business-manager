@@ -14,9 +14,11 @@ export const DatePickerField = memo(
   ({
     date,
     onDateChange,
+    minDate,
   }: {
     date: Date | string;
     onDateChange: (date: Date) => void;
+    minDate?: Date | number;
   }) => {
     const popoverTriggerBtnRef = useRef<HTMLButtonElement | null>(null);
 
@@ -40,6 +42,7 @@ export const DatePickerField = memo(
             mode="single"
             required
             id="date"
+            fromDate={minDate ? new Date(minDate) : undefined}
             selected={new Date(date)}
             onSelect={(selectedDate) => {
               if (selectedDate) onDateChange(selectedDate);

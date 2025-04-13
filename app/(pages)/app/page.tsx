@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,12 @@ import { authClient, useAuth } from "@/lib/auth-client";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import { greetUser } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +38,7 @@ export default function Home() {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -51,23 +58,50 @@ export default function Home() {
       router.push("/");
     });
   }
+
+  const userInitials = auth?.user?.name
+    ? auth.user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "U";
+
   return (
     <main className="container mx-auto px-4 py-6">
       <div className="mb-8 flex items-center justify-between">
         <span className="text-bold text-3xl">
           {greetUser(auth?.user?.name.split(" ")[0] || "there")}
         </span>
-        <div className="items-center">
-          <Button variant="outline" onClick={() => handleLogout()}>
-            Logout
-          </Button>
-          <a
-            href="/profile"
-            className="text-sm text-primary hover:underline flex items-center gap-1"
-          >
-            <span>Profile Settings</span>
-          </a>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="h-10 w-10 rounded-full">
+              <Avatar>
+                <AvatarImage src={auth?.user?.image || ""} alt="User Avatar" />
+                <AvatarFallback>{userInitials}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56" align="end">
+            <div className="space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => router.push("/profile")}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Profile Settings
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <form onSubmit={handleSearch} className="relative mb-6">

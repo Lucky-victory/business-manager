@@ -6,7 +6,10 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { FormField } from "@/components/ui/form-field";
 import { PasswordCriteria } from "@/components/auth/password-criteria";
-import { registerSchema, passwordSchema } from "@/app/auth/register/page"; // Adjust import path as needed
+import {
+  registerSchema,
+  passwordSchema,
+} from "@/app/(pages)/auth/register/page"; // Adjust import path as needed
 
 type ValidationErrors = {
   name?: string;

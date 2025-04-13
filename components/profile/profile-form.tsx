@@ -15,6 +15,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { UserSelect } from "@/lib/store";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
 
 // Define the profile schema
 const profileSchema = z.object({
@@ -27,6 +36,7 @@ const profileSchema = z.object({
   companyName: z.string().optional().or(z.literal("")),
   companyAddress: z.string().optional().or(z.literal("")),
   companyPhone: z.string().optional().or(z.literal("")),
+  currency: z.string().optional().or(z.literal("")),
   companyEmail: z
     .string()
     .email({ message: "Invalid email address" })
@@ -34,14 +44,30 @@ const profileSchema = z.object({
     .or(z.literal("")),
 });
 
-type ProfileData = z.infer<typeof profileSchema>;
+export type ProfileData = z.infer<typeof profileSchema>;
 
 type ProfileFormProps = {
-  initialData: ProfileData;
+  initialData: NonNullable<UserSelect>;
   isSubmitting: boolean;
   onSubmit: (data: ProfileData) => Promise<void>;
 };
-
+const currencies = [
+  { name: "Nigerian Naira", code: "NGN", symbol: "₦" },
+  { name: "South African Rand", code: "ZAR", symbol: "R" },
+  { name: "Kenyan Shilling", code: "KES", symbol: "KSh" },
+  { name: "Egyptian Pound", code: "EGP", symbol: "E£" },
+  { name: "Moroccan Dirham", code: "MAD", symbol: "DH" },
+  { name: "Ghanaian Cedi", code: "GHS", symbol: "GH₵" },
+  { name: "Ethiopian Birr", code: "ETB", symbol: "Br" },
+  { name: "Tunisian Dinar", code: "TND", symbol: "DT" },
+  { name: "Algerian Dinar", code: "DZD", symbol: "DA" },
+  { name: "Tanzanian Shilling", code: "TZS", symbol: "TSh" },
+  { name: "CFA Franc BCEAO", code: "XOF", symbol: "CFA" },
+  { name: "CFA Franc BEAC", code: "XAF", symbol: "FCFA" },
+  { name: "Rwandan Franc", code: "RWF", symbol: "FRw" },
+  { name: "Ugandan Shilling", code: "UGX", symbol: "USh" },
+  { name: "Zambian Kwacha", code: "ZMW", symbol: "ZK" },
+];
 export function ProfileForm({
   initialData,
   isSubmitting,
@@ -58,10 +84,15 @@ export function ProfileForm({
       companyAddress: initialData.companyAddress || "",
       companyPhone: initialData.companyPhone || "",
       companyEmail: initialData.companyEmail || "",
+      currency:
+        `${initialData.currencySymbol}_${initialData.currencyCode}_${initialData.currencyName}` ||
+        "₦_NGN_Nigerian Naira",
     },
   });
 
   async function handleSubmit(values: z.infer<typeof profileSchema>) {
+    console.log("Form values:", values);
+
     await onSubmit(values);
   }
 
@@ -236,6 +267,39 @@ export function ProfileForm({
                   </FormItem>
                 )}
               />
+            </div>
+          </div>
+          <div className="">
+            <h2 className="text-lg font-semibold mb-4">Others </h2>
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+
+              <Select
+                onValueChange={(value) => {
+                  console.log({
+                    value,
+                  });
+
+                  const [symbol, code, name] = value.split("_");
+                  form.setValue("currency", value);
+                }}
+                defaultValue={form.getValues("currency")}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencies.map((currency) => (
+                    <SelectItem
+                      key={currency.code}
+                      value={`${currency.symbol}_${currency.code}_${currency.name}`}
+                    >
+                      {currency.name} ({currency.symbol})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

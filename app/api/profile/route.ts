@@ -92,6 +92,9 @@ export async function PATCH(request: Request) {
       companyAddress,
       companyPhone,
       companyEmail,
+      currencyCode,
+      currencySymbol,
+      currencyName,
       image,
     } = body;
 
@@ -122,6 +125,9 @@ export async function PATCH(request: Request) {
           companyPhone,
           companyEmail,
           image,
+          currencyCode,
+          currencySymbol,
+          currencyName,
           updatedAt: new Date(),
         })
         .where(eq(users.id, authSession.user.id));

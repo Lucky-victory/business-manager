@@ -3,77 +3,44 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
-import { ProfileForm } from "@/components/profile/profile-form";
+import { ProfileData, ProfileForm } from "@/components/profile/profile-form";
 import { BackButton } from "@/components/ui/back-button";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
-
-// Define the profile schema
-const profileSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  username: z.string().optional().or(z.literal("")),
-  displayUsername: z.string().optional().or(z.literal("")),
-  image: z.string().optional().or(z.literal("")),
-  companyName: z.string().optional().or(z.literal("")),
-  companyAddress: z.string().optional().or(z.literal("")),
-  companyPhone: z.string().optional().or(z.literal("")),
-  companyEmail: z
-    .string()
-    .email({ message: "Invalid email address" })
-    .optional()
-    .or(z.literal("")),
-});
-
-type ProfileData = z.infer<typeof profileSchema>;
+import { useStore } from "@/lib/store";
+import isEmpty from "just-is-empty";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user: profileData, isLoading, fetchUser } = useStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Fetch profile data
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const response = await fetch("/api/profile");
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch profile data");
-        }
-
-        const data = await response.json();
-        setProfileData(data.data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-        setError("Failed to load profile data. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, []);
+    isEmpty(profileData) && fetchUser();
+  }, [fetchUser]);
 
   // Handle form submission
   const handleSubmit = async (data: ProfileData) => {
     setIsSubmitting(true);
     setSuccessMessage(null);
     setError(null);
-
+    const { currency, ...rest } = data;
+    const [currencySymbol, currencyCode, currencyName] =
+      currency?.split("_") || [];
     try {
       const response = await fetch("/api/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...rest,
+          currencyCode,
+          currencySymbol,
+          currencyName,
+        }),
       });
 
       if (!response.ok) {
@@ -82,13 +49,13 @@ export default function ProfilePage() {
       }
 
       const responseData = await response.json();
-      setProfileData(responseData.data);
+      fetchUser();
       setSuccessMessage("Profile updated successfully");
 
       // Refresh the page after a short delay
-      setTimeout(() => {
-        router.refresh();
-      }, 2000);
+      // setTimeout(() => {
+      //   router.refresh();
+      // }, 2000);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile. Please try again later.");
@@ -104,7 +71,7 @@ export default function ProfilePage() {
         backButton={<BackButton onClick={() => router.back()} />}
       />
 
-      {isLoading ? (
+      {isLoading?.user ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>

@@ -83,7 +83,7 @@ export function CreditList() {
         };
       }
 
-      // Add to total amount if it's a purchase, subtract if it's a payment
+      // Add to total amount if it's a purchase
       if (credit.type === "purchase") {
         acc[credit.debtorId].totalAmount += Number(credit.amount);
 
@@ -94,9 +94,12 @@ export function CreditList() {
           acc[credit.debtorId].unpaidAmount += Number(credit.amount);
         }
       } else if (credit.type === "payment") {
-        // acc[credit.debtorId].totalAmount -= Number(credit.amount);
-        acc[credit.debtorId].paidAmount += Number(credit.amount);
-        acc[credit.debtorId].unpaidAmount -= Number(credit.amount);
+        // For payments, we don't add to paidAmount directly to avoid double counting
+        // Instead, we just reduce the unpaidAmount
+        acc[credit.debtorId].unpaidAmount = Math.max(
+          0,
+          acc[credit.debtorId].unpaidAmount - Number(credit.amount)
+        );
       }
 
       // Update last update date if this entry is newer

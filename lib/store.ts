@@ -613,16 +613,38 @@ export const useStore = create<State>()(
       getTotalOutstandingCredit: () => {
         const { credits } = get();
 
-        // Calculate total outstanding credit
-        const totalPurchases = credits
+        // Group credits by debtor to calculate per-debtor balances
+        const debtorBalances: Record<string, number> = {};
+
+        // First, calculate unpaid purchases per debtor
+        credits
           .filter((credit) => credit.type === "purchase" && !credit.isPaid)
-          .reduce((sum, credit) => sum + Number(credit.amount), 0);
+          .forEach((credit) => {
+            if (!debtorBalances[credit.debtorId]) {
+              debtorBalances[credit.debtorId] = 0;
+            }
+            debtorBalances[credit.debtorId] += Number(credit.amount);
+          });
 
-        const totalPayments = credits
+        // Then, subtract payments per debtor (without going negative for any debtor)
+        credits
           .filter((credit) => credit.type === "payment")
-          .reduce((sum, credit) => sum + Number(credit.amount), 0);
+          .forEach((credit) => {
+            if (!debtorBalances[credit.debtorId]) {
+              debtorBalances[credit.debtorId] = 0;
+            } else {
+              debtorBalances[credit.debtorId] = Math.max(
+                0,
+                debtorBalances[credit.debtorId] - Number(credit.amount)
+              );
+            }
+          });
 
-        return Math.max(0, totalPurchases - totalPayments);
+        // Sum up all debtor balances for the total outstanding credit
+        return Object.values(debtorBalances).reduce(
+          (total, balance) => total + balance,
+          0
+        );
       },
 
       getDebtorCredits: (debtorId: string) => {
@@ -633,15 +655,23 @@ export const useStore = create<State>()(
       getDebtorBalance: (debtorId: string) => {
         const debtorCredits = get().getDebtorCredits(debtorId);
 
-        const totalPurchases = debtorCredits
-          .filter((credit) => credit.type === "purchase" && !credit.isPaid)
-          .reduce((sum, credit) => sum + Number(credit.amount), 0);
+        // Only consider unpaid purchases
+        const unpaidPurchases = debtorCredits.filter(
+          (credit) => credit.type === "purchase" && !credit.isPaid
+        );
 
+        const totalUnpaidPurchases = unpaidPurchases.reduce(
+          (sum, credit) => sum + Number(credit.amount),
+          0
+        );
+
+        // Consider all payments
         const totalPayments = debtorCredits
           .filter((credit) => credit.type === "payment")
           .reduce((sum, credit) => sum + Number(credit.amount), 0);
 
-        return Math.max(0, totalPurchases - totalPayments);
+        // Balance is unpaid purchases minus payments (can't be negative)
+        return Math.max(0, totalUnpaidPurchases - totalPayments);
       },
 
       // State management

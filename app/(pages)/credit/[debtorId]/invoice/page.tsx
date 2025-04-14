@@ -84,21 +84,14 @@ export default function InvoicePage({
     (credit) => credit.type === "purchase" && !credit.isPaid
   );
 
-  const unpaidItems = debtorCredits.filter(
-    (credit) => credit.type === "purchase" && !credit.isPaid
+  // Calculate total amount of unpaid purchases
+  const totalUnpaidPurchases = unpaidPurchases.reduce(
+    (sum, purchase) => sum + +purchase.amount,
+    0
   );
-  // const unpaidAmount =
-  //   unpaidItems?.length > 0
-  //     ? unpaidPurchases
-  //         .filter((purchase) => !purchase.isPaid)
-  //         .reduce((sum, purchase) => sum + +purchase.amount, 0) - totalPayments
-  //     : unpaidPurchases
-  //         .filter((purchase) => !purchase.isPaid)
-  //         .reduce((sum, purchase) => sum + +purchase.amount, 0);
-  // Calculate total amount due
-  const totalDue =
-    unpaidPurchases.reduce((sum, purchase) => sum + +purchase.amount, 0) -
-    totalPayments;
+
+  // Calculate total amount due (unpaid purchases minus payments)
+  const totalDue = Math.max(0, totalUnpaidPurchases - totalPayments);
 
   const invoiceRef = useRef<HTMLDivElement>(null);
 

@@ -14,30 +14,40 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
   );
   const payments = debtorCredits.filter((credit) => credit.type === "payment");
   const { formatCurrency } = useStore();
-  // Calculate total amount owed
+  // Calculate total amount owed (all purchases)
   const totalPurchases = allPurchases.reduce(
     (sum, purchase) => sum + +purchase.amount,
     0
   );
+
+  // Calculate total payments made
   const totalPayments = payments.reduce(
     (sum, payment) => sum + +payment.amount,
     0
   );
 
-  const totalOwed = totalPurchases - totalPayments;
-  const unpaidItems = allPurchases.filter((purchase) => !purchase.isPaid);
-  // Calculate paid and unpaid amounts
-  const paidAmount = allPurchases
-    .filter((purchase) => purchase.isPaid)
-    .reduce((sum, purchase) => sum + +purchase.amount, 0);
-  const unpaidAmount =
-    unpaidItems?.length > 0
-      ? allPurchases
-          .filter((purchase) => !purchase.isPaid)
-          .reduce((sum, purchase) => sum + +purchase.amount, 0) - totalPayments
-      : allPurchases
-          .filter((purchase) => !purchase.isPaid)
-          .reduce((sum, purchase) => sum + +purchase.amount, 0);
+  // Get purchases marked as paid
+  const paidPurchases = allPurchases.filter((purchase) => purchase.isPaid);
+  const paidPurchasesAmount = paidPurchases.reduce(
+    (sum, purchase) => sum + +purchase.amount,
+    0
+  );
+
+  // Get unpaid purchases
+  const unpaidPurchases = allPurchases.filter((purchase) => !purchase.isPaid);
+  const unpaidPurchasesAmount = unpaidPurchases.reduce(
+    (sum, purchase) => sum + +purchase.amount,
+    0
+  );
+
+  // Calculate paid amount:
+  // 1. All purchases marked as paid
+  // 2. For unpaid purchases, count payments up to the unpaid amount
+  const paidAmount =
+    paidPurchasesAmount + Math.min(totalPayments, unpaidPurchasesAmount);
+
+  // Calculate unpaid amount (unpaid purchases minus payments, can't be negative)
+  const unpaidAmount = Math.max(0, unpaidPurchasesAmount - totalPayments);
   const debtorCredit = {
     totalAmount: totalPurchases,
     paidAmount,

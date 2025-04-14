@@ -1,9 +1,10 @@
 "use client";
 
-import { useStore } from "@/lib/store";
+import { CreditSelect, useStore } from "@/lib/store";
+import isEmpty from "just-is-empty";
 
 type CreditSummaryProps = {
-  debtorCredits: any[];
+  debtorCredits: CreditSelect[];
 };
 
 export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
@@ -37,6 +38,11 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
       : allPurchases
           .filter((purchase) => !purchase.isPaid)
           .reduce((sum, purchase) => sum + +purchase.amount, 0);
+  const debtorCredit = {
+    totalAmount: totalPurchases,
+    paidAmount,
+    unpaidAmount,
+  };
 
   return (
     <div>
@@ -44,23 +50,23 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
         Total Owed:
         <span
           className={`font-medium ${
-            totalOwed > 0 ? "text-red-500" : "text-green-500"
+            debtorCredit.totalAmount > 0 ? "text-red-500" : "text-green-500"
           } ml-1`}
         >
-          {formatCurrency(Number(totalOwed))}
+          {formatCurrency(Number(debtorCredit.totalAmount))}
         </span>
       </p>
       <div className="flex flex-col gap-1">
         <p className="text-muted-foreground">
           Paid:
           <span className="font-medium text-green-500 ml-1">
-            {formatCurrency(Number(paidAmount))}
+            {formatCurrency(Number(debtorCredit.paidAmount))}
           </span>
         </p>
         <p className="text-muted-foreground">
           Unpaid:
           <span className="font-medium text-red-500 ml-1">
-            {formatCurrency(Number(unpaidAmount))}
+            {formatCurrency(Number(debtorCredit.unpaidAmount))}
           </span>
         </p>
         <p className="text-muted-foreground">

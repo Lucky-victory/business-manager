@@ -11,7 +11,7 @@ export async function PATCH(
   { params }: { params: { creditId: string } }
 ) {
   try {
-    const creditId = params.creditId;
+    const creditId = await params.creditId;
     const body = await request.json();
     const authSession = await auth.api.getSession({
       headers: await headers(),
@@ -78,7 +78,7 @@ export async function DELETE(
   { params }: { params: { creditId: string } }
 ) {
   try {
-    const creditId = params.creditId;
+    const creditId = await params.creditId;
     const authSession = await auth.api.getSession({
       headers: await headers(),
     });

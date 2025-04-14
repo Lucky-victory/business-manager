@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { CreditSummary } from "@/components/credit/credit-summary";
 import { CreditTabs } from "@/components/credit/credit-tabs";
 import { PageHeader } from "@/components/ui/page-header";
+import Link from "next/link";
 
 export default function CreditDetailPage({
   params,
@@ -58,12 +59,11 @@ export default function CreditDetailPage({
         <CreditSummary debtorCredits={debtorCredits} />
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/credit/${debtorId}/invoice`)}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Generate Invoice
+          <Button variant="outline" asChild>
+            <Link href={`/credit/${debtorId}/invoice`}>
+              <FileText className="h-4 w-4 mr-2" />
+              Generate Invoice
+            </Link>
           </Button>
           <Button onClick={() => setIsFormOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />

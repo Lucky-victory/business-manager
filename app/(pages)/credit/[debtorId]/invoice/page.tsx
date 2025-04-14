@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState, useRef } from "react";
+import { use, useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ArrowLeft, Download, Printer, Send } from "lucide-react";
@@ -34,9 +34,11 @@ export default function InvoicePage({
   const _params = use<{ debtorId: string }>(params as any);
   const { credits, fetchCredits, debtors, formatCurrency, user, fetchUser } =
     useStore();
-  const [invoiceNumber, setInvoiceNumber] = useState(
-    `INV-${generateUUID().slice(-16).toUpperCase()}`
+  const defaultInvNumber = useMemo(
+    () => `INV-${generateUUID().slice(-16).toUpperCase()}`,
+    []
   );
+  const [invoiceNumber, setInvoiceNumber] = useState(defaultInvNumber);
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
   );
@@ -58,17 +60,35 @@ export default function InvoicePage({
     (debtor) => debtor.id === debtorCredits?.[0]?.debtorId
   );
   const debtorName = debtor?.name || "Unknown Debtor";
+  const payments = debtorCredits.filter((credit) => credit.type === "payment");
+  const totalPayments = payments.reduce(
+    (sum, payment) => sum + +payment.amount,
+    0
+  );
 
   // Get unpaid purchases
   const unpaidPurchases = debtorCredits.filter(
     (credit) => credit.type === "purchase" && !credit.isPaid
   );
 
-  // Calculate total amount due
-  const totalDue = unpaidPurchases.reduce(
-    (sum, purchase) => sum + +purchase.amount,
-    0
+  const unpaidItems = debtorCredits.filter(
+    (credit) => credit.type === "purchase" && !credit.isPaid
   );
+  // const unpaidAmount =
+  //   unpaidItems?.length > 0
+  //     ? unpaidPurchases
+  //         .filter((purchase) => !purchase.isPaid)
+  //         .reduce((sum, purchase) => sum + +purchase.amount, 0) - totalPayments
+  //     : unpaidPurchases
+  //         .filter((purchase) => !purchase.isPaid)
+  //         .reduce((sum, purchase) => sum + +purchase.amount, 0);
+  // Calculate total amount due
+  const totalDue =
+    unpaidPurchases.reduce((sum, purchase) => sum + +purchase.amount, 0) -
+    totalPayments;
+  console.log({
+    totalPayments,
+  });
 
   const invoiceRef = useRef<HTMLDivElement>(null);
 
@@ -285,8 +305,8 @@ export default function InvoicePage({
                 <span>{formatCurrency(Number(totalDue))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Tax (0%):</span>
-                <span>0.00</span>
+                <span className="font-medium">Paid:</span>
+                <span>- {formatCurrency(Number(totalPayments))}</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">

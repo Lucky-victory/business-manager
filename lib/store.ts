@@ -99,9 +99,9 @@ export const useStore = create<State>()(
       error: null,
       formatCurrency: (amount: number | string) => {
         const amountNumber =
-          typeof amount === "string" ? parseFloat(amount) : amount;
+          typeof amount === "string" ? parseFloat(amount || "0.00") : amount;
         const userCurrencySymbol = get().user?.currencySymbol || "₦";
-        const formatted = amountNumber.toLocaleString("en-US");
+        const formatted = (amountNumber || 0.0).toLocaleString("en-US");
         return `${userCurrencySymbol}${formatted}`;
       },
       fetchUser: async () => {

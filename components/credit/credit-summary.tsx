@@ -23,14 +23,19 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
     0
   );
   const totalOwed = totalPurchases - totalPayments;
-
+  const unpaidItems = allPurchases.filter((purchase) => !purchase.isPaid);
   // Calculate paid and unpaid amounts
   const paidAmount = allPurchases
     .filter((purchase) => purchase.isPaid)
     .reduce((sum, purchase) => sum + +purchase.amount, 0);
-  const unpaidAmount = allPurchases
-    .filter((purchase) => !purchase.isPaid)
-    .reduce((sum, purchase) => sum + +purchase.amount, 0);
+  const unpaidAmount =
+    unpaidItems?.length > 0
+      ? allPurchases
+          .filter((purchase) => !purchase.isPaid)
+          .reduce((sum, purchase) => sum + +purchase.amount, 0) - totalPayments
+      : allPurchases
+          .filter((purchase) => !purchase.isPaid)
+          .reduce((sum, purchase) => sum + +purchase.amount, 0);
 
   return (
     <div>
@@ -44,7 +49,7 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
           {formatCurrency(Number(totalOwed))}
         </span>
       </p>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-1">
         <p className="text-muted-foreground">
           Paid:
           <span className="font-medium text-green-500 ml-1">
@@ -55,6 +60,12 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
           Unpaid:
           <span className="font-medium text-red-500 ml-1">
             {formatCurrency(Number(unpaidAmount))}
+          </span>
+        </p>
+        <p className="text-muted-foreground">
+          Payments made:
+          <span className="font-medium text-green-500 ml-1">
+            {formatCurrency(Number(totalPayments))}
           </span>
         </p>
       </div>

@@ -22,6 +22,7 @@ export function CreditSummary({ debtorCredits }: CreditSummaryProps) {
     (sum, payment) => sum + +payment.amount,
     0
   );
+
   const totalOwed = totalPurchases - totalPayments;
   const unpaidItems = allPurchases.filter((purchase) => !purchase.isPaid);
   // Calculate paid and unpaid amounts

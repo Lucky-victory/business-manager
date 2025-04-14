@@ -86,9 +86,6 @@ export default function InvoicePage({
   const totalDue =
     unpaidPurchases.reduce((sum, purchase) => sum + +purchase.amount, 0) -
     totalPayments;
-  console.log({
-    totalPayments,
-  });
 
   const invoiceRef = useRef<HTMLDivElement>(null);
 

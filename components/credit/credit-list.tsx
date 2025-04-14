@@ -94,8 +94,9 @@ export function CreditList() {
           acc[credit.debtorId].unpaidAmount += Number(credit.amount);
         }
       } else if (credit.type === "payment") {
-        acc[credit.debtorId].totalAmount -= Number(credit.amount);
+        // acc[credit.debtorId].totalAmount -= Number(credit.amount);
         acc[credit.debtorId].paidAmount += Number(credit.amount);
+        acc[credit.debtorId].unpaidAmount -= Number(credit.amount);
       }
 
       // Update last update date if this entry is newer
@@ -207,7 +208,7 @@ export function CreditList() {
                 </div>
                 {statusFilter === "all" && (
                   <>
-                    <div className="flex justify-between mt-2">
+                    <div className="flex justify-between mt-1.5">
                       <span className="text-muted-foreground">
                         Paid Amount:
                       </span>
@@ -215,7 +216,7 @@ export function CreditList() {
                         {formatCurrency(Number(debtorCredit.paidAmount))}
                       </span>
                     </div>
-                    <div className="flex justify-between mt-2">
+                    <div className="flex justify-between mt-1.5">
                       <span className="text-muted-foreground">
                         Unpaid Amount:
                       </span>
@@ -225,7 +226,7 @@ export function CreditList() {
                     </div>
                   </>
                 )}
-                <div className="flex justify-between mt-2">
+                <div className="flex justify-between mt-1.5">
                   <span className="text-muted-foreground">Last Update:</span>
                   <span className="font-medium">
                     {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}

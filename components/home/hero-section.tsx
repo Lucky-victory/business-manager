@@ -17,7 +17,7 @@ export const HeroSection = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+              <h1 className="text-3xl font-bold tracking-tighter  sm:text-4xl md:text-5xl lg:text-6xl lg:leading-tight">
                 Manage Your Business With Confidence
               </h1>
               <p className="text-gray-500 md:text-xl dark:text-gray-400">

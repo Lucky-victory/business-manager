@@ -34,4 +34,25 @@
   tr {
     page-break-inside: avoid !important;
   }
+
+  /* Ensure the watermark is visible during printing */
+  .print-watermark {
+    position: relative !important;
+    margin-top: 5mm !important;
+    margin-bottom: 5mm !important;
+    font-size: 9px !important;
+    color: #666 !important;
+    text-align: center !important;
+    width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* Alternative watermark positioning as a footer */
+.print-watermark {
+  position: relative;
+  text-align: center;
+  width: 100%;
+  font-size: 10px;
+  color: #666;
 }

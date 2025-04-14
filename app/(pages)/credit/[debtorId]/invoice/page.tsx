@@ -301,13 +301,13 @@ export default function InvoicePage({
             <p className="text-muted-foreground">{notes}</p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center border-t pt-3">
-          <p className="text-sm text-center font-semibold text-muted-foreground">
-            Powered by bizmanager.africa
-          </p>
-          {/* <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col items-center border-t pt-3">
+          <p className="text-sm text-muted-foreground mb-2">
             Thank you for your patronage!
-          </p> */}
+          </p>
+          <div className="print-watermark text-xs text-muted-foreground">
+            Powered by BizManager.Africa
+          </div>
         </CardFooter>
       </Card>
 

@@ -3,9 +3,22 @@
 import { use, useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { ArrowLeft, Download, Printer, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Printer,
+  Send,
+  Image,
+  ImageDown,
+} from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import "./print-styles.css";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -89,6 +102,83 @@ export default function InvoicePage({
 
   const invoiceRef = useRef<HTMLDivElement>(null);
 
+  const captureInvoice = async () => {
+    if (!invoiceRef.current) return null;
+
+    try {
+      // Hide buttons during capture
+      const printButtons = document.querySelector(".print-buttons");
+      if (printButtons) {
+        printButtons.classList.add("hidden");
+      }
+
+      // Capture the invoice element as an image with high quality
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 3, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        imageTimeout: 0, // No timeout for image loading
+        allowTaint: false,
+        removeContainer: true,
+      });
+
+      // Show buttons again
+      if (printButtons) {
+        printButtons.classList.remove("hidden");
+      }
+
+      return canvas;
+    } catch (error) {
+      console.error("Error capturing invoice:", error);
+
+      // Show buttons again in case of error
+      const printButtons = document.querySelector(".print-buttons");
+      if (printButtons) {
+        printButtons.classList.remove("hidden");
+      }
+
+      return null;
+    }
+  };
+
+  const handleDownloadAsImage = async () => {
+    try {
+      // Show loading toast
+      toast({
+        title: "Generating Image",
+        description: "Please wait while we generate your invoice image...",
+      });
+
+      const canvas = await captureInvoice();
+      if (!canvas) {
+        throw new Error("Failed to capture invoice");
+      }
+
+      // Create a lossless PNG with maximum quality
+      const imgData = canvas.toDataURL("image/png", 1.0);
+
+      // Create a download link
+      const link = document.createElement("a");
+      link.download = `Invoice-${invoiceNumber}.png`;
+      link.href = imgData;
+      link.click();
+
+      // Show success toast
+      toast({
+        title: "Invoice downloaded",
+        description: "Invoice has been downloaded as an image.",
+      });
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDownloadInvoice = async () => {
     if (!invoiceRef.current) return;
 
@@ -99,37 +189,61 @@ export default function InvoicePage({
         description: "Please wait while we generate your invoice...",
       });
 
-      // Hide buttons during capture
-      const printButtons = document.querySelector(".print-buttons");
-      if (printButtons) {
-        printButtons.classList.add("hidden");
-      }
-
-      // Capture the invoice element as an image
-      const canvas = await html2canvas(invoiceRef.current, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      });
-
-      // Show buttons again
-      if (printButtons) {
-        printButtons.classList.remove("hidden");
+      const canvas = await captureInvoice();
+      if (!canvas) {
+        throw new Error("Failed to capture invoice");
       }
 
       // Calculate PDF dimensions (A4 format)
       const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Create PDF
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png");
+      // Create PDF with compression options
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
 
-      // Add image to PDF
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Handle multi-page if content is longer than a single page
+      let heightLeft = imgHeight;
+      let position = 0;
+      let pageNumber = 1;
 
-      // Save PDF
+      // Add first page
+      pdf.addImage(
+        canvas,
+        "PNG",
+        0,
+        position,
+        imgWidth,
+        imgHeight,
+        `invoice-${pageNumber}`,
+        "FAST" // Use fast compression
+      );
+      heightLeft -= pageHeight;
+
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = -pageHeight * pageNumber;
+        pageNumber++;
+        pdf.addPage();
+        pdf.addImage(
+          canvas,
+          "PNG",
+          0,
+          position,
+          imgWidth,
+          imgHeight,
+          `invoice-${pageNumber}`,
+          "FAST"
+        );
+        heightLeft -= pageHeight;
+      }
+
+      // Save PDF with lossless compression
       pdf.save(`Invoice-${invoiceNumber}.pdf`);
 
       // Show success toast
@@ -144,12 +258,6 @@ export default function InvoicePage({
         description: "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
-
-      // Show buttons again in case of error
-      const printButtons = document.querySelector(".print-buttons");
-      if (printButtons) {
-        printButtons.classList.remove("hidden");
-      }
     }
   };
 
@@ -333,11 +441,32 @@ export default function InvoicePage({
           <Printer className="mr-2 h-4 w-4" />
           Print
         </Button> */}
+
+        <Button variant="outline" onClick={handleDownloadAsImage}>
+          <ImageDown className="mr-2 h-4 w-4" />
+          Download Image
+        </Button>
+        {/* <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleDownloadInvoice}>
+              Download as PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDownloadAsImage}>
+              Download as Image
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu> */}
         <Button onClick={handleDownloadInvoice}>
           <Download className="mr-2 h-4 w-4" />
           Download PDF
         </Button>
-        {/* <Button onClick={handleSendInvoice}>
+        {/* <Button variant="outline" onClick={handleSendInvoice}>
           <Send className="mr-2 h-4 w-4" />
           Send Invoice
         </Button> */}

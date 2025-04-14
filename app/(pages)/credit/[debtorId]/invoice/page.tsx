@@ -291,23 +291,23 @@ export default function InvoicePage({
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Due:</span>
-                <span>{totalDue.toFixed(2)}</span>
+                <span>{formatCurrency(totalDue)}</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 print:mt-6">
             <h3 className="font-semibold mb-1">Notes:</h3>
             <p className="text-muted-foreground">{notes}</p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between border-t pt-6 print:hidden">
-          <p className="text-sm font-semibold text-muted-foreground">
+        <CardFooter className="flex justify-center border-t pt-3">
+          <p className="text-sm text-center font-semibold text-muted-foreground">
             Powered by bizmanager.africa
           </p>
-          <p className="text-sm text-muted-foreground">
+          {/* <p className="text-sm text-muted-foreground">
             Thank you for your patronage!
-          </p>
+          </p> */}
         </CardFooter>
       </Card>
 

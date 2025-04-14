@@ -255,7 +255,7 @@ export function CreditList() {
           ))}
         </LoadingStateWrapper>
 
-        {filteredCredits.length === 0 && (
+        {!isLoading.credits && filteredCredits.length === 0 && (
           <div className="col-span-full text-center py-10 text-muted-foreground">
             No credit records found with the selected filter.
           </div>

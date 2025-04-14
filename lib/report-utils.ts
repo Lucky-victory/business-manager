@@ -149,12 +149,28 @@ export const generatePDFReport = async (
   fileName: string
 ): Promise<void> => {
   try {
+    // Make sure the element is visible and has dimensions
+    if (
+      !reportElement ||
+      reportElement.offsetWidth === 0 ||
+      reportElement.offsetHeight === 0
+    ) {
+      throw new Error(
+        "Report element has no dimensions. Make sure it's visible in the DOM."
+      );
+    }
+
+    // Wait a moment to ensure the element is fully rendered
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Capture the report element as an image
     const canvas = await html2canvas(reportElement, {
-      scale: 3, // Higher scale for better quality
+      scale: 2, // Higher scale for better quality
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
+      windowWidth: reportElement.scrollWidth,
+      windowHeight: reportElement.scrollHeight,
     });
 
     // Calculate PDF dimensions (A4 format)

@@ -5,7 +5,11 @@ import {
   PlanFeatures,
   SubscriptionTier,
   SUBSCRIPTION_PLANS,
+  COUNTRY_PRICING,
+  DEFAULT_COUNTRY_PRICING,
+  CountryPricing,
 } from "@/types/subscription";
+import { useStore } from "@/lib/store";
 
 interface SubscriptionContextType {
   currentPlan: SubscriptionTier;
@@ -13,6 +17,11 @@ interface SubscriptionContextType {
   isFeatureEnabled: (feature: keyof PlanFeatures) => boolean;
   isPro: boolean;
   isLoading: boolean;
+  countryPricing: CountryPricing;
+  showPlansModal: boolean;
+  setShowPlansModal: (show: boolean) => void;
+  featureClicked: keyof PlanFeatures | null;
+  setFeatureClicked: (feature: keyof PlanFeatures | null) => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
@@ -24,8 +33,20 @@ export function SubscriptionProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useStore();
   const [currentPlan, setCurrentPlan] = useState<SubscriptionTier>("free");
   const [isLoading, setIsLoading] = useState(true);
+  const [showPlansModal, setShowPlansModal] = useState(false);
+  const [featureClicked, setFeatureClicked] = useState<
+    keyof PlanFeatures | null
+  >(null);
+
+  // Get country code from user or default to Nigeria
+  const countryCode = user?.currencyCode?.slice(0, 2) || "NG";
+
+  // Get pricing for the user's country or default to Nigerian pricing
+  const countryPricing =
+    COUNTRY_PRICING[countryCode] || DEFAULT_COUNTRY_PRICING;
 
   useEffect(() => {
     // In a real app, this would fetch the user's subscription from the API
@@ -70,6 +91,11 @@ export function SubscriptionProvider({
         isFeatureEnabled,
         isPro,
         isLoading,
+        countryPricing,
+        showPlansModal,
+        setShowPlansModal,
+        featureClicked,
+        setFeatureClicked,
       }}
     >
       {children}

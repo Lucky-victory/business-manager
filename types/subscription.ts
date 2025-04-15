@@ -101,3 +101,49 @@ export const COUNTRY_PRICING: Record<string, CountryPricing> = {
     premiumYearly: 199.99,
   },
 };
+
+export const SUBSCRIPTION_PLANS: Record<
+  SubscriptionTier,
+  {
+    name: string;
+    description: string;
+    features: PlanFeatures;
+  }
+> = {
+  free: {
+    name: "Free",
+    description: "Basic sales tracking for small businesses",
+    features: {
+      expenses: false,
+      expensesAnalytics: false,
+      credit: false,
+      creditReports: false,
+      invoicing: false,
+      inventory: false,
+    },
+  },
+  basic: {
+    name: "Basic",
+    description: "Essential tools for growing businesses",
+    features: {
+      expenses: true,
+      expensesAnalytics: false,
+      credit: true,
+      creditReports: false,
+      invoicing: false,
+      inventory: false,
+    },
+  },
+  premium: {
+    name: "Premium",
+    description: "Complete business management solution",
+    features: {
+      expenses: true,
+      expensesAnalytics: true,
+      credit: true,
+      creditReports: true,
+      invoicing: true,
+      inventory: true,
+    },
+  },
+};

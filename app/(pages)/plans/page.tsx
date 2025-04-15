@@ -13,21 +13,56 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SUBSCRIPTION_PLANS, FEATURE_DESCRIPTIONS } from "@/types/subscription";
+import {
+  SUBSCRIPTION_PLANS,
+  FEATURE_DESCRIPTIONS,
+  COUNTRY_PRICING,
+  DEFAULT_COUNTRY_PRICING,
+  CountryPricing,
+} from "@/types/subscription";
 import { useSubscription } from "@/lib/subscription-context";
+import { useStore } from "@/lib/store";
 
 export default function PlansPage() {
   const router = useRouter();
   const { currentPlan } = useSubscription();
+  const { user } = useStore();
   const [billingInterval, setBillingInterval] = React.useState<
     "monthly" | "yearly"
   >("monthly");
 
+  // Get country code from user or default to Nigeria
+  const countryCode = user?.currencyCode?.slice(0, 2) || "NG";
+
+  // Get pricing for the user's country or default to Nigerian pricing
+  const pricing: CountryPricing =
+    COUNTRY_PRICING[countryCode] || DEFAULT_COUNTRY_PRICING;
+
+  const getPlanPrice = (planId: string, interval: "monthly" | "yearly") => {
+    if (planId === "free") return 0;
+
+    if (planId === "basic") {
+      return interval === "monthly"
+        ? pricing.basicMonthly
+        : pricing.basicYearly;
+    }
+
+    if (planId === "premium") {
+      return interval === "monthly"
+        ? pricing.premiumMonthly
+        : pricing.premiumYearly;
+    }
+
+    return 0;
+  };
+
   const plans = Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => ({
     id: key,
     ...plan,
-    price: billingInterval === "monthly" ? plan.monthlyPrice : plan.yearlyPrice,
+    price: getPlanPrice(key, billingInterval),
     interval: billingInterval,
+    currencySymbol: pricing.currencySymbol,
+    currencyCode: pricing.currencyCode,
   }));
 
   return (
@@ -73,7 +108,9 @@ export default function PlansPage() {
               <CardDescription>{plan.description}</CardDescription>
               <div className="mt-4">
                 <span className="text-3xl font-bold">
-                  {plan.price === 0 ? "Free" : `$${plan.price}`}
+                  {plan.price === 0
+                    ? "Free"
+                    : `${plan.currencySymbol}${plan.price.toLocaleString()}`}
                 </span>
                 {plan.price > 0 && (
                   <span className="text-muted-foreground ml-1">
@@ -112,9 +149,14 @@ export default function PlansPage() {
                 variant={currentPlan === plan.id ? "outline" : "default"}
                 disabled={currentPlan === plan.id}
                 onClick={() => {
-                  // In a real app, this would redirect to checkout or subscription management
-                  alert(
-                    `Upgrading to ${plan.name} plan would be implemented here`
+                  if (plan.id === "free") {
+                    alert("You are now on the Free plan");
+                    return;
+                  }
+
+                  // In a real app, this would redirect to Paystack checkout
+                  router.push(
+                    `/checkout?plan=${plan.id}&interval=${billingInterval}`
                   );
                 }}
               >

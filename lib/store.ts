@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { credits, debtors, sales, users } from "./db/schema";
+import { credits, debtors, expenses, sales, users } from "./db/schema";
 
 export type SaleSelect = typeof sales.$inferSelect;
 export type SaleInsert = typeof sales.$inferInsert;
 export type CreditSelect = typeof credits.$inferSelect;
 export type CreditInsert = typeof credits.$inferInsert;
+export type ExpenseSelect = typeof expenses.$inferSelect;
+export type ExpenseInsert = typeof expenses.$inferInsert;
 
 export type DebtorSelect = typeof debtors.$inferSelect;
 export type DebtorInsert = typeof debtors.$inferInsert;
@@ -24,6 +26,7 @@ type State = {
   sales: SaleSelect[];
   credits: CreditSelect[];
   debtors: DebtorSelect[];
+  expenses: ExpenseSelect[];
   searchResults: SearchResult[];
   user: UserSelect;
   formatCurrency: (amount: number | string) => string;
@@ -31,6 +34,7 @@ type State = {
     sales: boolean;
     credits: boolean;
     debtors: boolean;
+    expenses: boolean;
     search: boolean;
     user: boolean;
   };
@@ -71,10 +75,19 @@ type State = {
   searchSalesAndCredit: (query: string) => Promise<void>;
   clearSearchResults: () => void;
 
+  // Expense operations
+  fetchExpenses: () => Promise<void>;
+  addExpense: (expense: ExpenseInsert) => Promise<ExpenseSelect | null>;
+  updateExpense: (
+    expense: Partial<ExpenseInsert> & { id: string }
+  ) => Promise<void>;
+  deleteExpense: (expenseId: string) => Promise<void>;
+
   // Analytics
   getTotalOutstandingCredit: () => number;
   getDebtorCredits: (debtorId: string) => CreditSelect[];
   getDebtorBalance: (debtorId: string) => number;
+  getTotalExpenses: (period?: "day" | "week" | "month" | "year") => number;
 
   // State management
   clearError: () => void;
@@ -87,12 +100,14 @@ export const useStore = create<State>()(
       sales: [],
       credits: [],
       debtors: [],
+      expenses: [],
       searchResults: [],
       user: {} as UserSelect,
       isLoading: {
         sales: true,
         credits: true,
         debtors: true,
+        expenses: true,
         search: false,
         user: true,
       },
@@ -678,18 +693,177 @@ export const useStore = create<State>()(
       clearError: () => {
         set({ error: null });
       },
+      // Expense operations
+      fetchExpenses: async () => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, expenses: true },
+            error: null,
+          }));
+
+          const response = await fetch("/api/expenses");
+          if (!response.ok) throw new Error("Failed to fetch expenses");
+
+          const { data } = await response.json();
+          set((state) => ({
+            expenses: data,
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        } catch (error: any) {
+          console.error("Error fetching expenses:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        }
+      },
+
+      addExpense: async (expense: ExpenseInsert) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, expenses: true },
+            error: null,
+          }));
+
+          const response = await fetch("/api/expenses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(expense),
+          });
+
+          if (!response.ok) throw new Error("Failed to add expense");
+
+          const { data } = await response.json();
+          set((state) => ({
+            expenses: [...state.expenses, data],
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+
+          return data;
+        } catch (error: any) {
+          console.error("Error adding expense:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+          return null;
+        }
+      },
+
+      updateExpense: async (
+        expense: Partial<ExpenseInsert> & { id: string }
+      ) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, expenses: true },
+            error: null,
+          }));
+
+          const { id, ...data } = expense;
+          const response = await fetch(`/api/expenses/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) throw new Error("Failed to update expense");
+
+          const { data: updatedExpense } = await response.json();
+          set((state) => ({
+            expenses: state.expenses.map((exp) =>
+              exp.id === id ? updatedExpense : exp
+            ),
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        } catch (error: any) {
+          console.error("Error updating expense:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        }
+      },
+
+      deleteExpense: async (expenseId: string) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, expenses: true },
+            error: null,
+          }));
+
+          const response = await fetch(`/api/expenses/${expenseId}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) throw new Error("Failed to delete expense");
+
+          set((state) => ({
+            expenses: state.expenses.filter(
+              (expense) => expense.id !== expenseId
+            ),
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        } catch (error: any) {
+          console.error("Error deleting expense:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, expenses: false },
+          }));
+        }
+      },
+
+      // Analytics
+      getTotalExpenses: (period?: "day" | "week" | "month" | "year") => {
+        const { expenses } = get();
+
+        if (!period) {
+          return expenses.reduce(
+            (total, expense) => total + Number(expense.amount),
+            0
+          );
+        }
+
+        const now = new Date();
+        let startDate: Date;
+
+        switch (period) {
+          case "day":
+            startDate = new Date(now.setHours(0, 0, 0, 0));
+            break;
+          case "week":
+            const day = now.getDay();
+            startDate = new Date(now.setDate(now.getDate() - day));
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "month":
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+          case "year":
+            startDate = new Date(now.getFullYear(), 0, 1);
+            break;
+          default:
+            startDate = new Date(0); // Beginning of time
+        }
+
+        return expenses
+          .filter((expense) => new Date(expense.date) >= startDate)
+          .reduce((total, expense) => total + Number(expense.amount), 0);
+      },
+
       clearState: () => {
         set({
           user: {} as UserSelect,
           sales: [],
           credits: [],
           debtors: [],
+          expenses: [],
           searchResults: [],
           error: null,
           isLoading: {
             sales: false,
             credits: false,
             debtors: false,
+            expenses: false,
             search: false,
             user: false,
           },
@@ -704,6 +878,7 @@ export const useStore = create<State>()(
         sales: state.sales,
         credits: state.credits,
         debtors: state.debtors,
+        expenses: state.expenses,
       }),
     }
   )

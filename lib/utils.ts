@@ -6,8 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 export const IS_DEV = process.env.NODE_ENV !== "production";
 export const generateUUID = () => uuidv4();
-export const formatCurrency = (val: number) =>
-  val && typeof val === "number" ? val.toLocaleString() : "0.00";
+export const formatCurrency = (val: number | string) => {
+  const numVal = typeof val === "string" ? parseFloat(val) : val;
+  return numVal && !isNaN(numVal) ? numVal.toLocaleString() : "0.00";
+};
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 export const getCurrentDateTime = (date: string | Date) => {
   const currentDate = new Date(date as Date);
   const now = new Date();

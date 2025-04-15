@@ -1,16 +1,28 @@
 // components/ui/page-header.tsx
 import { ReactNode } from "react";
 
-type PageHeaderProps = {
+export type PageHeaderProps = {
   title: string;
+  description?: string;
   backButton?: ReactNode;
 };
 
-export function PageHeader({ title, backButton }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  description,
+  backButton,
+}: PageHeaderProps) {
   return (
-    <div className="flex items-center mb-6">
-      {backButton}
-      <h1 className="text-2xl font-bold ml-3">{title}</h1>
+    <div className="mb-6">
+      <div className="flex items-center">
+        {backButton}
+        <h1 className={`text-2xl font-bold ${backButton ? "ml-3" : ""}`}>
+          {title}
+        </h1>
+      </div>
+      {description && (
+        <p className="text-muted-foreground mt-1">{description}</p>
+      )}
     </div>
   );
 }

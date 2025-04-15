@@ -233,6 +233,34 @@ export const invoices = mysqlTable(
 );
 
 // Define relationships
+// Expenses table - stores all expense transactions
+export const expenses = mysqlTable(
+  "expenses",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().notNull(),
+    item: varchar("item", { length: 255 }).notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    paymentType: varchar("payment_type", {
+      length: 50,
+      enum: ["cash", "card", "transfer", "other"],
+    }).notNull(),
+    category: varchar("category", { length: 100 }),
+    notes: text("notes"),
+    date: timestamp("date").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    userId: varchar("user_id", { length: 36 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("expenses_user_id_idx").on(table.userId),
+    index("expenses_date_idx").on(table.date),
+    index("expenses_payment_type_idx").on(table.paymentType),
+    index("expenses_category_idx").on(table.category),
+  ]
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -241,6 +269,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   debtors: many(debtors),
   credits: many(credits),
   invoices: many(invoices),
+  expenses: many(expenses),
 }));
 
 export const debtorsRelations = relations(debtors, ({ many, one }) => ({
@@ -294,6 +323,13 @@ export const productsRelations = relations(products, ({ many, one }) => ({
   sales: many(sales),
   user: one(users, {
     fields: [products.userId],
+    references: [users.id],
+  }),
+}));
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  user: one(users, {
+    fields: [expenses.userId],
     references: [users.id],
   }),
 }));

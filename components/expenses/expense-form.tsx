@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useStore } from "@/lib/store";
+import { useStore, ExpenseSelect, ExpenseInsert } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,20 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Expense } from "@/types";
 import { Loader2 } from "lucide-react";
 
 const expenseFormSchema = z.object({
   item: z.string().min(1, "Item is required"),
   amount: z.coerce.number().positive("Amount must be greater than 0"),
   paymentType: z.string().min(1, "Payment type is required"),
+  category: z.string().optional(),
+  notes: z.string().optional(),
   date: z.string().min(1, "Date is required"),
 });
 
 type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
 interface ExpenseFormProps {
-  expense?: Expense;
+  expense?: ExpenseSelect;
   onSuccess: () => void;
 }
 
@@ -48,14 +49,18 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
     defaultValues: expense
       ? {
           item: expense.item,
-          amount: expense.amount,
+          amount: Number(expense.amount),
           paymentType: expense.paymentType,
+          category: expense.category || "",
+          notes: expense.notes || "",
           date: new Date(expense.date).toISOString().split("T")[0],
         }
       : {
           item: "",
           amount: 0,
           paymentType: "",
+          category: "",
+          notes: "",
           date: new Date().toISOString().split("T")[0],
         },
   });
@@ -66,13 +71,31 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
       if (expense) {
         await updateExpense({
           id: expense.id,
-          ...data,
-          date: new Date(data.date).toISOString(),
+          item: data.item,
+          amount: String(data.amount),
+          paymentType: data.paymentType as
+            | "cash"
+            | "card"
+            | "transfer"
+            | "other",
+          category: data.category || null,
+          notes: data.notes || null,
+          date: new Date(data.date),
         });
       } else {
         await addExpense({
-          ...data,
-          date: new Date(data.date).toISOString(),
+          item: data.item,
+          amount: String(data.amount),
+          paymentType: data.paymentType as
+            | "cash"
+            | "card"
+            | "transfer"
+            | "other",
+          category: data.category || null,
+          notes: data.notes || null,
+          date: new Date(data.date),
+          userId: "", // This will be set by the server
+          id: "", // This will be set by the server
         });
       }
       onSuccess();
@@ -138,6 +161,48 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category (Optional)</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="utilities">Utilities</SelectItem>
+                  <SelectItem value="rent">Rent</SelectItem>
+                  <SelectItem value="supplies">Supplies</SelectItem>
+                  <SelectItem value="salary">Salary</SelectItem>
+                  <SelectItem value="transportation">Transportation</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Additional details" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -21,17 +21,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Expense } from "@/types";
-import { EmptyState } from "@/components/empty-state";
-import { LoadingSpinner } from "@/components/loading-spinner";
+import { ExpenseSelect } from "@/lib/store";
+import { EmptyState } from "../empty-state";
+import { Loader } from "@/components/ui/loader";
 
 export function ExpensesList() {
   const { expenses, isLoading, deleteExpense } = useStore();
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingExpense, setEditingExpense] = useState<ExpenseSelect | null>(
+    null
+  );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const handleEdit = (expense: Expense) => {
+  const handleEdit = (expense: ExpenseSelect) => {
     setEditingExpense(expense);
     setIsEditDialogOpen(true);
   };
@@ -43,7 +45,7 @@ export function ExpensesList() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <Loader loadingText="Loading expenses..." />;
   }
 
   if (!expenses || expenses.length === 0) {
@@ -97,6 +99,7 @@ export function ExpensesList() {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Item</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Payment Type</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -107,9 +110,25 @@ export function ExpensesList() {
               <TableRow key={expense.id}>
                 <TableCell className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  {formatDate(expense.date)}
+                  {formatDate(expense.date.toString())}
                 </TableCell>
-                <TableCell>{expense.item}</TableCell>
+                <TableCell>
+                  <div className="font-medium">{expense.item}</div>
+                  {expense.notes && (
+                    <div className="text-xs text-muted-foreground">
+                      {expense.notes}
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {expense.category ? (
+                    <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                      {expense.category}
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
                 <TableCell>{formatCurrency(expense.amount)}</TableCell>
                 <TableCell>{expense.paymentType}</TableCell>
                 <TableCell className="text-right">

@@ -265,21 +265,19 @@ export function CreditReportDialog({
           </div>
 
           {/* Hidden report view for PDF generation */}
-          {/* <div className="hidden">
-            <div ref={reportRef}> */}
-          <CreditReportView
-            credits={credits}
-            debtors={debtors}
-            dateRange={dateRange}
-            selectedDebtorId={
-              selectedDebtor !== "all" ? selectedDebtor : undefined
-            }
-            user={user}
-            ref={reportRef}
-            formatCurrency={formatCurrency}
-          />
-          {/* </div>
-          </div> */}
+          <div className="hidden">
+            <CreditReportView
+              credits={credits}
+              debtors={debtors}
+              dateRange={dateRange}
+              selectedDebtorId={
+                selectedDebtor !== "all" ? selectedDebtor : undefined
+              }
+              user={user}
+              ref={reportRef}
+              formatCurrency={formatCurrency}
+            />
+          </div>
         </div>
 
         <DialogFooter>

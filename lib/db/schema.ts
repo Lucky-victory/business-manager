@@ -9,6 +9,8 @@ import {
   boolean,
   index,
   json,
+  char,
+  uniqueIndex,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
@@ -263,23 +265,96 @@ export const expenses = mysqlTable(
 );
 
 // Subscription plans table
-export const subscriptionPlans = mysqlTable(
-  "subscription_plans",
+// export const subscriptionPlans = mysqlTable(
+//   "subscription_plans",
+//   {
+//     id: varchar("id", { length: 36 }).primaryKey().notNull(),
+//     name: varchar("name", { length: 255 }).notNull(),
+//     description: text("description"),
+//     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+//     interval: mysqlEnum("interval", ["monthly", "yearly"]).notNull(),
+//     features: json("features").notNull(), // JSON string of features
+//     isActive: boolean("is_active").default(true).notNull(),
+//     createdAt: timestamp("created_at").defaultNow().notNull(),
+//     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+//   },
+//   (table) => [
+//     index("subscription_plans_name_idx").on(table.name),
+//     index("subscription_plans_is_active_idx").on(table.isActive),
+//   ]
+// );
+
+// Combined countries and currencies table
+export const countryCurrency = mysqlTable(
+  "country_currency",
+  {
+    countryCode: char("country_code", {
+      length: 2,
+      enum: ["NG", "US", "ZAR", "KE", "GH"],
+    }).primaryKey(),
+    name: varchar("name", { length: 100 }).notNull(),
+    currencyCode: char("currency_code", { length: 3 }).notNull(),
+    currencySymbol: varchar("currency_symbol", { length: 10 }).notNull(),
+    currencyName: varchar("currency_name", { length: 100 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("country_currency_currency_code_idx").on(table.currencyCode),
+    index("country_currency_country_name_idx").on(table.name),
+  ]
+);
+
+// Plans table to define available plan types
+export const plans = mysqlTable(
+  "plans",
   {
     id: varchar("id", { length: 36 }).primaryKey().notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: text("description"),
-    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-    interval: mysqlEnum("interval", ["monthly", "yearly"]).notNull(),
-    features: json("features").notNull(), // JSON string of features
+    name: varchar("name", { length: 50 }).notNull(),
+    description: varchar("description", { length: 255 }),
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    index("subscription_plans_name_idx").on(table.name),
-    index("subscription_plans_is_active_idx").on(table.isActive),
+    index("plan_name_idx").on(table.name),
+    index("plan_is_active_idx").on(table.isActive),
   ]
+);
+
+// Pricing table that connects countries with plans and pricing details
+export const pricing = mysqlTable(
+  "pricing",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().notNull(),
+    countryCode: char("country_code", { length: 2 })
+      .notNull()
+      .references(() => countryCurrency.countryCode),
+    planId: varchar("plan_id", { length: 36 })
+      .notNull()
+      .references(() => plans.id),
+    monthlyPrice: decimal("monthly_price", {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
+    features: json("features").notNull(), // JSON string of features
+    yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("pricing_country_code_idx").on(table.countryCode),
+    index("pricing_plan_id_idx").on(table.planId),
+    uniqueIndex("unique_pricing").on(table.countryCode, table.planId),
+  ]
+);
+
+// Define relations for better TypeScript type inference
+export const countryCurrencyRelations = relations(
+  countryCurrency,
+  ({ many }) => ({
+    pricing: many(pricing),
+  })
 );
 
 // User subscriptions table
@@ -289,50 +364,92 @@ export const userSubscriptions = mysqlTable(
     id: varchar("id", { length: 36 }).primaryKey().notNull(),
     userId: varchar("user_id", { length: 36 })
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    planId: varchar("plan_id", { length: 36 })
+      .references(() => users.id),
+    pricingId: varchar("pricing_id", { length: 36 })
       .notNull()
-      .references(() => subscriptionPlans.id),
-    status: mysqlEnum("status", ["active", "canceled", "expired"])
-      .default("active")
-      .notNull(),
-    currentPeriodStart: timestamp("current_period_start").notNull(),
-    currentPeriodEnd: timestamp("current_period_end").notNull(),
-    cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+      .references(() => pricing.id),
+    startDate: timestamp("start_date").notNull(),
+    endDate: timestamp("end_date"),
+    isActive: boolean("is_active").default(true).notNull(),
+    canceledAt: timestamp("canceled_at"),
+    billingCycle: varchar("billing_cycle", { length: 20 }).notNull(), // "monthly" or "yearly"
+    autoRenew: boolean("auto_renew").default(true).notNull(),
+    paymentMethod: varchar("payment_method", { length: 50 }),
+    lastPaymentDate: timestamp("last_payment_date"),
+    nextBillingDate: timestamp("next_billing_date"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    index("user_subscriptions_user_id_idx").on(table.userId),
-    index("user_subscriptions_plan_id_idx").on(table.planId),
-    index("user_subscriptions_status_idx").on(table.status),
-    index("user_subscriptions_current_period_end_idx").on(
-      table.currentPeriodEnd
-    ),
+    index("user_subscription_user_id_idx").on(table.userId),
+    index("user_subscription_pricing_id_idx").on(table.pricingId),
+    index("user_subscription_is_active_idx").on(table.isActive),
+    index("user_subscription_next_billing_date_idx").on(table.nextBillingDate),
   ]
 );
 
-// Define relationships
-export const subscriptionPlansRelations = relations(
-  subscriptionPlans,
-  ({ many }) => ({
-    userSubscriptions: many(userSubscriptions),
-  })
+// Optional: Subscription payment history
+export const subscriptionPayments = mysqlTable(
+  "subscription_payments",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().notNull(),
+    subscriptionId: varchar("subscription_id", { length: 36 })
+      .notNull()
+      .references(() => userSubscriptions.id),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: char("currency", { length: 3 }).notNull(),
+    status: varchar("status", { length: 20 }).notNull(), // "succeeded", "failed", "pending", etc.
+    paymentMethod: varchar("payment_method", { length: 50 }),
+    paymentDate: timestamp("payment_date").notNull(),
+    metadata: json("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("payment_subscription_id_idx").on(table.subscriptionId),
+    index("payment_status_idx").on(table.status),
+    index("payment_date_idx").on(table.paymentDate),
+  ]
 );
-
-export const userSubscriptionsRelations = relations(
+// Define relationships
+export const plansRelations = relations(plans, ({ many }) => ({
+  pricing: many(pricing),
+}));
+export const userSubscriptionRelations = relations(
   userSubscriptions,
-  ({ one }) => ({
+  ({ one, many }) => ({
     user: one(users, {
       fields: [userSubscriptions.userId],
       references: [users.id],
     }),
-    plan: one(subscriptionPlans, {
-      fields: [userSubscriptions.planId],
-      references: [subscriptionPlans.id],
+    pricing: one(pricing, {
+      fields: [userSubscriptions.pricingId],
+      references: [pricing.id],
+    }),
+    payments: many(subscriptionPayments),
+  })
+);
+
+export const subscriptionPaymentRelations = relations(
+  subscriptionPayments,
+  ({ one }) => ({
+    subscription: one(userSubscriptions, {
+      fields: [subscriptionPayments.subscriptionId],
+      references: [userSubscriptions.id],
     }),
   })
 );
+export const pricingRelations = relations(pricing, ({ one, many }) => ({
+  country: one(countryCurrency, {
+    fields: [pricing.countryCode],
+    references: [countryCurrency.countryCode],
+  }),
+  plan: one(plans, {
+    fields: [pricing.planId],
+    references: [plans.id],
+  }),
+  subscriptions: many(userSubscriptions),
+}));
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(session),

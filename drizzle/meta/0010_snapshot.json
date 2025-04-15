@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "83a0095b-7dab-4926-82e3-42124d83c30c",
+  "id": "98f68671-5789-4ced-97d1-3f51e999fb1c",
   "prevId": "764c8efa-106a-4f25-937f-5cdb95ec7dea",
   "tables": {
     "account": {
@@ -120,6 +120,89 @@
           "name": "account_id",
           "columns": [
             "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "country_currency": {
+      "name": "country_currency",
+      "columns": {
+        "country_code": {
+          "name": "country_code",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "currency_code": {
+          "name": "currency_code",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "currency_symbol": {
+          "name": "currency_symbol",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "currency_name": {
+          "name": "currency_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "country_currency_currency_code_idx": {
+          "name": "country_currency_currency_code_idx",
+          "columns": [
+            "currency_code"
+          ],
+          "isUnique": false
+        },
+        "country_currency_country_name_idx": {
+          "name": "country_currency_country_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "country_currency_country_code": {
+          "name": "country_currency_country_code",
+          "columns": [
+            "country_code"
           ]
         }
       },
@@ -733,6 +816,208 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "plans": {
+      "name": "plans",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "plan_name_idx": {
+          "name": "plan_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        },
+        "plan_is_active_idx": {
+          "name": "plan_is_active_idx",
+          "columns": [
+            "is_active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "plans_id": {
+          "name": "plans_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "pricing": {
+      "name": "pricing",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "country_code": {
+          "name": "country_code",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "monthly_price": {
+          "name": "monthly_price",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "features": {
+          "name": "features",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "yearly_price": {
+          "name": "yearly_price",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "pricing_country_code_idx": {
+          "name": "pricing_country_code_idx",
+          "columns": [
+            "country_code"
+          ],
+          "isUnique": false
+        },
+        "pricing_plan_id_idx": {
+          "name": "pricing_plan_id_idx",
+          "columns": [
+            "plan_id"
+          ],
+          "isUnique": false
+        },
+        "unique_pricing": {
+          "name": "unique_pricing",
+          "columns": [
+            "country_code",
+            "plan_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "pricing_country_code_country_currency_country_code_fk": {
+          "name": "pricing_country_code_country_currency_country_code_fk",
+          "tableFrom": "pricing",
+          "tableTo": "country_currency",
+          "columnsFrom": [
+            "country_code"
+          ],
+          "columnsTo": [
+            "country_code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pricing_plan_id_plans_id_fk": {
+          "name": "pricing_plan_id_plans_id_fk",
+          "tableFrom": "pricing",
+          "tableTo": "plans",
+          "columnsFrom": [
+            "plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pricing_id": {
+          "name": "pricing_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "products": {
       "name": "products",
       "columns": {
@@ -1137,8 +1422,8 @@
       },
       "checkConstraint": {}
     },
-    "subscription_plans": {
-      "name": "subscription_plans",
+    "subscription_payments": {
+      "name": "subscription_payments",
       "columns": {
         "id": {
           "name": "id",
@@ -1147,48 +1432,54 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
+        "subscription_id": {
+          "name": "subscription_id",
+          "type": "varchar(36)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "price": {
-          "name": "price",
+        "amount": {
+          "name": "amount",
           "type": "decimal(10,2)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "interval": {
-          "name": "interval",
-          "type": "enum('monthly','yearly')",
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "features": {
-          "name": "features",
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "payment_date": {
+          "name": "payment_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
           "type": "json",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
         },
         "created_at": {
           "name": "created_at",
@@ -1208,25 +1499,46 @@
         }
       },
       "indexes": {
-        "subscription_plans_name_idx": {
-          "name": "subscription_plans_name_idx",
+        "payment_subscription_id_idx": {
+          "name": "payment_subscription_id_idx",
           "columns": [
-            "name"
+            "subscription_id"
           ],
           "isUnique": false
         },
-        "subscription_plans_is_active_idx": {
-          "name": "subscription_plans_is_active_idx",
+        "payment_status_idx": {
+          "name": "payment_status_idx",
           "columns": [
-            "is_active"
+            "status"
+          ],
+          "isUnique": false
+        },
+        "payment_date_idx": {
+          "name": "payment_date_idx",
+          "columns": [
+            "payment_date"
           ],
           "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "subscription_payments_subscription_id_user_subscriptions_id_fk": {
+          "name": "subscription_payments_subscription_id_user_subscriptions_id_fk",
+          "tableFrom": "subscription_payments",
+          "tableTo": "user_subscriptions",
+          "columnsFrom": [
+            "subscription_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {
-        "subscription_plans_id": {
-          "name": "subscription_plans_id",
+        "subscription_payments_id": {
+          "name": "subscription_payments_id",
           "columns": [
             "id"
           ]
@@ -1252,42 +1564,77 @@
           "notNull": true,
           "autoincrement": false
         },
-        "plan_id": {
-          "name": "plan_id",
+        "pricing_id": {
+          "name": "pricing_id",
           "type": "varchar(36)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
-          "type": "enum('active','canceled','expired')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'active'"
-        },
-        "current_period_start": {
-          "name": "current_period_start",
+        "start_date": {
+          "name": "start_date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "current_period_end": {
-          "name": "current_period_end",
+        "end_date": {
+          "name": "end_date",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
-        "cancel_at_period_end": {
-          "name": "cancel_at_period_end",
+        "is_active": {
+          "name": "is_active",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": false
+          "default": true
+        },
+        "canceled_at": {
+          "name": "canceled_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "billing_cycle": {
+          "name": "billing_cycle",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "auto_renew": {
+          "name": "auto_renew",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_payment_date": {
+          "name": "last_payment_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "next_billing_date": {
+          "name": "next_billing_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
@@ -1307,31 +1654,31 @@
         }
       },
       "indexes": {
-        "user_subscriptions_user_id_idx": {
-          "name": "user_subscriptions_user_id_idx",
+        "user_subscription_user_id_idx": {
+          "name": "user_subscription_user_id_idx",
           "columns": [
             "user_id"
           ],
           "isUnique": false
         },
-        "user_subscriptions_plan_id_idx": {
-          "name": "user_subscriptions_plan_id_idx",
+        "user_subscription_pricing_id_idx": {
+          "name": "user_subscription_pricing_id_idx",
           "columns": [
-            "plan_id"
+            "pricing_id"
           ],
           "isUnique": false
         },
-        "user_subscriptions_status_idx": {
-          "name": "user_subscriptions_status_idx",
+        "user_subscription_is_active_idx": {
+          "name": "user_subscription_is_active_idx",
           "columns": [
-            "status"
+            "is_active"
           ],
           "isUnique": false
         },
-        "user_subscriptions_current_period_end_idx": {
-          "name": "user_subscriptions_current_period_end_idx",
+        "user_subscription_next_billing_date_idx": {
+          "name": "user_subscription_next_billing_date_idx",
           "columns": [
-            "current_period_end"
+            "next_billing_date"
           ],
           "isUnique": false
         }
@@ -1347,15 +1694,15 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "user_subscriptions_plan_id_subscription_plans_id_fk": {
-          "name": "user_subscriptions_plan_id_subscription_plans_id_fk",
+        "user_subscriptions_pricing_id_pricing_id_fk": {
+          "name": "user_subscriptions_pricing_id_pricing_id_fk",
           "tableFrom": "user_subscriptions",
-          "tableTo": "subscription_plans",
+          "tableTo": "pricing",
           "columnsFrom": [
-            "plan_id"
+            "pricing_id"
           ],
           "columnsTo": [
             "id"

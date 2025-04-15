@@ -71,6 +71,13 @@
       "when": 1744756299798,
       "tag": "0009_ambitious_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1744761280066,
+      "tag": "0010_fearless_the_phantom",
+      "breakpoints": true
     }
   ]
 }

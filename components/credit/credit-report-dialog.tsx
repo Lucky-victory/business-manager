@@ -146,12 +146,12 @@ export function CreditReportDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Generate Credit Report</DialogTitle>
           <DialogDescription>
-            Create a report of credit transactions for the selected date range
+            Create a report of credit transactionos for the selected date range
             and format.
           </DialogDescription>
         </DialogHeader>

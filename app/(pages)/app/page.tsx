@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SalesList } from "@/components/sales/sales-list";
 import { CreditList } from "@/components/credit/credit-list";
+import { ExpensesList } from "@/components/expenses/expenses-list";
 import { SearchResults } from "@/components/search/search-results";
 import { authClient, useAuth } from "@/lib/auth-client";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
@@ -29,7 +30,7 @@ export default function Home() {
     useStore();
   const auth = useAuth();
   const router = useRouter();
-  const tabs = ["sales", "credit", "search"] as const;
+  const tabs = ["sales", "credit", "expenses", "search"] as const;
   const [tabQueryState, setTabQueryState] = useQueryState(
     "tab",
     parseAsStringLiteral(tabs).withDefault("sales")
@@ -128,7 +129,7 @@ export default function Home() {
       <form onSubmit={handleSearch} className="relative mb-8">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
-          placeholder="Search sales or credit..."
+          placeholder="Search sales, credit, or expenses..."
           className="pl-10 h-11 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -150,19 +151,23 @@ export default function Home() {
           <Tabs
             value={tabQueryState}
             onValueChange={(value) =>
-              setTabQueryState(value as "sales" | "credit")
+              setTabQueryState(value as "sales" | "credit" | "expenses")
             }
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="sales">Sales</TabsTrigger>
               <TabsTrigger value="credit">Credit</TabsTrigger>
+              <TabsTrigger value="expenses">Expenses</TabsTrigger>
             </TabsList>
             <TabsContent value="sales" className="pt-2">
               <SalesList />
             </TabsContent>
             <TabsContent value="credit" className="pt-2">
               <CreditList />
+            </TabsContent>
+            <TabsContent value="expenses" className="pt-2">
+              <ExpensesList />
             </TabsContent>
           </Tabs>
         )}

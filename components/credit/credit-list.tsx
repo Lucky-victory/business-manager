@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Filter, Download } from "lucide-react";
+import { Plus, Filter, Download, Sparkles } from "lucide-react";
+import { useSubscription } from "@/lib/subscription-context";
+import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
+import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
 import { format } from "date-fns";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -44,6 +47,7 @@ export function CreditList() {
     formatCurrency,
     isLoading,
   } = useStore();
+  const { isFeatureEnabled } = useSubscription();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">(
@@ -125,118 +129,148 @@ export function CreditList() {
   );
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">Credit</h2>
-          <p className="text-muted-foreground">
-            Total Outstanding:{" "}
-            <span className="font-medium text-red-500">
-              {formatCurrency(Number(totalOutstandingCredit))}
-            </span>
-          </p>
-        </div>
+    <ProFeatureWrapper
+      feature="credit"
+      disabledMessage="Credit management requires a Basic or Premium subscription"
+    >
+      <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h2 className="text-xl font-semibold">Credit</h2>
+            <p className="text-muted-foreground">
+              Total Outstanding:{" "}
+              <span className="font-medium text-red-500">
+                {formatCurrency(Number(totalOutstandingCredit))}
+              </span>
+            </p>
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Select
-            value={statusFilter}
-            onValueChange={(value: "all" | "paid" | "unpaid") =>
-              setStatusFilter(value)
-            }
-          >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Items</SelectItem>
-              <SelectItem value="paid">Paid Only</SelectItem>
-              <SelectItem value="unpaid">Unpaid Only</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                Reports
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Credit Reports</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setIsReportOpen(true)}>
-                Generate Report
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/credit/summary")}>
-                View Summary
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Credit
-          </Button>
-        </div>
-      </div>
-
-      <div
-        className={cn(
-          isLoading.credits && "",
-          !isLoading?.credits && "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-        )}
-      >
-        <LoadingStateWrapper isLoading={isLoading.credits}>
-          {Object.values(creditsByDebtor).map((debtorCredit) => (
-            <Card
-              key={debtorCredit.debtorId}
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => router.push(`/credit/${debtorCredit.debtorId}`)}
+          <div className="flex flex-wrap gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(value: "all" | "paid" | "unpaid") =>
+                setStatusFilter(value)
+              }
             >
-              <CardHeader className="pb-2">
-                <CardTitle>{debtorCredit.debtorName}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Owed:</span>
-                  <span
-                    className={`font-medium ${
-                      debtorCredit.totalAmount > 0
-                        ? "text-red-500"
-                        : "text-green-500"
-                    }`}
-                  >
-                    {formatCurrency(Number(debtorCredit.totalAmount))}
-                  </span>
-                </div>
-                {statusFilter === "all" && (
-                  <>
-                    <div className="flex justify-between mt-1.5">
-                      <span className="text-muted-foreground">
-                        Paid Amount:
-                      </span>
-                      <span className="font-medium text-green-500">
-                        {formatCurrency(Number(debtorCredit.paidAmount))}
-                      </span>
-                    </div>
-                    <div className="flex justify-between mt-1.5">
-                      <span className="text-muted-foreground">
-                        Unpaid Amount:
-                      </span>
-                      <span className="font-medium text-red-500">
-                        {formatCurrency(Number(debtorCredit.unpaidAmount))}
-                      </span>
-                    </div>
-                  </>
-                )}
-                <div className="flex justify-between mt-1.5">
-                  <span className="text-muted-foreground">Last Update:</span>
-                  <span className="font-medium">
-                    {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}
-                  </span>
-                </div>
-              </CardContent>
-              {/* <CardFooter className="pt-0">
+              <SelectTrigger className="w-[130px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="paid">Paid Only</SelectItem>
+                <SelectItem value="unpaid">Unpaid Only</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Reports
+                  {!isFeatureEnabled("creditReports") && (
+                    <ProFeatureBadge
+                      className="ml-2"
+                      tooltipText="Credit reports require a Premium subscription"
+                    />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Credit Reports</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (isFeatureEnabled("creditReports")) {
+                      setIsReportOpen(true);
+                    }
+                  }}
+                  disabled={!isFeatureEnabled("creditReports")}
+                  className={
+                    !isFeatureEnabled("creditReports") ? "opacity-50" : ""
+                  }
+                >
+                  Generate Report
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (isFeatureEnabled("creditReports")) {
+                      router.push("/credit/summary");
+                    }
+                  }}
+                  disabled={!isFeatureEnabled("creditReports")}
+                  className={
+                    !isFeatureEnabled("creditReports") ? "opacity-50" : ""
+                  }
+                >
+                  View Summary
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button onClick={() => setIsFormOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Credit
+            </Button>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            isLoading.credits && "",
+            !isLoading?.credits && "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          )}
+        >
+          <LoadingStateWrapper isLoading={isLoading.credits}>
+            {Object.values(creditsByDebtor).map((debtorCredit) => (
+              <Card
+                key={debtorCredit.debtorId}
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => router.push(`/credit/${debtorCredit.debtorId}`)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle>{debtorCredit.debtorName}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Owed:</span>
+                    <span
+                      className={`font-medium ${
+                        debtorCredit.totalAmount > 0
+                          ? "text-red-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {formatCurrency(Number(debtorCredit.totalAmount))}
+                    </span>
+                  </div>
+                  {statusFilter === "all" && (
+                    <>
+                      <div className="flex justify-between mt-1.5">
+                        <span className="text-muted-foreground">
+                          Paid Amount:
+                        </span>
+                        <span className="font-medium text-green-500">
+                          {formatCurrency(Number(debtorCredit.paidAmount))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mt-1.5">
+                        <span className="text-muted-foreground">
+                          Unpaid Amount:
+                        </span>
+                        <span className="font-medium text-red-500">
+                          {formatCurrency(Number(debtorCredit.unpaidAmount))}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between mt-1.5">
+                    <span className="text-muted-foreground">Last Update:</span>
+                    <span className="font-medium">
+                      {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}
+                    </span>
+                  </div>
+                </CardContent>
+                {/* <CardFooter className="pt-0">
               <div className="flex gap-2 w-full justify-end">
               <Button
                   variant="outline"
@@ -251,19 +285,23 @@ export function CreditList() {
                   </Button>
               </div>
             </CardFooter> */}
-            </Card>
-          ))}
-        </LoadingStateWrapper>
+              </Card>
+            ))}
+          </LoadingStateWrapper>
 
-        {!isLoading.credits && filteredCredits.length === 0 && (
-          <div className="col-span-full text-center py-10 text-muted-foreground">
-            No credit records found with the selected filter.
-          </div>
-        )}
+          {!isLoading.credits && filteredCredits.length === 0 && (
+            <div className="col-span-full text-center py-10 text-muted-foreground">
+              No credit records found with the selected filter.
+            </div>
+          )}
+        </div>
+
+        <CreditForm open={isFormOpen} onOpenChange={setIsFormOpen} />
+        <CreditReportDialog
+          open={isReportOpen}
+          onOpenChange={setIsReportOpen}
+        />
       </div>
-
-      <CreditForm open={isFormOpen} onOpenChange={setIsFormOpen} />
-      <CreditReportDialog open={isReportOpen} onOpenChange={setIsReportOpen} />
-    </div>
+    </ProFeatureWrapper>
   );
 }

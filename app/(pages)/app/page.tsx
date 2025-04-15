@@ -2,7 +2,9 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
+import { useSubscription } from "@/lib/subscription-context";
+import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
 import {
   Search,
   User,
@@ -11,6 +13,7 @@ import {
   ChevronDown,
   BarChart3,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,6 +60,7 @@ export default function Home() {
     "tab",
     parseAsStringLiteral(tabs).withDefault("sales")
   );
+  const { isFeatureEnabled } = useSubscription();
 
   useEffect(() => {
     fetchUser();
@@ -138,6 +142,15 @@ export default function Home() {
               <Button
                 variant="ghost"
                 size="sm"
+                className="w-full justify-start text-left px-2 py-1.5"
+                onClick={() => router.push("/plans")}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Subscription Plans
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 className="w-full justify-start text-left px-2 py-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                 onClick={handleLogout}
               >
@@ -180,8 +193,24 @@ export default function Home() {
           >
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="sales">Sales</TabsTrigger>
-              <TabsTrigger value="credit">Credit</TabsTrigger>
-              <TabsTrigger value="expenses">Expenses</TabsTrigger>
+              <TabsTrigger
+                value="credit"
+                disabled={!isFeatureEnabled("credit")}
+              >
+                Credit
+                {!isFeatureEnabled("credit") && (
+                  <ProFeatureBadge className="ml-2" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger
+                value="expenses"
+                disabled={!isFeatureEnabled("expenses")}
+              >
+                Expenses
+                {!isFeatureEnabled("expenses") && (
+                  <ProFeatureBadge className="ml-2" />
+                )}
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="sales" className="pt-2">
               <SalesList />

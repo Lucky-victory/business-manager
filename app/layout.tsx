@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { roboto } from "@/lib/font";
+import { SubscriptionProvider } from "@/lib/subscription-context";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bizmanager.africa"),
   title: "Biz Manager - Business Management Simplified for Africans",
@@ -83,7 +84,9 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${roboto.variable} ${roboto.className}`}
       >
-        <NuqsAdapter>{children}</NuqsAdapter>
+        <NuqsAdapter>
+          <SubscriptionProvider>{children}</SubscriptionProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

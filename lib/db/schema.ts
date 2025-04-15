@@ -10,6 +10,7 @@ import {
   index,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
+import { subscriptionPlans, userSubscriptions } from "./subscription-schema";
 
 // Users table for authentication
 export const users = mysqlTable("users", {
@@ -270,6 +271,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   credits: many(credits),
   invoices: many(invoices),
   expenses: many(expenses),
+  subscriptions: many(userSubscriptions),
 }));
 
 export const debtorsRelations = relations(debtors, ({ many, one }) => ({

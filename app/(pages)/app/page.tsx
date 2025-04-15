@@ -3,7 +3,15 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
-import { Search, User, LogOut, Settings, ChevronDown } from "lucide-react";
+import {
+  Search,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown,
+  BarChart3,
+  Plus,
+} from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -22,12 +30,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ExpenseForm } from "@/components/expenses/expense-form";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const { searchResults, searchSalesAndCredit, fetchUser, clearState } =
-    useStore();
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const {
+    searchResults,
+    searchSalesAndCredit,
+    fetchUser,
+    clearState,
+    fetchExpenses,
+  } = useStore();
   const auth = useAuth();
   const router = useRouter();
   const tabs = ["sales", "credit", "expenses", "search"] as const;
@@ -38,7 +60,8 @@ export default function Home() {
 
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]);
+    fetchExpenses();
+  }, [fetchUser, fetchExpenses]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

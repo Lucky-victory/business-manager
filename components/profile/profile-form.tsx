@@ -91,8 +91,6 @@ export function ProfileForm({
   });
 
   async function handleSubmit(values: z.infer<typeof profileSchema>) {
-    console.log("Form values:", values);
-
     await onSubmit(values);
   }
 
@@ -276,11 +274,6 @@ export function ProfileForm({
 
               <Select
                 onValueChange={(value) => {
-                  console.log({
-                    value,
-                  });
-
-                  const [symbol, code, name] = value.split("_");
                   form.setValue("currency", value);
                 }}
                 defaultValue={form.getValues("currency")}

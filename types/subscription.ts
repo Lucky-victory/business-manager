@@ -1,7 +1,4 @@
-import {
-  subscriptionPlans,
-  userSubscriptions,
-} from "@/lib/db/subscription-schema";
+import { plans as subscriptionPlans, userSubscriptions } from "@/lib/db/schema";
 
 export type SubscriptionPlanSelect = typeof subscriptionPlans.$inferSelect;
 export type SubscriptionPlanInsert = typeof subscriptionPlans.$inferInsert;

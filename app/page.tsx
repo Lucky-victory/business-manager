@@ -7,6 +7,7 @@ import { Header } from "@/components/home/header";
 import { HeroSection } from "@/components/home/hero-section";
 import { TestimonialsSection } from "@/components/home/testimonial-section";
 import { Footer } from "@/components/home/footer";
+import PricingSection from "@/components/pricing";
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -15,6 +16,7 @@ export default function Home() {
         <HeroSection />
         <FeaturesSection />
         <BenefitsSection />
+        <PricingSection isHome={true} />
         <TestimonialsSection />
         <CTASection />
       </main>

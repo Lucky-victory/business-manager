@@ -182,7 +182,7 @@ export default function Home() {
         />
       </form>
 
-      <div className="bg-white dark:bg-gray-950 rounded-lg p-4 shadow-sm">
+      <div className="bg-white dark:bg-gray-950 rounded-lg p-4 px-0 shadow-sm">
         {tabQueryState === "search" ? (
           <SearchResults
             results={searchResults}

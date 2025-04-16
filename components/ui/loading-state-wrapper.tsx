@@ -24,5 +24,5 @@ export const LoadingStateWrapper = ({
       </div>
     );
   }
-  return <>{children};</>;
+  return <>{children}</>;
 };

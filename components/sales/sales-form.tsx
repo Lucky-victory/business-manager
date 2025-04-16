@@ -152,7 +152,7 @@ const NumberField = memo(
   }) => (
     <div className="space-y-2 col-span-1">
       <Label htmlFor={id}>{label}</Label>
-      <Input
+      {/* <Input
         id={id}
         type="number"
         min="0"
@@ -160,6 +160,14 @@ const NumberField = memo(
         value={value}
         onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
         required
+      />{" "} */}
+      <CustomNumberInput
+        inputId={id}
+        enableFormatting
+        allowDecimal
+        value={value + ""}
+        minValue={0}
+        onValueChange={(val) => onChange(parseFloat(val))}
       />
     </div>
   )

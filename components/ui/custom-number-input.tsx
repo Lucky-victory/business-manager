@@ -162,7 +162,7 @@ export default function CustomNumberInput({
         ))}
         <Button
           variant="outline"
-          className="h-16 flex items-center justify-center hover:bg-gray-100"
+          className="h-16 flex text-2xl font-semibold  hover:bg-gray-100"
           onClick={() => handleButtonClick(".")}
           disabled={!allowDecimal}
         >
@@ -177,26 +177,26 @@ export default function CustomNumberInput({
         </Button>
         <Button
           variant="outline"
-          className="h-16 flex items-center justify-center hover:bg-gray-100"
-          onClick={handleBackspace}
+          className="h-16 text-2xl font-semibold hover:bg-gray-100"
+          onClick={() => handleButtonClick("00")}
         >
-          <Delete className="h-6 w-6" />
+          00
         </Button>
       </div>
 
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 grid grid-cols-2 gap-2">
         <Button
-          variant="outline"
           className="flex-1 h-12"
           onClick={() => setIsKeyboardVisible(false)}
         >
           Close
         </Button>
         <Button
-          className="flex-1 h-12 text-lg font-medium"
-          onClick={handleSubmit}
+          variant="outline"
+          className="h-12 flex-1 flex items-center justify-center hover:bg-gray-100"
+          onClick={handleBackspace}
         >
-          <CornerDownLeft className="mr-2 h-5 w-5" /> Submit
+          <Delete className="h-6 w-6" />
         </Button>
       </div>
     </Card>
@@ -213,7 +213,11 @@ export default function CustomNumberInput({
           className={cn("font-medium", className)}
           placeholder={placeholder}
           min={minValue}
-          onFocus={() => isMobile && setIsKeyboardVisible(true)}
+          onFocus={(e) => {
+            isMobile && setIsKeyboardVisible(true);
+
+            e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
         />
         {!isMobile && (
           <Popover modal={true} open={isKeyboardVisible}>

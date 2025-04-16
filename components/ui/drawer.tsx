@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
 const Drawer = ({
   shouldScaleBackground = true,
   autoFocus = true,
+  closeThreshold = 0.6,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
   <DrawerPrimitive.Root
     shouldScaleBackground={shouldScaleBackground}
     autoFocus={autoFocus}
+    closeThreshold={closeThreshold}
     {...props}
   />
 );

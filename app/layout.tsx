@@ -79,11 +79,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        suppressHydrationWarning
-        className={`${roboto.variable} ${roboto.className}`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${roboto.variable} ${roboto.className}`}>
         <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function PlansPage() {
   >("monthly");
 
   // Fetch subscription data on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSubscriptionData();
   }, [fetchSubscriptionData]);
 

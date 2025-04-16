@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { SocialSignInButton } from "@/components/auth/social-sign-in-button";
 import { BackButton } from "@/components/ui/back-button";
 import { AlertError } from "@/components/ui/alert-error";
+import { Button } from "@/components/ui/button";
 
 export default function SignIn() {
   const router = useRouter();
@@ -98,9 +99,10 @@ export default function SignIn() {
           </div>
 
           <div>
-            <button
+            <Button
               type="submit"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
@@ -110,7 +112,7 @@ export default function SignIn() {
               ) : (
                 <>Sign in</>
               )}
-            </button>
+            </Button>
           </div>
         </form>
 

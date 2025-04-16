@@ -288,10 +288,13 @@ export const expenses = mysqlTable(
 export const countryCurrency = mysqlTable(
   "country_currency",
   {
+    id: varchar("id", { length: 36 }).notNull(),
     countryCode: char("country_code", {
-      length: 2,
+      length: 4,
       enum: ["NG", "US", "ZAR", "KE", "GH"],
-    }).primaryKey(),
+    })
+      .primaryKey()
+      .notNull(),
     name: varchar("name", { length: 100 }).notNull(),
     currencyCode: char("currency_code", { length: 3 }).notNull(),
     currencySymbol: varchar("currency_symbol", { length: 10 }).notNull(),
@@ -327,7 +330,7 @@ export const pricing = mysqlTable(
   "pricing",
   {
     id: varchar("id", { length: 36 }).primaryKey().notNull(),
-    countryCode: char("country_code", { length: 2 })
+    countryCode: char("country_code", { length: 4 })
       .notNull()
       .references(() => countryCurrency.countryCode),
     planId: varchar("plan_id", { length: 36 })

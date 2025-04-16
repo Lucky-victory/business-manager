@@ -41,6 +41,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ExpenseForm } from "@/components/expenses/expense-form";
+import { PlansModal } from "@/components/subscription/plans-modal";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -202,10 +203,30 @@ export default function Home() {
           >
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="sales">Sales</TabsTrigger>
+              {/* {!isFeatureEnabled("credit") ? (
+                <Button
+                  onClick={() => {
+                    // if (!isFeatureEnabled("credit")) {
+                    setFeatureClicked("credit");
+                    setShowPlansModal(true);
+                    // }
+                  }}
+                >
+                  Credit
+                </Button>
+              ) : (
+                <TabsTrigger value="credit">
+                  Credit
+                  {!isFeatureEnabled("credit") && (
+                    <ProFeatureBadge className="ml-2" />
+                  )}
+                </TabsTrigger>
+              )} */}
               <TabsTrigger
                 value="credit"
-                disabled={!isFeatureEnabled("credit")}
-                onClick={() => {
+                // disabled={!isFeatureEnabled("credit")}
+                onClick={(e) => {
+                  e.preventDefault();
                   if (!isFeatureEnabled("credit")) {
                     setFeatureClicked("credit");
                     setShowPlansModal(true);
@@ -245,6 +266,7 @@ export default function Home() {
           </Tabs>
         )}
       </div>
+      <PlansModal />
     </main>
   );
 }

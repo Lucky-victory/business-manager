@@ -39,6 +39,7 @@ import { cn, generateUUID, getCurrentDateTime } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
 import { DatePickerField } from "../ui/date-picker";
+import CustomNumberInput from "../ui/custom-number-input";
 
 // Types for form data
 interface SalesFormData {
@@ -73,7 +74,7 @@ const ItemNameField = memo(
       <Label htmlFor="item">Item Name</Label>
       <Input
         id="item"
-        placeholder="Enter item name"
+        placeholder="What did you sell"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
@@ -98,7 +99,16 @@ const QuantityUnitField = memo(
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="quantity">Quantity</Label>
-        <Input
+        <CustomNumberInput
+          inputId="quantity"
+          placeholder="Quantity"
+          enableFormatting={false}
+          allowDecimal={false}
+          value={quantity + ""}
+          minValue={1}
+          onValueChange={(val) => onQuantityChange(parseInt(val, 10))}
+        />
+        {/* <Input
           id="quantity"
           type="number"
           min="1"
@@ -107,7 +117,7 @@ const QuantityUnitField = memo(
             onQuantityChange(Number.parseInt(e.target.value) || 1)
           }
           required
-        />
+        /> */}
       </div>
 
       <div className="space-y-2">

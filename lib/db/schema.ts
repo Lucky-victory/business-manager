@@ -9,7 +9,6 @@ import {
   boolean,
   index,
   json,
-  char,
   uniqueIndex,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
@@ -289,14 +288,14 @@ export const countryCurrency = mysqlTable(
   "country_currency",
   {
     id: varchar("id", { length: 36 }).notNull(),
-    countryCode: char("country_code", {
+    countryCode: varchar("country_code", {
       length: 4,
       enum: ["NG", "US", "ZAR", "KE", "GH"],
     })
       .primaryKey()
       .notNull(),
     name: varchar("name", { length: 100 }).notNull(),
-    currencyCode: char("currency_code", { length: 3 }).notNull(),
+    currencyCode: varchar("currency_code", { length: 3 }).notNull(),
     currencySymbol: varchar("currency_symbol", { length: 10 }).notNull(),
     currencyName: varchar("currency_name", { length: 100 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -330,7 +329,7 @@ export const pricing = mysqlTable(
   "pricing",
   {
     id: varchar("id", { length: 36 }).primaryKey().notNull(),
-    countryCode: char("country_code", { length: 4 })
+    countryCode: varchar("country_code", { length: 4 })
       .notNull()
       .references(() => countryCurrency.countryCode),
     planId: varchar("plan_id", { length: 36 })
@@ -400,7 +399,7 @@ export const subscriptionPayments = mysqlTable(
       .notNull()
       .references(() => userSubscriptions.id),
     amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-    currency: char("currency", { length: 3 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull(),
     status: varchar("status", { length: 20 }).notNull(), // "succeeded", "failed", "pending", etc.
     paymentMethod: varchar("payment_method", { length: 50 }),
     paymentDate: timestamp("payment_date").notNull(),

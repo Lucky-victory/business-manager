@@ -83,11 +83,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           const freePlan = data.plans.find(
             (plan: SubscriptionPlanSelect) => plan.name.toLowerCase() === "free"
           );
+          const sortedPlans = (data?.plans as SubscriptionPlanSelect[]).sort(
+            (a, b) => (a.name.toLowerCase() === "free" ? -1 : 1)
+          );
 
           // In a real app, we would also fetch the user's current subscription
           // For now, we'll default to free plan
           set({
-            plans: data.plans,
+            plans: sortedPlans,
             pricing: data.pricing,
             country: data.country || defaultCountry,
             detectedCountryCode: data.detectedCountryCode,

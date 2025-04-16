@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e7720ad4-4dd7-4395-b5e6-c41b754b88ef",
+  "id": "fc471b3d-dc89-4ba2-89b4-0daef6f74603",
   "prevId": "764c8efa-106a-4f25-937f-5cdb95ec7dea",
   "tables": {
     "account": {
@@ -138,7 +138,7 @@
         },
         "country_code": {
           "name": "country_code",
-          "type": "char(4)",
+          "type": "varchar(4)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -152,7 +152,7 @@
         },
         "currency_code": {
           "name": "currency_code",
-          "type": "char(3)",
+          "type": "varchar(3)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -912,7 +912,7 @@
         },
         "country_code": {
           "name": "country_code",
-          "type": "char(4)",
+          "type": "varchar(4)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -1455,7 +1455,7 @@
         },
         "currency": {
           "name": "currency",
-          "type": "char(3)",
+          "type": "varchar(3)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

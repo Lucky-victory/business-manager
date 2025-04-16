@@ -1,8 +1,8 @@
 CREATE TABLE `country_currency` (
 	`id` varchar(36) NOT NULL,
-	`country_code` char(4) NOT NULL,
+	`country_code` varchar(4) NOT NULL,
 	`name` varchar(100) NOT NULL,
-	`currency_code` char(3) NOT NULL,
+	`currency_code` varchar(3) NOT NULL,
 	`currency_symbol` varchar(10) NOT NULL,
 	`currency_name` varchar(100) NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
@@ -22,7 +22,7 @@ CREATE TABLE `plans` (
 
 CREATE TABLE `pricing` (
 	`id` varchar(36) NOT NULL,
-	`country_code` char(4) NOT NULL,
+	`country_code` varchar(4) NOT NULL,
 	`plan_id` varchar(36) NOT NULL,
 	`monthly_price` decimal(10,2) NOT NULL,
 	`features` json NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `subscription_payments` (
 	`id` varchar(36) NOT NULL,
 	`subscription_id` varchar(36) NOT NULL,
 	`amount` decimal(10,2) NOT NULL,
-	`currency` char(3) NOT NULL,
+	`currency` varchar(3) NOT NULL,
 	`status` varchar(20) NOT NULL,
 	`payment_method` varchar(50),
 	`payment_date` timestamp NOT NULL,

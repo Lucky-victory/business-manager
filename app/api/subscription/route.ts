@@ -17,21 +17,23 @@ async function getCountryFromIp(ip: string): Promise<string> {
   try {
     // Use a geolocation API to get country from IP
     // For production, you might want to use a paid service with better reliability
-    const response = await fetch(`https://ipapi.co/${ip}/json/`);
+    const response = await fetch(`http://ip-api.com/json/${"102.89.46.194"}`);
     const data = await response.json();
 
     // Return the country code if available and supported, otherwise default to US
-    const countryCode = data.country_code;
+    const countryCode = data.countrycode;
+    console.log({
+      ipData: data,
+    });
 
     // Check if the country code is one we support
     const supportedCountries = ["NG", "GH", "KE", "ZAR", "US"] as const;
 
-    // Map ZA to ZAR if needed (some APIs return ZA for South Africa)
-    const normalizedCode = countryCode === "ZA" ? "ZAR" : countryCode;
+    // Check if the normalized code is in our supported countries
+    const isSupported = supportedCountries.includes(countryCode);
 
-    return supportedCountries.includes(normalizedCode as any)
-      ? (normalizedCode as "NG" | "GH" | "KE" | "ZAR" | "US")
-      : "US";
+    // Return the supported country code or default to US
+    return isSupported ? countryCode : "US";
   } catch (error) {
     console.error("Error fetching country from IP:", error);
     return "US"; // Default to US on error
@@ -43,6 +45,10 @@ export async function GET(req: NextRequest) {
     // Get client IP and determine country
     const clientIp = getClientIp(req) || "0.0.0.0";
     const countryCode = await getCountryFromIp(clientIp);
+    console.log({
+      clientIp,
+      countryCode,
+    });
 
     // Fetch all active plans
     const activePlans = await db.query.plans.findMany({
@@ -50,36 +56,54 @@ export async function GET(req: NextRequest) {
     });
 
     // Fetch pricing for the determined country
-    const countryPricing = await db.query.pricing.findMany({
-      where: eq(
-        pricing.countryCode,
-        countryCode as "NG" | "GH" | "KE" | "ZAR" | "US"
-      ),
-      with: {
-        plan: true,
-      },
-    });
+    const countryPricing = await db
+      .select()
+      .from(pricing)
+      .where(eq(pricing.countryCode, countryCode))
+      .leftJoin(plans, eq(pricing.planId, plans.id));
 
     // Fetch country currency information
-    const country = await db.query.countryCurrency.findFirst({
-      where: eq(
-        countryCurrency.countryCode,
-        countryCode as "NG" | "GH" | "KE" | "ZAR" | "US"
-      ),
+    const country = await db
+      .select()
+      .from(countryCurrency)
+      .where(
+        eq(
+          countryCurrency.countryCode,
+          countryCode as "NG" | "GH" | "KE" | "ZAR" | "US"
+        )
+      )
+      .limit(1);
+
+    // // If no country found, use default (US)
+    // const fallbackCountry = await db
+    //   .select()
+    //   .from(countryCurrency)
+    //   .where(eq(countryCurrency.countryCode, "US"))
+    //   .limit(1);
+
+    const currencyInfo = country[0];
+
+    console.log({
+      activePlans,
+      countryPricing,
+      currencyInfo,
     });
 
-    // If no country found, use default (US)
-    const fallbackCountry = await db.query.countryCurrency.findFirst({
-      where: eq(countryCurrency.countryCode, "US"),
+    // Format the pricing data to include plan information
+    const formattedPricing = countryPricing.map((row) => ({
+      ...row.pricing,
+      plan: row.plans,
+    }));
+    console.log({
+      formattedPricing,
+      activePlans,
     });
-
-    const currencyInfo = country || fallbackCountry;
 
     return NextResponse.json({
       success: true,
       data: {
         plans: activePlans,
-        pricing: countryPricing,
+        pricing: formattedPricing,
         country: currencyInfo,
         detectedCountryCode: countryCode,
       },

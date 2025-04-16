@@ -17,14 +17,11 @@ async function getCountryFromIp(ip: string): Promise<string> {
   try {
     // Use a geolocation API to get country from IP
     // For production, you might want to use a paid service with better reliability
-    const response = await fetch(`http://ip-api.com/json/${"102.89.46.194"}`);
+    const response = await fetch(`http://ip-api.com/json/${ip}`);
     const data = await response.json();
 
     // Return the country code if available and supported, otherwise default to US
-    const countryCode = data.countrycode;
-    console.log({
-      ipData: data,
-    });
+    const countryCode = data.countryCode;
 
     // Check if the country code is one we support
     const supportedCountries = ["NG", "GH", "KE", "ZAR", "US"] as const;
@@ -45,10 +42,6 @@ export async function GET(req: NextRequest) {
     // Get client IP and determine country
     const clientIp = getClientIp(req) || "0.0.0.0";
     const countryCode = await getCountryFromIp(clientIp);
-    console.log({
-      clientIp,
-      countryCode,
-    });
 
     // Fetch all active plans
     const activePlans = await db.query.plans.findMany({
@@ -73,13 +66,6 @@ export async function GET(req: NextRequest) {
         )
       )
       .limit(1);
-
-    // // If no country found, use default (US)
-    // const fallbackCountry = await db
-    //   .select()
-    //   .from(countryCurrency)
-    //   .where(eq(countryCurrency.countryCode, "US"))
-    //   .limit(1);
 
     const currencyInfo = country[0];
 

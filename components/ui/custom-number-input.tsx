@@ -152,32 +152,36 @@ export default function CustomNumberInput({
       <div className="grid grid-cols-3 gap-2">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
           <Button
+            type="button"
             key={digit}
             variant="outline"
-            className="h-16 text-2xl font-semibold hover:bg-gray-100"
+            className="h-10 text-2xl font-semibold hover:bg-gray-100"
             onClick={() => handleButtonClick(digit.toString())}
           >
             {digit}
           </Button>
         ))}
         <Button
+          type="button"
           variant="outline"
-          className="h-16 flex text-2xl font-semibold  hover:bg-gray-100"
+          className="h-10 flex text-2xl font-semibold  hover:bg-gray-100"
           onClick={() => handleButtonClick(".")}
           disabled={!allowDecimal}
         >
           .
         </Button>
         <Button
+          type="button"
           variant="outline"
-          className="h-16 text-2xl font-semibold hover:bg-gray-100"
+          className="h-10 text-2xl font-semibold hover:bg-gray-100"
           onClick={() => handleButtonClick("0")}
         >
           0
         </Button>
         <Button
+          type="button"
           variant="outline"
-          className="h-16 text-2xl font-semibold hover:bg-gray-100"
+          className="h-10 text-2xl font-semibold hover:bg-gray-100"
           onClick={() => handleButtonClick("00")}
         >
           00
@@ -186,14 +190,16 @@ export default function CustomNumberInput({
 
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Button
-          className="flex-1 h-12"
+          type="button"
+          className="flex-1 h-10"
           onClick={() => setIsKeyboardVisible(false)}
         >
           Close
         </Button>
         <Button
+          type="button"
           variant="outline"
-          className="h-12 flex-1 flex items-center justify-center hover:bg-gray-100"
+          className="h-10 flex-1 flex items-center justify-center hover:bg-gray-100"
           onClick={handleBackspace}
         >
           <Delete className="h-6 w-6" />
@@ -223,6 +229,7 @@ export default function CustomNumberInput({
           <Popover modal={true} open={isKeyboardVisible}>
             <PopoverTrigger asChild>
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2"

@@ -96,7 +96,7 @@ const QuantityUnitField = memo(
     onQuantityChange: (value: number) => void;
     onUnitChange: (value: string) => void;
   }) => (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="w-full grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="quantity">Quantity</Label>
         <CustomNumberInput
@@ -372,7 +372,8 @@ export function SalesForm({
           onQuantityChange={(value) => updateField("quantity", value)}
           onUnitChange={(value) => updateField("measurementUnit", value)}
         />
-
+      </div>
+      <div className="grid grid-cols-2 gap-4">
         <NumberField
           value={formData.price as number}
           id="price"

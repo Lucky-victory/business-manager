@@ -1,9 +1,23 @@
-import { plans as subscriptionPlans, userSubscriptions } from "@/lib/db/schema";
+import {
+  plans as subscriptionPlans,
+  userSubscriptions,
+  pricing,
+  countryCurrency,
+} from "@/lib/db/schema";
 
 export type SubscriptionPlanSelect = typeof subscriptionPlans.$inferSelect;
 export type SubscriptionPlanInsert = typeof subscriptionPlans.$inferInsert;
 export type UserSubscriptionSelect = typeof userSubscriptions.$inferSelect;
 export type UserSubscriptionInsert = typeof userSubscriptions.$inferInsert;
+export type PricingSelect = typeof pricing.$inferSelect;
+export type PricingInsert = typeof pricing.$inferInsert;
+export type CountryCurrencySelect = typeof countryCurrency.$inferSelect;
+export type CountryCurrencyInsert = typeof countryCurrency.$inferInsert;
+
+// Define a type for pricing with plan relation
+export type PricingWithPlan = PricingSelect & {
+  plan: SubscriptionPlanSelect;
+};
 
 export interface SubscriptionFeature {
   id: string;

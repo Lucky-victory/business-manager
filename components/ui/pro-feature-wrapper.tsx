@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { useSubscription } from "@/lib/subscription-context";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { PlanFeatures } from "@/types/subscription";
 import { cn } from "@/lib/utils";
 import { ProFeatureBadge } from "./pro-feature-badge";
-import { Lock, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { PlansModal } from "@/components/subscription/plans-modal";
 
 interface ProFeatureWrapperProps {
@@ -26,7 +26,7 @@ export function ProFeatureWrapper({
   disabledMessage = "This feature requires a Pro subscription",
 }: ProFeatureWrapperProps) {
   const { isFeatureEnabled, isLoading, setShowPlansModal, setFeatureClicked } =
-    useSubscription();
+    useSubscriptionStore();
   const isEnabled = isFeatureEnabled(feature);
 
   if (isLoading) {

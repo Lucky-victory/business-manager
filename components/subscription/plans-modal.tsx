@@ -11,12 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  SUBSCRIPTION_PLANS,
-  FEATURE_DESCRIPTIONS,
-  PlanFeatures,
-} from "@/types/subscription";
-import { useSubscription } from "@/lib/subscription-context";
+import { PlanFeatures } from "@/types/subscription";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function PlansModal() {
@@ -26,45 +22,47 @@ export function PlansModal() {
     setShowPlansModal,
     featureClicked,
     setFeatureClicked,
-    countryPricing,
-  } = useSubscription();
+    plans,
+    pricing,
+    getPlanPrice,
+    getCurrencySymbol,
+    isFeatureEnabled,
+    getFeatureDescriptions,
+  } = useSubscriptionStore();
+
   const [billingInterval, setBillingInterval] = React.useState<
     "monthly" | "yearly"
   >("monthly");
 
-  const getPlanPrice = (planId: string, interval: "monthly" | "yearly") => {
-    if (planId === "free") return 0;
-
-    if (planId === "basic") {
-      return interval === "monthly"
-        ? countryPricing.basicMonthly
-        : countryPricing.basicYearly;
-    }
-
-    if (planId === "premium") {
-      return interval === "monthly"
-        ? countryPricing.premiumMonthly
-        : countryPricing.premiumYearly;
-    }
-
-    return 0;
-  };
+  // Get feature descriptions
+  const FEATURE_DESCRIPTIONS = getFeatureDescriptions();
 
   // Filter plans to only show those that include the clicked feature
-  const filteredPlans = Object.entries(SUBSCRIPTION_PLANS)
-    .filter(([_, plan]) => {
+  const filteredPlans = plans
+    .filter((plan) => {
       // If no feature was clicked, show all plans
       if (!featureClicked) return true;
-      // Otherwise, only show plans that include the clicked feature
-      return plan.features[featureClicked];
+
+      // Find the pricing for this plan
+      const planPricing = pricing.find((p) => p.planId === plan.id);
+      if (!planPricing) return false;
+
+      // Parse features
+      const features =
+        typeof planPricing.features === "string"
+          ? (JSON.parse(planPricing.features as string) as PlanFeatures)
+          : (planPricing.features as unknown as PlanFeatures);
+
+      // Check if this plan includes the clicked feature
+      return features[featureClicked];
     })
-    .map(([key, plan]) => ({
-      id: key,
-      ...plan,
-      price: getPlanPrice(key, billingInterval),
+    .map((plan) => ({
+      id: plan.id,
+      name: plan.name,
+      description: plan.description || "",
+      price: getPlanPrice(plan.id, billingInterval),
       interval: billingInterval,
-      currencySymbol: countryPricing.currencySymbol,
-      currencyCode: countryPricing.currencyCode,
+      currencySymbol: getCurrencySymbol(),
     }));
 
   const handleClose = () => {
@@ -73,7 +71,7 @@ export function PlansModal() {
   };
 
   const handleUpgrade = (planId: string) => {
-    if (planId === "free") {
+    if (planId.includes("free")) {
       handleClose();
       return;
     }
@@ -145,35 +143,70 @@ export function PlansModal() {
 
                 {featureClicked && (
                   <div className="mb-4 flex items-center">
-                    {plan.features[featureClicked] ? (
-                      <>
-                        <Check className="h-5 w-5 text-emerald-500 mr-2" />
-                        <span>
-                          Includes {FEATURE_DESCRIPTIONS[featureClicked]}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <X className="h-5 w-5 text-gray-300 mr-2" />
-                        <span className="text-muted-foreground">
-                          Does not include{" "}
-                          {FEATURE_DESCRIPTIONS[featureClicked]}
-                        </span>
-                      </>
-                    )}
+                    {/* Find the pricing for this plan */}
+                    {(() => {
+                      const planPricing = pricing.find(
+                        (p) => p.planId === plan.id
+                      );
+                      if (!planPricing) return null;
+
+                      // Parse features
+                      const features =
+                        typeof planPricing.features === "string"
+                          ? (JSON.parse(
+                              planPricing.features as string
+                            ) as PlanFeatures)
+                          : (planPricing.features as unknown as PlanFeatures);
+
+                      return features[featureClicked] ? (
+                        <>
+                          <Check className="h-5 w-5 text-emerald-500 mr-2" />
+                          <span>
+                            Includes {FEATURE_DESCRIPTIONS[featureClicked]}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-5 w-5 text-gray-300 mr-2" />
+                          <span className="text-muted-foreground">
+                            Does not include{" "}
+                            {FEATURE_DESCRIPTIONS[featureClicked]}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
 
                 <div className="mt-auto pt-4">
                   <Button
                     className="w-full"
-                    variant={plan.id === "free" ? "outline" : "default"}
+                    variant={plan.id.includes("free") ? "outline" : "default"}
                     onClick={() => handleUpgrade(plan.id)}
                     disabled={
-                      featureClicked ? !plan.features[featureClicked] : false
+                      featureClicked
+                        ? (() => {
+                            const planPricing = pricing.find(
+                              (p) => p.planId === plan.id
+                            );
+                            if (!planPricing) return true;
+
+                            // Parse features
+                            const features =
+                              typeof planPricing.features === "string"
+                                ? (JSON.parse(
+                                    planPricing.features as string
+                                  ) as PlanFeatures)
+                                : (planPricing.features as unknown as PlanFeatures);
+
+                            return !features[featureClicked];
+                          })()
+                        : false
                     }
                   >
-                    {plan.id === "free" ? "Continue with Free" : "Upgrade"}
+                    {plan.id.includes("free")
+                      ? "Continue with Free"
+                      : "Upgrade"}
                   </Button>
                 </div>
               </div>

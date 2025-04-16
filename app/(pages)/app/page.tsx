@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState, Fragment } from "react";
-import { useSubscription } from "@/lib/subscription-context";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
 import {
   Search,
@@ -60,7 +60,16 @@ export default function Home() {
     "tab",
     parseAsStringLiteral(tabs).withDefault("sales")
   );
-  const { isFeatureEnabled } = useSubscription();
+  const {
+    isFeatureEnabled,
+    setShowPlansModal,
+    setFeatureClicked,
+    fetchSubscriptionData,
+  } = useSubscriptionStore();
+
+  useEffect(() => {
+    fetchSubscriptionData();
+  }, [fetchSubscriptionData]);
 
   useEffect(() => {
     fetchUser();
@@ -196,6 +205,12 @@ export default function Home() {
               <TabsTrigger
                 value="credit"
                 disabled={!isFeatureEnabled("credit")}
+                onClick={() => {
+                  if (!isFeatureEnabled("credit")) {
+                    setFeatureClicked("credit");
+                    setShowPlansModal(true);
+                  }
+                }}
               >
                 Credit
                 {!isFeatureEnabled("credit") && (
@@ -205,6 +220,12 @@ export default function Home() {
               <TabsTrigger
                 value="expenses"
                 disabled={!isFeatureEnabled("expenses")}
+                onClick={() => {
+                  if (!isFeatureEnabled("expenses")) {
+                    setFeatureClicked("expenses");
+                    setShowPlansModal(true);
+                  }
+                }}
               >
                 Expenses
                 {!isFeatureEnabled("expenses") && (

@@ -10,15 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useSubscription } from "@/lib/subscription-context";
-import { SubscriptionTier, SUBSCRIPTION_PLANS } from "@/types/subscription";
+import { useSubscriptionStore } from "@/lib/subscription-store";
+import { SubscriptionTier } from "@/types/subscription";
 import { ArrowLeft, CreditCard, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { countryPricing } = useSubscription();
+  const { getCurrencySymbol, plans, pricing } = useSubscriptionStore();
+  const currencySymbol = getCurrencySymbol();
   const { user } = useStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,18 +55,41 @@ export default function CheckoutPage() {
     );
   }
 
-  // Get plan details
-  const plan = SUBSCRIPTION_PLANS[planId];
+  // Get plan details from the store
+  const plan = plans.find((p) => p.name.toLowerCase() === planId);
+
+  if (!plan) {
+    return (
+      <div className="container max-w-md py-10">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">Plan Not Found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-muted-foreground">
+              The selected plan could not be found. Please try again.
+            </p>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button onClick={() => router.push("/plans")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Plans
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Find pricing for this plan
+  const planPricing = pricing.find((p) => p.planId === plan.id);
 
   // Calculate price based on interval
-  const price =
-    interval === "monthly"
-      ? planId === "basic"
-        ? countryPricing.basicMonthly
-        : countryPricing.premiumMonthly
-      : planId === "basic"
-      ? countryPricing.basicYearly
-      : countryPricing.premiumYearly;
+  const price = planPricing
+    ? interval === "monthly"
+      ? Number(planPricing.monthlyPrice)
+      : Number(planPricing.yearlyPrice)
+    : 0;
 
   const handlePaystackCheckout = async () => {
     setIsLoading(true);
@@ -96,17 +120,17 @@ export default function CheckoutPage() {
             <h3 className="font-medium">Order Summary</h3>
             <div className="flex justify-between">
               <span>
-                {plan.name} Plan ({interval})
+                {plan?.name} Plan ({interval})
               </span>
               <span className="font-medium">
-                {countryPricing.currencySymbol}
+                {currencySymbol}
                 {price.toLocaleString()}
               </span>
             </div>
             <div className="border-t pt-2 mt-2 flex justify-between font-medium">
               <span>Total</span>
               <span>
-                {countryPricing.currencySymbol}
+                {currencySymbol}
                 {price.toLocaleString()}
               </span>
             </div>

@@ -11,11 +11,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, Home } from "lucide-react";
-import { useSubscription } from "@/lib/subscription-context";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
-  const { currentPlan } = useSubscription();
+  const { currentPlanId } = useSubscriptionStore();
 
   // In a real app, this would verify the payment status with the server
   useEffect(() => {

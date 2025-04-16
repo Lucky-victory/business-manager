@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Filter, Download, Sparkles } from "lucide-react";
-import { useSubscription } from "@/lib/subscription-context";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
 import { format } from "date-fns";
@@ -47,7 +47,7 @@ export function CreditList() {
     formatCurrency,
     isLoading,
   } = useStore();
-  const { isFeatureEnabled } = useSubscription();
+  const { isFeatureEnabled } = useSubscriptionStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">(

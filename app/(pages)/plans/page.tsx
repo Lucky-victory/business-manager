@@ -13,57 +13,56 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  SUBSCRIPTION_PLANS,
-  FEATURE_DESCRIPTIONS,
-  COUNTRY_PRICING,
-  DEFAULT_COUNTRY_PRICING,
-  CountryPricing,
-} from "@/types/subscription";
-import { useSubscription } from "@/lib/subscription-context";
+import { FEATURE_DESCRIPTIONS } from "@/types/subscription";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { useStore } from "@/lib/store";
 
 export default function PlansPage() {
   const router = useRouter();
-  const { currentPlan } = useSubscription();
-  const { user } = useStore();
+  const {
+    currentPlanId,
+    plans,
+    pricing,
+    getPlanPrice,
+    getCurrencySymbol,
+    fetchSubscriptionData,
+    getFeatureDescriptions,
+  } = useSubscriptionStore();
+
   const [billingInterval, setBillingInterval] = React.useState<
     "monthly" | "yearly"
   >("monthly");
 
-  // Get country code from user or default to Nigeria
-  const countryCode = user?.currencyCode?.slice(0, 2) || "NG";
+  // Fetch subscription data on component mount
+  React.useEffect(() => {
+    fetchSubscriptionData();
+  }, [fetchSubscriptionData]);
 
-  // Get pricing for the user's country or default to Nigerian pricing
-  const pricing: CountryPricing =
-    COUNTRY_PRICING[countryCode] || DEFAULT_COUNTRY_PRICING;
+  // Get feature descriptions
+  const FEATURE_DESCRIPTIONS = getFeatureDescriptions();
 
-  const getPlanPrice = (planId: string, interval: "monthly" | "yearly") => {
-    if (planId === "free") return 0;
+  // Map plans with pricing information
+  const plansWithPricing = plans.map((plan) => {
+    // Find pricing for this plan
+    const planPricing = pricing.find((p) => p.planId === plan.id);
 
-    if (planId === "basic") {
-      return interval === "monthly"
-        ? pricing.basicMonthly
-        : pricing.basicYearly;
-    }
+    // Parse features if available
+    const features = planPricing
+      ? typeof planPricing.features === "string"
+        ? JSON.parse(planPricing.features as string)
+        : planPricing.features
+      : {};
 
-    if (planId === "premium") {
-      return interval === "monthly"
-        ? pricing.premiumMonthly
-        : pricing.premiumYearly;
-    }
-
-    return 0;
-  };
-
-  const plans = Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => ({
-    id: key,
-    ...plan,
-    price: getPlanPrice(key, billingInterval),
-    interval: billingInterval,
-    currencySymbol: pricing.currencySymbol,
-    currencyCode: pricing.currencyCode,
-  }));
+    return {
+      id: plan.id,
+      name: plan.name,
+      description: plan.description || "",
+      features: features,
+      price: getPlanPrice(plan.id, billingInterval),
+      interval: billingInterval,
+      currencySymbol: getCurrencySymbol(),
+    };
+  });
 
   return (
     <div className="container max-w-5xl py-10">
@@ -94,11 +93,11 @@ export default function PlansPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {plans.map((plan) => (
+        {plansWithPricing.map((plan) => (
           <Card
             key={plan.id}
             className={
-              currentPlan === plan.id
+              currentPlanId === plan.id
                 ? "border-2 border-primary shadow-md"
                 : "border shadow"
             }
@@ -146,8 +145,8 @@ export default function PlansPage() {
             <CardFooter>
               <Button
                 className="w-full"
-                variant={currentPlan === plan.id ? "outline" : "default"}
-                disabled={currentPlan === plan.id}
+                variant={currentPlanId === plan.id ? "outline" : "default"}
+                disabled={currentPlanId === plan.id}
                 onClick={() => {
                   if (plan.id === "free") {
                     alert("You are now on the Free plan");
@@ -160,7 +159,7 @@ export default function PlansPage() {
                   );
                 }}
               >
-                {currentPlan === plan.id ? "Current Plan" : "Upgrade"}
+                {currentPlanId === plan.id ? "Current Plan" : "Upgrade"}
               </Button>
             </CardFooter>
           </Card>

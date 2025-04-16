@@ -11,7 +11,7 @@ import {
   BarChart3,
   Sparkles,
 } from "lucide-react";
-import { useSubscription } from "@/lib/subscription-context";
+import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
 import {
@@ -39,7 +39,7 @@ import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
 
 export function ExpensesList() {
   const { expenses, isLoading, deleteExpense } = useStore();
-  const { isFeatureEnabled } = useSubscription();
+  const { isFeatureEnabled } = useSubscriptionStore();
   const [editingExpense, setEditingExpense] = useState<ExpenseSelect | null>(
     null
   );

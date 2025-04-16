@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { roboto } from "@/lib/font";
-import { SubscriptionProvider } from "@/lib/subscription-context";
+// No need for subscription provider with Zustand
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bizmanager.africa"),
   title: "Biz Manager - Business Management Simplified for Africans",
@@ -84,9 +84,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${roboto.variable} ${roboto.className}`}
       >
-        <NuqsAdapter>
-          <SubscriptionProvider>{children}</SubscriptionProvider>
-        </NuqsAdapter>
+        <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>
   );

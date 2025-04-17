@@ -69,21 +69,11 @@ export async function GET(req: NextRequest) {
 
     const currencyInfo = country[0];
 
-    console.log({
-      activePlans,
-      countryPricing,
-      currencyInfo,
-    });
-
     // Format the pricing data to include plan information
     const formattedPricing = countryPricing.map((row) => ({
       ...row.pricing,
       plan: row.plans,
     }));
-    console.log({
-      formattedPricing,
-      activePlans,
-    });
 
     return NextResponse.json({
       success: true,

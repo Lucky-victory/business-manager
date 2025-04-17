@@ -254,10 +254,6 @@ export default function InvoicePage({
     }
   };
 
-  const handlePrintInvoice = () => {
-    window.print();
-  };
-
   const handleSendInvoice = () => {
     // In a real app, this would send the invoice via email
     toast({
@@ -430,31 +426,11 @@ export default function InvoicePage({
       </Card>
 
       <div className="flex justify-end gap-2 print:hidden print-buttons">
-        {/* <Button variant="outline" onClick={handlePrintInvoice}>
-          <Printer className="mr-2 h-4 w-4" />
-          Print
-        </Button> */}
-
         <Button variant="outline" onClick={handleDownloadAsImage}>
           <ImageDown className="mr-2 h-4 w-4" />
           Download Image
         </Button>
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Download className="mr-2 h-4 w-4" />
-              Download
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleDownloadInvoice}>
-              Download as PDF
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDownloadAsImage}>
-              Download as Image
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
+
         <Button onClick={handleDownloadInvoice}>
           <Download className="mr-2 h-4 w-4" />
           Download PDF

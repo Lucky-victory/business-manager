@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { credits, debtors, expenses, sales, users } from "./db/schema";
+import { formatPrice } from "./utils";
 
 export type SaleSelect = typeof sales.$inferSelect;
 export type SaleInsert = typeof sales.$inferInsert;
@@ -30,6 +31,7 @@ type State = {
   searchResults: SearchResult[];
   user: UserSelect;
   formatCurrency: (amount: number | string) => string;
+  currency: string;
   isLoading: {
     sales: boolean;
     credits: boolean;
@@ -101,6 +103,7 @@ export const useStore = create<State>()(
       credits: [],
       debtors: [],
       expenses: [],
+      currency: "",
       searchResults: [],
       user: {} as UserSelect,
       isLoading: {
@@ -113,11 +116,11 @@ export const useStore = create<State>()(
       },
       error: null,
       formatCurrency: (amount: number | string) => {
-        const amountNumber =
-          typeof amount === "string" ? parseFloat(amount || "0.00") : amount;
         const userCurrencySymbol = get().user?.currencySymbol || "₦";
-        const formatted = (amountNumber || 0.0).toLocaleString("en-US");
-        return `${userCurrencySymbol}${formatted}`;
+        set(() => ({
+          currency: userCurrencySymbol,
+        }));
+        return formatPrice(amount, userCurrencySymbol, { addPrefix: true });
       },
       fetchUser: async () => {
         try {
@@ -858,6 +861,7 @@ export const useStore = create<State>()(
           debtors: [],
           expenses: [],
           searchResults: [],
+          currency: "",
           error: null,
           isLoading: {
             sales: false,

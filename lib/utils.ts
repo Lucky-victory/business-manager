@@ -6,10 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 export const IS_DEV = process.env.NODE_ENV !== "production";
 export const generateUUID = () => uuidv4();
-export const formatCurrency = (val: number | string) => {
-  const numVal = typeof val === "string" ? parseFloat(val) : val;
-  return numVal && !isNaN(numVal) ? numVal.toLocaleString() : "0.00";
-};
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -64,4 +60,41 @@ export function greetUser(userName: string): string {
   } else {
     return `Good night, ${userName}!`;
   }
+}
+export interface FormatPriceOptions {
+  addPrefix?: boolean;
+  addDecimals?: boolean;
+  formatted?: boolean;
+}
+
+export function formatPrice(
+  amount: string | number,
+  currencyPrefix: string = "$",
+  options: FormatPriceOptions = {}
+): string {
+  const { addPrefix = false, addDecimals = true, formatted = true } = options;
+
+  const num = parseFloat(String(amount));
+
+  if (isNaN(num)) {
+    const fallback = addDecimals ? "0.00" : "0";
+    return addPrefix ? `${currencyPrefix}${fallback}` : fallback;
+  }
+
+  const rounded = Math.round(num * 100) / 100;
+
+  let formattedNumber: string;
+
+  if (formatted) {
+    formattedNumber = rounded.toLocaleString(undefined, {
+      minimumFractionDigits: addDecimals ? 2 : 0,
+      maximumFractionDigits: addDecimals ? 2 : 0,
+    });
+  } else {
+    formattedNumber = addDecimals
+      ? rounded.toFixed(2)
+      : Math.round(rounded).toString();
+  }
+
+  return addPrefix ? `${currencyPrefix}${formattedNumber}` : formattedNumber;
 }

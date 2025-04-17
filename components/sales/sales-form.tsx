@@ -35,7 +35,7 @@ import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn, generateUUID, getCurrentDateTime } from "@/lib/utils";
+import { cn, formatPrice, generateUUID, getCurrentDateTime } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
 import { DatePickerField } from "../ui/date-picker";
@@ -46,11 +46,12 @@ interface SalesFormData {
   id?: string;
   item?: string;
   quantity: number;
-  price: number;
+  price: string;
   paymentType: SaleInsert["paymentType"];
   measurementUnit: SaleInsert["measurementUnit"];
   date: Date | string;
-  profit: number;
+  profit: string;
+  amount: string;
 }
 
 // Types for form props
@@ -95,46 +96,73 @@ const QuantityUnitField = memo(
     measurementUnit: SaleInsert["measurementUnit"];
     onQuantityChange: (value: number) => void;
     onUnitChange: (value: string) => void;
-  }) => (
-    <div className="w-full grid grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label htmlFor="quantity">Quantity</Label>
-        <CustomNumberInput
-          inputId="quantity"
-          placeholder="Quantity"
-          enableFormatting={false}
-          allowDecimal={false}
-          value={quantity + ""}
-          minValue={1}
-          onValueChange={(val) => onQuantityChange(parseInt(val, 10))}
-        />
-        {/* <Input
-          id="quantity"
-          type="number"
-          min="1"
-          value={quantity}
-          onChange={(e) =>
-            onQuantityChange(Number.parseInt(e.target.value) || 1)
-          }
-          required
-        /> */}
-      </div>
+  }) => {
+    const units = [
+      {
+        name: "Kilogram",
+        value: "kg",
+      },
+      {
+        name: "Gram",
+        value: "g",
+      },
+      {
+        name: "Liter",
+        value: "ltr",
+      },
+      { name: "Pieces", value: "pcs" },
+      {
+        name: "Packs",
+        value: "pks",
+      },
+      {
+        name: "Bags",
+        value: "bg",
+      },
+      {
+        name: "Dozens",
+        value: "dz",
+      },
+    ];
+    return (
+      <div className="w-full grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="quantity">Quantity</Label>
+          <CustomNumberInput
+            inputId="quantity"
+            placeholder="Quantity"
+            enableFormatting={false}
+            allowDecimal={false}
+            value={quantity + ""}
+            minValue={1}
+            onValueChange={(val) => onQuantityChange(parseInt(val, 10))}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="measurementUnit">Unit</Label>
-        <Select value={measurementUnit as string} onValueChange={onUnitChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Unit" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="pcs">pcs</SelectItem>
-            <SelectItem value="set">set</SelectItem>
-            <SelectItem value="kg">kg</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Label htmlFor="measurementUnit">Unit</Label>
+          <Select
+            value={measurementUnit as string}
+            onValueChange={onUnitChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Unit" />
+            </SelectTrigger>
+            <SelectContent>
+              {units.map((unit) => {
+                return (
+                  <SelectItem value={unit.value} key={unit.value}>
+                    {unit.name}
+                    {`(${unit.value})`}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-    </div>
-  )
+    );
+  }
 );
 QuantityUnitField.displayName = "QuantityUnitField";
 
@@ -145,8 +173,8 @@ const NumberField = memo(
     label,
     id,
   }: {
-    value: number;
-    onChange: (value: number) => void;
+    value: string;
+    onChange: (value: string) => void;
     label: string;
     id: string;
   }) => (
@@ -164,10 +192,17 @@ const NumberField = memo(
       <CustomNumberInput
         inputId={id}
         enableFormatting
+        placeholder="0.00"
         allowDecimal
-        value={value + ""}
+        value={value}
         minValue={0}
-        onValueChange={(val) => onChange(parseFloat(val))}
+        onValueChange={(val) =>
+          onChange(
+            formatPrice(val, undefined, {
+              formatted: false,
+            })
+          )
+        }
       />
     </div>
   )
@@ -191,7 +226,7 @@ const PaymentTypeField = memo(
         <SelectContent>
           <SelectItem value="cash">Cash</SelectItem>
           <SelectItem value="transfer">Bank Transfer</SelectItem>
-          <SelectItem value="pos">POS</SelectItem>
+          <SelectItem value="pos">POS (card)</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -236,8 +271,9 @@ export function SalesForm({
       // Set default date to today if no initial data is provided
       date: defaultDate ? new Date(defaultDate) : new Date(),
       quantity: initialData?.quantity || 1,
-      price: initialData?.price || 0,
-      profit: initialData?.profit || 0,
+      price: initialData?.price || "",
+      profit: initialData?.profit || "",
+      amount: initialData?.amount || "",
     } as SalesFormData),
   });
 
@@ -246,8 +282,9 @@ export function SalesForm({
       setFormData({
         ...initialData,
         quantity: initialData?.quantity || 1,
-        price: parseInt(initialData?.price as string) || 0,
-        profit: parseInt(initialData?.profit as string) || 0,
+        price: initialData?.price || 0,
+        profit: initialData?.profit || "",
+        amount: initialData?.amount || "",
       } as SalesFormData);
     }
   }, [initialData]);
@@ -297,10 +334,11 @@ export function SalesForm({
       setFormData({
         item: "",
         quantity: 1,
-        price: 0,
+        price: "",
         paymentType: "transfer",
         measurementUnit: "pcs",
-        profit: 0,
+        profit: "",
+        amount: "",
         date: defaultDate ? new Date(defaultDate) : new Date(),
       });
 
@@ -369,22 +407,61 @@ export function SalesForm({
         <QuantityUnitField
           quantity={formData.quantity as number}
           measurementUnit={formData.measurementUnit}
-          onQuantityChange={(value) => updateField("quantity", value)}
+          onQuantityChange={(value) => {
+            updateField("quantity", value);
+            updateField(
+              "amount",
+              formatPrice(value * parseFloat(formData.price), undefined, {
+                formatted: false,
+              })
+            );
+          }}
           onUnitChange={(value) => updateField("measurementUnit", value)}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <NumberField
-          value={formData.price as number}
+          value={formData.price}
           id="price"
           label="Price per Unit"
-          onChange={(value) => updateField("price", value)}
+          onChange={(value) => {
+            updateField("price", value);
+            updateField(
+              "amount",
+              formatPrice(
+                parseFloat(value) * parseFloat(formData.price),
+                undefined,
+                {
+                  formatted: false,
+                  addDecimals: false,
+                }
+              )
+            );
+          }}
         />
         <NumberField
-          value={formData.profit as number}
+          value={formData.profit}
           id="profit"
           label="Profit Made"
           onChange={(value) => updateField("profit", value)}
+        />
+        <NumberField
+          value={formData.profit}
+          id="amount"
+          label="Total Amount"
+          onChange={(value) => {
+            updateField("amount", value);
+            updateField(
+              "price",
+              formatPrice(
+                Math.abs(parseFloat(value) / formData.quantity),
+                undefined,
+                {
+                  formatted: false,
+                }
+              )
+            );
+          }}
         />
       </div>
 
@@ -404,10 +481,11 @@ export function SalesForm({
     setFormData({
       item: "",
       quantity: 1,
-      price: 0,
+      price: "",
       paymentType: "transfer",
       measurementUnit: "pcs",
-      profit: 0,
+      profit: "",
+      amount: "",
       date: defaultDate ? new Date(defaultDate) : new Date(),
     });
   }

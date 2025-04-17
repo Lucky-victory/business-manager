@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ExpenseForm } from "./expense-form";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -38,7 +38,7 @@ import Link from "next/link";
 import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
 
 export function ExpensesList() {
-  const { expenses, isLoading, deleteExpense } = useStore();
+  const { expenses, isLoading, deleteExpense, formatCurrency } = useStore();
   const { isFeatureEnabled } = useSubscriptionStore();
   const [editingExpense, setEditingExpense] = useState<ExpenseSelect | null>(
     null

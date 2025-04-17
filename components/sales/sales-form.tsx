@@ -136,7 +136,9 @@ const QuantityUnitField = memo(
             value={quantity + ""}
             minValue={1}
             onValueChange={(val) => {
-              onQuantityChange(parseInt(val, 10));
+              onQuantityChange(
+                isNaN(parseInt(val, 10)) ? 1 : parseInt(val, 10)
+              );
             }}
           />
         </div>
@@ -439,12 +441,6 @@ export function SalesForm({
           }}
         />
         <NumberField
-          value={formData.profit}
-          id="profit"
-          label="Profit Made"
-          onChange={(value) => updateField("profit", value)}
-        />
-        <NumberField
           value={formData.amount}
           id="amount"
           label="Total Amount"
@@ -461,6 +457,12 @@ export function SalesForm({
               )
             );
           }}
+        />
+        <NumberField
+          value={formData.profit}
+          id="profit"
+          label="Profit Made"
+          onChange={(value) => updateField("profit", value)}
         />
       </div>
 

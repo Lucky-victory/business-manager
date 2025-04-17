@@ -1,17 +1,23 @@
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  CreditCard,
+  RefreshCcw,
+  ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export const HeroSection = () => {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+    <section className="w-full py-12 md:py-24 lg:py-28 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center gap-8">
           {/* Text content - now centered */}
           <motion.div
-            className="flex flex-col items-center justify-center space-y-6 text-center max-w-3xl"
+            className="flex flex-col items-center justify-center space-y-8 text-center max-w-3xl"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -25,7 +31,7 @@ export const HeroSection = () => {
                 manage credit, and build customer relationships.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 w-full justify-center">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 w-full justify-center mb-5">
               <Button
                 asChild
                 size="lg"
@@ -40,21 +46,29 @@ export const HeroSection = () => {
                 Book a Demo
               </Button>
             </div>
-            <div className="flex items-center gap-6 text-md flex-wrap justify-center">
+            <div className="flex items-center gap-6 text-md flex-wrap justify-center my-5">
               <div className="flex items-center gap-1">
                 <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                <span>Completely free</span>
+                <span>Secure payments</span>
               </div>
               <div className="flex items-center gap-1">
-                <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                <span>No hidden fees</span>
+                <BadgeCheck className="h-5 w-5 text-emerald-600" />
+                <span>Premium support</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <RefreshCcw className="h-5 w-5 text-emerald-600" />
+                <span>Cancel anytime</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CreditCard className="h-5 w-5 text-emerald-600" />
+                <span>Money-back guarantee</span>
               </div>
             </div>
           </motion.div>
 
           {/* Dashboard image - now below text */}
           <motion.div
-            className="w-full max-w-4xl mx-auto"
+            className="w-full max-w-4xl mx-auto mt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}

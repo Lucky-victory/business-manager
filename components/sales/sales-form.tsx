@@ -135,7 +135,9 @@ const QuantityUnitField = memo(
             allowDecimal={false}
             value={quantity + ""}
             minValue={1}
-            onValueChange={(val) => onQuantityChange(parseInt(val, 10))}
+            onValueChange={(val) => {
+              onQuantityChange(parseInt(val, 10));
+            }}
           />
         </div>
 
@@ -196,13 +198,7 @@ const NumberField = memo(
         allowDecimal
         value={value}
         minValue={0}
-        onValueChange={(val) =>
-          onChange(
-            formatPrice(val, undefined, {
-              formatted: false,
-            })
-          )
-        }
+        onValueChange={(val) => onChange(val)}
       />
     </div>
   )
@@ -282,7 +278,7 @@ export function SalesForm({
       setFormData({
         ...initialData,
         quantity: initialData?.quantity || 1,
-        price: initialData?.price || 0,
+        price: initialData?.price || "",
         profit: initialData?.profit || "",
         amount: initialData?.amount || "",
       } as SalesFormData);
@@ -301,18 +297,16 @@ export function SalesForm({
     try {
       setIsAdding(true);
 
-      const amount =
-        formData?.quantity &&
-        formData.quantity * parseInt(formData.price as string);
+      const amount = formData.amount;
       const currentDate = getCurrentDateTime(formData.date as Date);
 
       if (initialData) {
         await editSale(formData.id as string, {
           ...formData,
           date: currentDate,
-          price: formData.price + "",
-          profit: formData.profit + "",
-          amount: amount + "",
+          price: formData.price,
+          profit: formData.profit,
+          amount: amount,
           userId: auth?.user?.id as string,
         });
       } else {
@@ -320,9 +314,9 @@ export function SalesForm({
           id: generateUUID(),
           item: formData.item as string,
           quantity: formData.quantity as number,
-          price: formData.price + "",
-          profit: formData.profit + "",
-          amount: amount + "",
+          price: formData.price,
+          profit: formData.profit,
+          amount: amount,
           paymentType: formData.paymentType as SaleInsert["paymentType"],
           date: currentDate,
           measurementUnit: formData.measurementUnit,
@@ -411,9 +405,14 @@ export function SalesForm({
             updateField("quantity", value);
             updateField(
               "amount",
-              formatPrice(value * parseFloat(formData.price), undefined, {
-                formatted: false,
-              })
+              formatPrice(
+                value * parseFloat(formData.price || "0"),
+                undefined,
+                {
+                  formatted: false,
+                  addDecimals: false,
+                }
+              )
             );
           }}
           onUnitChange={(value) => updateField("measurementUnit", value)}
@@ -429,7 +428,7 @@ export function SalesForm({
             updateField(
               "amount",
               formatPrice(
-                parseFloat(value) * parseFloat(formData.price),
+                Math.abs(parseFloat(value) * formData.quantity),
                 undefined,
                 {
                   formatted: false,
@@ -446,7 +445,7 @@ export function SalesForm({
           onChange={(value) => updateField("profit", value)}
         />
         <NumberField
-          value={formData.profit}
+          value={formData.amount}
           id="amount"
           label="Total Amount"
           onChange={(value) => {

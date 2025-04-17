@@ -219,10 +219,8 @@ export default function CustomNumberInput({
           className={cn("font-medium", className)}
           placeholder={placeholder}
           min={minValue}
-          onFocus={(e) => {
+          onFocus={() => {
             isMobile && setIsKeyboardVisible(true);
-
-            e.target.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
         />
         {!isMobile && (

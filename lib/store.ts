@@ -31,7 +31,7 @@ type State = {
   searchResults: SearchResult[];
   user: UserSelect;
   formatCurrency: (amount: number | string) => string;
-  currency: string;
+  // currency: string;
   isLoading: {
     sales: boolean;
     credits: boolean;
@@ -103,7 +103,7 @@ export const useStore = create<State>()(
       credits: [],
       debtors: [],
       expenses: [],
-      currency: "",
+      // currency: "",
       searchResults: [],
       user: {} as UserSelect,
       isLoading: {
@@ -117,9 +117,9 @@ export const useStore = create<State>()(
       error: null,
       formatCurrency: (amount: number | string) => {
         const userCurrencySymbol = get().user?.currencySymbol || "₦";
-        set(() => ({
-          currency: userCurrencySymbol,
-        }));
+        // set(() => ({
+        //   currency: userCurrencySymbol,
+        // }));
         return formatPrice(amount, userCurrencySymbol, { addPrefix: true });
       },
       fetchUser: async () => {
@@ -861,7 +861,7 @@ export const useStore = create<State>()(
           debtors: [],
           expenses: [],
           searchResults: [],
-          currency: "",
+          // currency: "",
           error: null,
           isLoading: {
             sales: false,

@@ -103,15 +103,6 @@ export function NumericKeyboard({
           Enter
         </Button>
       </div>
-
-      <Button
-        type="button"
-        variant="secondary"
-        className="w-full h-10 mt-2"
-        onClick={onClose}
-      >
-        Close
-      </Button>
     </Card>
   );
 }

@@ -27,6 +27,7 @@ import { authClient, useAuth } from "@/lib/auth-client";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import { greetUser } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Popover,
   PopoverContent,

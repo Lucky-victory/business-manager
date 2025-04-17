@@ -344,6 +344,7 @@ export default function CustomNumberInput({
           id={inputId}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
+          required
           onClick={handleInputClick}
           className={cn("font-medium", className)}
           placeholder={placeholder}

@@ -182,15 +182,9 @@ export default function SalesDetailPage({
                         {sale.quantity} {sale.measurementUnit || "--"}
                       </TableCell>
                       <TableCell>{sale.item}</TableCell>
-                      <TableCell>
-                        {formatCurrency(parseInt(sale.price, 10))}
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(parseInt(sale.amount, 10))}
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(parseInt(sale.profit, 10))}
-                      </TableCell>
+                      <TableCell>{formatCurrency(sale.price)}</TableCell>
+                      <TableCell>{formatCurrency(sale.amount)}</TableCell>
+                      <TableCell>{formatCurrency(sale.profit)}</TableCell>
                       <TableCell>
                         {format(new Date(sale.date), "h:mm a")}
                       </TableCell>
@@ -258,15 +252,15 @@ export default function SalesDetailPage({
                       </div>
                       <div>
                         <p className="text-muted-foreground">Price:</p>
-                        <p>{formatCurrency(parseInt(sale.price, 10))}</p>
+                        <p>{formatCurrency(sale.price)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Total:</p>
-                        <p>{formatCurrency(parseInt(sale.amount, 10))}</p>
+                        <p>{formatCurrency(sale.amount)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Profit:</p>
-                        <p>{formatCurrency(parseInt(sale.profit, 10))}</p>
+                        <p>{formatCurrency(sale.profit)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Time:</p>

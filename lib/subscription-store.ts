@@ -71,7 +71,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           set({ isLoading: true, error: null });
 
           // Fetch subscription data from API
-          const response = await fetch("/api/subscription");
+          const response = await fetch("/api/subscriptions");
 
           if (!response.ok) {
             throw new Error("Failed to fetch subscription data");
@@ -82,7 +82,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           // Find the free plan ID
           const freePlan = data.plans.find(
             (plan: SubscriptionPlanSelect) =>
-              plan.name.toLowerCase() === "premium"
+              plan.name.toLowerCase() === "basic"
           );
           const sortedPlans = (data?.plans as SubscriptionPlanSelect[]).sort(
             (a, b) => (a.name.toLowerCase() === "free" ? -1 : 1)

@@ -16,7 +16,8 @@
 
   .container {
     width: 100% !important;
-    max-width: 100% !important;
+    min-width: 1500px !important;
+    max-width: 2000px !important;
     padding: 0 !important;
     margin: 0 !important;
   }

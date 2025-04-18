@@ -3,7 +3,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useState } from "react";
+import { Building, Mail, Phone, User, Loader2, CreditCard } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -12,18 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
-import { UserSelect } from "@/lib/store";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Label } from "../ui/label";
+} from "@/components/ui/select";
+import { UserSelect } from "@/lib/store";
 
 // Define the profile schema
 const profileSchema = z.object({
@@ -51,23 +62,21 @@ type ProfileFormProps = {
   isSubmitting: boolean;
   onSubmit: (data: ProfileData) => Promise<void>;
 };
+
 const currencies = [
   { name: "Nigerian Naira", code: "NGN", symbol: "₦" },
   { name: "South African Rand", code: "ZAR", symbol: "R" },
   { name: "Kenyan Shilling", code: "KES", symbol: "KSh" },
-  { name: "Egyptian Pound", code: "EGP", symbol: "E£" },
-  { name: "Moroccan Dirham", code: "MAD", symbol: "DH" },
+  { name: "United States Dollar", code: "USD", symbol: "$" },
   { name: "Ghanaian Cedi", code: "GHS", symbol: "GH₵" },
-  { name: "Ethiopian Birr", code: "ETB", symbol: "Br" },
-  { name: "Tunisian Dinar", code: "TND", symbol: "DT" },
   { name: "Algerian Dinar", code: "DZD", symbol: "DA" },
   { name: "Tanzanian Shilling", code: "TZS", symbol: "TSh" },
   { name: "CFA Franc BCEAO", code: "XOF", symbol: "CFA" },
-  { name: "CFA Franc BEAC", code: "XAF", symbol: "FCFA" },
   { name: "Rwandan Franc", code: "RWF", symbol: "FRw" },
   { name: "Ugandan Shilling", code: "UGX", symbol: "USh" },
   { name: "Zambian Kwacha", code: "ZMW", symbol: "ZK" },
 ];
+
 export function ProfileForm({
   initialData,
   isSubmitting,
@@ -95,226 +104,304 @@ export function ProfileForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="mt-6 space-y-4 max-w-xl"
-      >
-        <div className="space-y-4">
-          {/* Personal Information Section */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-            <div className="space-y-4">
-              {/* Name Field */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your full name"
-                        {...field}
-                        disabled={isSubmitting}
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className="flex flex-col gap-4">
+      <h1 className="text-3xl font-bold">Settings</h1>
 
-              {/* Username Field */}
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your username"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <Form {...form}>
+        <Tabs defaultValue="profile" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="company">Company</TabsTrigger>
+            <TabsTrigger value="currency">Currency</TabsTrigger>
+          </TabsList>
 
-              {/* Display Username Field */}
-              <FormField
-                control={form.control}
-                name="displayUsername"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your display name"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+                <CardDescription>
+                  Manage your personal information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Enter your full name"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                            required
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Profile Image URL Field */}
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Image URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your profile image URL"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Enter your username"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {/* Company Information Section */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Company Information</h2>
-            <div className="space-y-4">
-              {/* Company Name Field */}
-              <FormField
-                control={form.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your company name"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* <FormField
+                  control={form.control}
+                  name="displayUsername"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Display Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Enter your display name"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
 
-              {/* Company Address Field */}
-              <FormField
-                control={form.control}
-                name="companyAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Address</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter your company address"
-                        {...field}
-                        disabled={isSubmitting}
-                        rows={2}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Profile Image URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your profile image URL"
+                          {...field}
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button
+                  type="button"
+                  onClick={form.handleSubmit(handleSubmit)}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
 
-              {/* Company Phone Field */}
-              <FormField
-                control={form.control}
-                name="companyPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Phone</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your company phone"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <TabsContent value="company">
+            <Card>
+              <CardHeader>
+                <CardTitle>Company Information</CardTitle>
+                <CardDescription>Manage your company details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Company Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Enter your company name"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Company Email Field */}
-              <FormField
-                control={form.control}
-                name="companyEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Enter your company email"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <div className="">
-            <h2 className="text-lg font-semibold mb-4">Others </h2>
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
+                <FormField
+                  control={form.control}
+                  name="companyAddress"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Company Address</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter your company address"
+                          {...field}
+                          disabled={isSubmitting}
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Select
-                onValueChange={(value) => {
-                  form.setValue("currency", value);
-                }}
-                defaultValue={form.getValues("currency")}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((currency) => (
-                    <SelectItem
-                      key={currency.code}
-                      value={`${currency.symbol}_${currency.code}_${currency.name}`}
-                    >
-                      {currency.name} ({currency.symbol})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+                <FormField
+                  control={form.control}
+                  name="companyPhone"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Company Phone</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Enter your company phone"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        {/* Submit Button */}
-        <div className="mt-6">
-          <Button
-            type="submit"
-            className="max-sm:w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
-        </div>
-      </form>
-    </Form>
+                <FormField
+                  control={form.control}
+                  name="companyEmail"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Company Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="email"
+                            placeholder="Enter your company email"
+                            {...field}
+                            disabled={isSubmitting}
+                            className="pl-9"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button
+                  type="button"
+                  onClick={form.handleSubmit(handleSubmit)}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="currency">
+            <Card>
+              <CardHeader>
+                <CardTitle>Currency Settings</CardTitle>
+                <CardDescription>Set your preferred currency</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Currency</FormLabel>
+                      <FormControl>
+                        {/* <div className="relative">
+                          <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /> */}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isSubmitting}
+                        >
+                          <SelectTrigger className="w-full pl-9">
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies.map((currency) => (
+                              <SelectItem
+                                key={currency.code}
+                                value={`${currency.symbol}_${currency.code}_${currency.name}`}
+                              >
+                                {currency.name} ({currency.symbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {/* </div> */}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button
+                  type="button"
+                  onClick={form.handleSubmit(handleSubmit)}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </Form>
+    </div>
   );
 }

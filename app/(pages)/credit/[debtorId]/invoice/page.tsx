@@ -72,7 +72,7 @@ export default function InvoicePage({
   const debtor = debtors.find(
     (debtor) => debtor.id === debtorCredits?.[0]?.debtorId
   );
-  const debtorName = debtor?.name || "Unknown Debtor";
+  const debtorName = debtor?.name || "Unknown";
   const payments = debtorCredits.filter((credit) => credit.type === "payment");
   const totalPayments = payments.reduce(
     (sum, payment) => sum + +payment.amount,
@@ -81,7 +81,7 @@ export default function InvoicePage({
 
   // Get unpaid purchases
   const unpaidPurchases = debtorCredits.filter(
-    (credit) => credit.type === "purchase" && !credit.isPaid
+    (credit) => credit.type === "purchase"
   );
 
   // Calculate total amount of unpaid purchases

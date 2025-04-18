@@ -40,6 +40,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
 import { DatePickerField } from "../ui/date-picker";
 import CustomNumberInput from "../ui/custom-number-input";
+import { QuantityUnitField } from "../ui/quantity-unit-field";
+import { SheetFooter } from "../ui/sheet";
 
 // Types for form data
 interface SalesFormData {
@@ -84,91 +86,6 @@ const ItemNameField = memo(
   )
 );
 ItemNameField.displayName = "ItemNameField";
-
-const QuantityUnitField = memo(
-  ({
-    quantity,
-    measurementUnit,
-    onQuantityChange,
-    onUnitChange,
-  }: {
-    quantity: number;
-    measurementUnit: SaleInsert["measurementUnit"];
-    onQuantityChange: (value: number) => void;
-    onUnitChange: (value: string) => void;
-  }) => {
-    const units = [
-      {
-        name: "Kilogram",
-        value: "kg",
-      },
-      {
-        name: "Gram",
-        value: "g",
-      },
-      {
-        name: "Liter",
-        value: "ltr",
-      },
-      { name: "Pieces", value: "pcs" },
-      {
-        name: "Packs",
-        value: "pks",
-      },
-      {
-        name: "Bags",
-        value: "bg",
-      },
-      {
-        name: "Dozens",
-        value: "dz",
-      },
-    ];
-    return (
-      <div className="w-full grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="quantity">Quantity</Label>
-          <CustomNumberInput
-            inputId="quantity"
-            placeholder="Quantity"
-            enableFormatting={false}
-            allowDecimal={false}
-            value={quantity + ""}
-            minValue={1}
-            onValueChange={(val) => {
-              onQuantityChange(
-                isNaN(parseInt(val, 10)) ? 1 : parseInt(val, 10)
-              );
-            }}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="measurementUnit">Unit</Label>
-          <Select
-            value={measurementUnit as string}
-            onValueChange={onUnitChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Unit" />
-            </SelectTrigger>
-            <SelectContent>
-              {units.map((unit) => {
-                return (
-                  <SelectItem value={unit.value} key={unit.value}>
-                    {unit.name}
-                    {`(${unit.value})`}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    );
-  }
-);
-QuantityUnitField.displayName = "QuantityUnitField";
 
 const NumberField = memo(
   ({
@@ -389,7 +306,7 @@ export function SalesForm({
   const FormContent = (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 py-4"
+      className="space-y-4 py-4 pb-10"
       id="sales-add-form"
     >
       <ErrorAlert message={error} />
@@ -471,10 +388,17 @@ export function SalesForm({
         onChange={(value) => updateField("paymentType", value)}
       />
 
-      <DatePickerField
-        date={formData.date!}
-        onDateChange={(date) => updateField("date", date)}
-      />
+      <Label className="flex flex-col gap-2">
+        <span>Date</span>
+        <DatePickerField
+          date={formData.date!}
+          onDateChange={(date) => updateField("date", date)}
+        />
+      </Label>
+
+      <SheetFooter>
+        <AddButton isAdding={isAdding} />
+      </SheetFooter>
     </form>
   );
   function handleOpenChange(open: boolean) {
@@ -498,7 +422,6 @@ export function SalesForm({
         title="Add New Sale"
         open={open}
         onOpenChange={handleOpenChange}
-        footer={<AddButton isAdding={isAdding} />}
       >
         {FormContent}
       </DrawerOrModal>

@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
-import { memo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "./calendar";
 import { format } from "date-fns";
@@ -15,13 +15,15 @@ export const DatePickerField = memo(
     date,
     onDateChange,
     minDate,
+    id,
   }: {
     date: Date | string;
+    id?: string;
     onDateChange: (date: Date) => void;
     minDate?: Date | number;
   }) => {
     const popoverTriggerBtnRef = useRef<HTMLButtonElement | null>(null);
-
+    const _id = useMemo(() => id || generateUUID(), [id]);
     return (
       <Popover modal={true}>
         <PopoverTrigger asChild>
@@ -41,7 +43,7 @@ export const DatePickerField = memo(
           <Calendar
             mode="single"
             required
-            id="date"
+            id={_id}
             fromDate={minDate ? new Date(minDate) : undefined}
             selected={new Date(date)}
             onSelect={(selectedDate) => {

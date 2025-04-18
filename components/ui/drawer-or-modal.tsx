@@ -38,7 +38,7 @@ export const DrawerOrModal = ({
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} modal={true}>
-          <DrawerContent>
+          <DrawerContent className="pb-16">
             <DrawerHeader>
               {title && <DrawerTitle>{title}</DrawerTitle>}
               {description && (

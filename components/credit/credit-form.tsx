@@ -43,42 +43,44 @@ export function CreditForm({
       title={"Manage Credit"}
       description={" Add a new purchase on credit or record a payment."}
     >
-      <Tabs
-        value={tabQueryState}
-        onValueChange={(value) =>
-          setTabQueryState(value as "purchase" | "payment")
-        }
-        className="mt-6"
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="purchase">Purchase</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="add_debtor">Add Debtor</TabsTrigger>
-        </TabsList>
+      <div className="pb-10">
+        <Tabs
+          value={tabQueryState}
+          onValueChange={(value) =>
+            setTabQueryState(value as "purchase" | "payment")
+          }
+          className="mt-6"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="purchase">Purchase</TabsTrigger>
+            <TabsTrigger value="payment">Payment</TabsTrigger>
+            <TabsTrigger value="add_debtor">Add Debtor</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="purchase">
-          <PurchaseForm
-            defaultDebtorId={defaultDebtorId}
-            defaultDebtorName={defaultDebtorName}
-            onSuccess={() => onOpenChange(false)}
-          />
-        </TabsContent>
+          <TabsContent value="purchase">
+            <PurchaseForm
+              defaultDebtorId={defaultDebtorId}
+              defaultDebtorName={defaultDebtorName}
+              onSuccess={() => onOpenChange(false)}
+            />
+          </TabsContent>
 
-        <TabsContent value="payment">
-          <PaymentForm
-            defaultDebtorId={defaultDebtorId}
-            defaultDebtorName={defaultDebtorName}
-            onSuccess={() => onOpenChange(false)}
-          />
-        </TabsContent>
-        <TabsContent value="add_debtor">
-          <AddDebtorForm
-            onSuccess={() => {
-              setTabQueryState("purchase");
-            }}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="payment">
+            <PaymentForm
+              defaultDebtorId={defaultDebtorId}
+              defaultDebtorName={defaultDebtorName}
+              onSuccess={() => onOpenChange(false)}
+            />
+          </TabsContent>
+          <TabsContent value="add_debtor">
+            <AddDebtorForm
+              onSuccess={() => {
+                setTabQueryState("purchase");
+              }}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </DrawerOrModal>
   );
 }

@@ -23,6 +23,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import CustomNumberInput from "../ui/custom-number-input";
+import { Textarea } from "../ui/textarea";
+import { DatePickerField } from "../ui/date-picker";
+import { SheetFooter } from "../ui/sheet";
 
 const expenseFormSchema = z.object({
   item: z.string().min(1, "Item is required"),
@@ -108,7 +112,7 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-10">
         <FormField
           control={form.control}
           name="item"
@@ -122,49 +126,52 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="paymentType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Payment Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Amount</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment type" />
-                  </SelectTrigger>
+                  <CustomNumberInput
+                    value={field.value + ""}
+                    placeholder="0.00"
+                    onValueChange={(value) => field.onChange(value)}
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="card">Card</SelectItem>
-                  <SelectItem value="transfer">Transfer</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="paymentType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select payment type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="card">Card</SelectItem>
+                    <SelectItem value="transfer">Transfer</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -201,7 +208,12 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Additional details" {...field} />
+                <Textarea
+                  rows={3}
+                  className="max-h-[100px]"
+                  placeholder="Additional details"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -212,17 +224,20 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
           control={form.control}
           name="date"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <DatePickerField
+                  date={new Date(field.value)}
+                  onDateChange={(date) => field.onChange(date)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="flex justify-end">
+        <SheetFooter>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
@@ -235,7 +250,7 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
               "Add Expense"
             )}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Form>
   );

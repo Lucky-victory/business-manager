@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type React from "react";
-import { useStore } from "@/lib/store";
+import { SaleInsert, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetFooter } from "@/components/ui/sheet";
@@ -9,6 +9,8 @@ import { authClient, useAuth } from "@/lib/auth-client";
 import { DebtorSelector } from "./debtor-selector";
 import { DatePickerField } from "../ui/date-picker";
 import { getCurrentDateTime } from "@/lib/utils";
+import { QuantityUnitField } from "../ui/quantity-unit-field";
+import CustomNumberInput from "../ui/custom-number-input";
 
 type PurchaseFormProps = {
   defaultDebtorId?: string;
@@ -30,6 +32,7 @@ export function PurchaseForm({
     item: "",
     quantity: 1,
     price: 0,
+    measurementUnit: "pcs" as SaleInsert["measurementUnit"],
     date: new Date().toISOString().split("T")[0],
   });
 
@@ -46,6 +49,8 @@ export function PurchaseForm({
       quantity: purchaseData.quantity,
       price: purchaseData.price + "",
       amount: amount + "",
+      measurementUnit:
+        purchaseData.measurementUnit as SaleInsert["measurementUnit"],
       date: new Date(purchaseData.date).toISOString() as unknown as Date,
       userId: auth?.user?.id as string,
     });
@@ -57,6 +62,7 @@ export function PurchaseForm({
       item: "",
       quantity: 1,
       price: 0,
+      measurementUnit: "pcs",
       date: new Date().toISOString().split("T")[0],
     });
     onSuccess();
@@ -88,35 +94,38 @@ export function PurchaseForm({
         />
       </FormField>
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormField id="quantity" label="Quantity" required>
-          <Input
-            type="number"
-            min="1"
-            value={purchaseData.quantity}
-            onChange={(e) =>
-              setPurchaseData({
-                ...purchaseData,
-                quantity: Number.parseInt(e.target.value) || 1,
-              })
-            }
-            required
-          />
-        </FormField>
+      <div className="flex items-center gap-4">
+        <QuantityUnitField
+          quantity={purchaseData.quantity}
+          measurementUnit={purchaseData.measurementUnit}
+          onQuantityChange={(value) => {
+            setPurchaseData({
+              ...purchaseData,
+              quantity: value || 1,
+            });
+          }}
+          onUnitChange={(value) =>
+            setPurchaseData({
+              ...purchaseData,
+              measurementUnit: value as SaleInsert["measurementUnit"],
+            })
+          }
+        />
 
         <FormField id="price" label="Price per Unit" required>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={purchaseData.price}
-            onChange={(e) =>
+          <CustomNumberInput
+            inputId="price"
+            placeholder="0.00"
+            enableFormatting
+            allowDecimal
+            value={purchaseData.price + ""}
+            minValue={0}
+            onValueChange={(val) => {
               setPurchaseData({
                 ...purchaseData,
-                price: Number.parseFloat(e.target.value) || 0,
-              })
-            }
-            required
+                price: Number.parseFloat(val) || 0,
+              });
+            }}
           />
         </FormField>
       </div>

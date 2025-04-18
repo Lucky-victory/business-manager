@@ -10,6 +10,7 @@ import { DebtorSelector } from "./debtor-selector";
 import { PaymentTypeSelector } from "./payment-type-selector";
 import { DatePickerField } from "../ui/date-picker";
 import { getCurrentDateTime } from "@/lib/utils";
+import CustomNumberInput from "../ui/custom-number-input";
 
 type PaymentFormProps = {
   defaultDebtorId?: string;
@@ -29,7 +30,7 @@ export function PaymentForm({
     debtorId: defaultDebtorId,
     debtorName: defaultDebtorName,
     amount: 0,
-    paymentType: "cash",
+    paymentType: "cash" as any,
     date: new Date().toISOString().split("T")[0],
   });
 
@@ -81,18 +82,19 @@ export function PaymentForm({
       </FormField>
 
       <FormField id="paymentAmount" label="Payment Amount" required>
-        <Input
-          type="number"
-          min="0"
-          step="5"
-          value={paymentData.amount}
-          onChange={(e) =>
+        <CustomNumberInput
+          inputId="paymentAmount"
+          placeholder="0.00"
+          enableFormatting
+          allowDecimal
+          value={paymentData.amount + ""}
+          minValue={0}
+          onValueChange={(val) => {
             setPaymentData({
               ...paymentData,
-              amount: Number.parseFloat(e.target.value) || 0,
-            })
-          }
-          required
+              amount: isNaN(parseFloat(val)) ? 0.0 : parseFloat(val),
+            });
+          }}
         />
       </FormField>
 

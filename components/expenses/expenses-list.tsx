@@ -36,6 +36,7 @@ import { EmptyState } from "../empty-state";
 import { Loader } from "@/components/ui/loader";
 import Link from "next/link";
 import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
+import { DrawerOrModal } from "../ui/drawer-or-modal";
 
 export function ExpensesList() {
   const { expenses, isLoading, deleteExpense, formatCurrency } = useStore();
@@ -62,20 +63,20 @@ export function ExpensesList() {
       title="No expenses yet"
       description="Start tracking your expenses by adding your first expense record."
       action={
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Expense
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Expense</DialogTitle>
-            </DialogHeader>
+        <>
+          <DrawerOrModal
+            title="Add Expense"
+            description="Add your first expense record to get started."
+            open={isAddDialogOpen}
+            onOpenChange={setIsAddDialogOpen}
+          >
             <ExpenseForm onSuccess={() => setIsAddDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+          </DrawerOrModal>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Expense
+          </Button>
+        </>
       }
     />
   );
@@ -114,25 +115,18 @@ export function ExpensesList() {
                       )}
                     </Link>
                   </Button>
-                  <Dialog
+                  <Button onClick={() => setIsAddDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Expense
+                  </Button>
+                  <DrawerOrModal
                     open={isAddDialogOpen}
+                    title="Add New Expense"
+                    description="Add a new expense record."
                     onOpenChange={setIsAddDialogOpen}
                   >
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Expense
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Expense</DialogTitle>
-                      </DialogHeader>
-                      <ExpenseForm
-                        onSuccess={() => setIsAddDialogOpen(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
+                    <ExpenseForm onSuccess={() => setIsAddDialogOpen(false)} />
+                  </DrawerOrModal>
                 </div>
               </div>
 
@@ -201,22 +195,19 @@ export function ExpensesList() {
                 </Table>
               </div>
 
-              <Dialog
+              <DrawerOrModal
                 open={isEditDialogOpen}
                 onOpenChange={setIsEditDialogOpen}
+                title="Edit Expense"
+                description="Edit an expense record."
               >
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Expense</DialogTitle>
-                  </DialogHeader>
-                  {editingExpense && (
-                    <ExpenseForm
-                      expense={editingExpense}
-                      onSuccess={() => setIsEditDialogOpen(false)}
-                    />
-                  )}
-                </DialogContent>
-              </Dialog>
+                {editingExpense && (
+                  <ExpenseForm
+                    expense={editingExpense}
+                    onSuccess={() => setIsEditDialogOpen(false)}
+                  />
+                )}
+              </DrawerOrModal>
             </div>
           )}
         </>

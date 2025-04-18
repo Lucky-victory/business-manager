@@ -313,7 +313,16 @@ export default function CustomNumberInput({
       setCursorPosition(inputRef.current.selectionStart || 0);
     }
   };
-
+  const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>): void => {
+    if (
+      keyboardRef.current &&
+      !keyboardRef.current.contains(event.target as Node) &&
+      inputRef.current &&
+      !inputRef.current.contains(event.target as Node)
+    ) {
+      setIsKeyboardVisible(false);
+    }
+  };
   // Close keyboard when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -334,7 +343,7 @@ export default function CustomNumberInput({
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto space-y-4">
+    <div className="flex flex-col items-center w-full  space-y-4">
       <div className="w-full relative">
         <Input
           ref={inputRef}
@@ -344,6 +353,7 @@ export default function CustomNumberInput({
           id={inputId}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
           required
           onClick={handleInputClick}
           className={cn("font-medium", className)}

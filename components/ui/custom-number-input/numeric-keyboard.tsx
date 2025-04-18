@@ -54,7 +54,10 @@ export function NumericKeyboard({
 
   return (
     <Card
-      className={cn("p-2 w-full shadow-lg animate-in fade-in", className)}
+      className={cn(
+        "p-2 max-md:pt-0  w-full shadow-lg animate-in fade-in",
+        className
+      )}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
@@ -83,12 +86,14 @@ export function NumericKeyboard({
           variant="destructive"
           className="h-10"
           onClick={onClear}
+          tabIndex={-1}
         >
           Clear
         </Button>
         <Button
           type="button"
           variant="outline"
+          tabIndex={-1}
           className="h-10 flex items-center justify-center"
           onClick={onBackspace}
         >
@@ -96,6 +101,7 @@ export function NumericKeyboard({
         </Button>
         <Button
           type="button"
+          tabIndex={-1}
           className="h-10 flex items-center justify-center"
           onClick={onSubmit}
         >
@@ -122,6 +128,7 @@ function KeypadButton({
     <Button
       type="button"
       variant="outline"
+      tabIndex={-1}
       className="h-10 text-2xl font-semibold hover:bg-gray-100"
       onClick={onClick}
       disabled={disabled}

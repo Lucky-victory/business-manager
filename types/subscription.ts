@@ -95,7 +95,7 @@ export const COUNTRY_PRICING: Record<string, CountryPricing> = {
     premiumMonthly: 1500,
     premiumYearly: 15000,
   },
-  ZA: {
+  ZAR: {
     currencyCode: "ZAR",
     currencySymbol: "R",
     basicMonthly: 75,

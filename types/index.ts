@@ -1,15 +1,16 @@
-export interface Expense {
-  id: string;
-  item: string;
-  amount: number;
-  paymentType: string;
-  category?: string;
-  notes?: string;
-  date: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { plans } from "@/lib/db/schema";
 
-export type ExpenseInsert = Omit<Expense, "id" | "createdAt" | "updatedAt">;
-export type ExpenseUpdate = Partial<ExpenseInsert>;
+export const PAYMENT_TYPES = ["cash", "card", "transfer", "other"] as const;
+export const MEASUREMENT_UNITS = [
+  "set",
+  "kg",
+  "pcs",
+  "dz",
+  "bg",
+  "pks",
+  "ltr",
+  "g",
+] as const;
+
+export type PlanSelect = typeof plans.$inferSelect;
+export type PlanInsert = typeof plans.$inferInsert;

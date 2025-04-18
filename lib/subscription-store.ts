@@ -81,7 +81,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
           // Find the free plan ID
           const freePlan = data.plans.find(
-            (plan: SubscriptionPlanSelect) => plan.name.toLowerCase() === "free"
+            (plan: SubscriptionPlanSelect) =>
+              plan.name.toLowerCase() === "premium"
           );
           const sortedPlans = (data?.plans as SubscriptionPlanSelect[]).sort(
             (a, b) => (a.name.toLowerCase() === "free" ? -1 : 1)

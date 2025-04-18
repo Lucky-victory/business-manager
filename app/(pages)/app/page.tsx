@@ -14,6 +14,11 @@ import {
   BarChart3,
   Plus,
   Sparkles,
+  HomeIcon,
+  CreditCard,
+  DollarSign,
+  Menu,
+  X,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,11 +48,15 @@ import {
 } from "@/components/ui/dialog";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import { PlansModal } from "@/components/subscription/plans-modal";
+import { cn } from "@/lib/utils";
+import { PlanFeatures } from "@/types/subscription";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
   const {
     searchResults,
     searchSalesAndCredit,
@@ -77,6 +86,13 @@ export default function Home() {
     fetchUser();
     fetchExpenses();
   }, [fetchUser, fetchExpenses]);
+
+  useEffect(() => {
+    // Close sidebar by default on mobile
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,166 +124,295 @@ export default function Home() {
     ).toUpperCase();
   };
 
+  const navItems = [
+    {
+      id: "sales" as keyof PlanFeatures,
+      label: "Sales",
+      icon: <BarChart3 className="h-5 w-5" />,
+      enabled: true,
+    },
+    {
+      id: "credit" as keyof PlanFeatures,
+      label: "Credit",
+      icon: <CreditCard className="h-5 w-5" />,
+      enabled: isFeatureEnabled("credit"),
+    },
+    {
+      id: "expenses" as keyof PlanFeatures,
+      label: "Expenses",
+      icon: <DollarSign className="h-5 w-5" />,
+      enabled: isFeatureEnabled("expenses"),
+    },
+  ];
+
   return (
-    <main className="container mx-auto px-4 py-6">
-      <header className="mb-8 flex items-center justify-between bg-white dark:bg-gray-950 py-3 px-1 rounded-lg shadow-sm">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          {greetUser(auth?.user?.name?.split(" ")[0] || "there")}
-        </h1>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 h-10 px-3"
-            >
-              <Avatar className="h-8 w-8 border-2 border-emerald-100">
-                <AvatarImage src={auth?.user?.image || ""} alt="User Avatar" />
-
-                <AvatarFallback className="bg-emerald-600 text-white">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden md:inline">My Account</span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56 p-2" align="end">
-            <div className="space-y-1">
-              <div className="px-2 py-1.5 text-sm font-medium">
-                {auth?.user?.name || "User"}
-              </div>
-              <div className="px-2 py-1 text-xs text-muted-foreground">
-                {auth?.user?.email || ""}
-              </div>
-              <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-left px-2 py-1.5"
-                onClick={() => router.push("/profile")}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Profile Settings
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-left px-2 py-1.5"
-                onClick={() => router.push("/plans")}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Subscription Plans
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-left px-2 py-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </header>
-
-      <form onSubmit={handleSearch} className="relative mb-8">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search sales, credit, or expenses..."
-          className="pl-10 h-11 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </form>
-
-      <div className="bg-white dark:bg-gray-950 rounded-lg p-4 px-0 shadow-sm">
-        {tabQueryState === "search" ? (
-          <SearchResults
-            results={searchResults}
-            isSearching={isSearching}
-            onClear={() => {
-              setIsSearching(false);
-              setSearchQuery("");
-              setTabQueryState("sales");
-            }}
-          />
-        ) : (
-          <Tabs
-            value={tabQueryState}
-            onValueChange={(value) =>
-              setTabQueryState(value as "sales" | "credit" | "expenses")
-            }
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="sales">Sales</TabsTrigger>
-              {/* {!isFeatureEnabled("credit") ? (
-                <Button
-                  onClick={() => {
-                    // if (!isFeatureEnabled("credit")) {
-                    setFeatureClicked("credit");
-                    setShowPlansModal(true);
-                    // }
-                  }}
-                >
-                  Credit
-                </Button>
-              ) : (
-                <TabsTrigger value="credit">
-                  Credit
-                  {!isFeatureEnabled("credit") && (
-                    <ProFeatureBadge className="ml-2" />
-                  )}
-                </TabsTrigger>
-              )} */}
-              <TabsTrigger
-                value="credit"
-                // disabled={!isFeatureEnabled("credit")}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!isFeatureEnabled("credit")) {
-                    setFeatureClicked("credit");
-                    setShowPlansModal(true);
-                  }
-                }}
-              >
-                Credit
-                {!isFeatureEnabled("credit") && (
-                  <ProFeatureBadge className="ml-2" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="expenses"
-                disabled={!isFeatureEnabled("expenses")}
-                onClick={() => {
-                  if (!isFeatureEnabled("expenses")) {
-                    setFeatureClicked("expenses");
-                    setShowPlansModal(true);
-                  }
-                }}
-              >
-                Expenses
-                {!isFeatureEnabled("expenses") && (
-                  <ProFeatureBadge className="ml-2" />
-                )}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="sales" className="pt-2">
-              <SalesList />
-            </TabsContent>
-            <TabsContent value="credit" className="pt-2">
-              <CreditList />
-            </TabsContent>
-            <TabsContent value="expenses" className="pt-2">
-              <ExpensesList />
-            </TabsContent>
-          </Tabs>
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          "bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 h-full z-30 transition-all duration-300",
+          isMobile
+            ? `fixed inset-y-0 left-0 w-64 transform ${
+                sidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`
+            : `${sidebarOpen ? "w-64" : "w-20"} flex-shrink-0`
         )}
+      >
+        <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+          <div
+            className={cn(
+              "flex items-center",
+              !sidebarOpen && !isMobile && "justify-center w-full"
+            )}
+          >
+            {sidebarOpen ? (
+              <h1 className="font-bold text-xl">Dashboard</h1>
+            ) : (
+              !isMobile && <BarChart3 className="h-6 w-6" />
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={cn(!sidebarOpen && !isMobile && "hidden")}
+          >
+            {isMobile ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+
+        <div className="py-4 px-2 space-y-1">
+          {navItems.map((item) => (
+            <Button
+              key={item.id}
+              variant={tabQueryState === item.id ? "default" : "ghost"}
+              className={cn(
+                "w-full justify-start mb-1",
+                !sidebarOpen && !isMobile && "justify-center px-2"
+              )}
+              disabled={!item.enabled}
+              onClick={() => {
+                if (!item.enabled) {
+                  setFeatureClicked(item.id);
+                  setShowPlansModal(true);
+                  return;
+                }
+                setTabQueryState(item.id as any);
+                if (isMobile) setSidebarOpen(false);
+              }}
+            >
+              {item.icon}
+              {(sidebarOpen || isMobile) && (
+                <>
+                  <span className="ml-3">{item.label}</span>
+                  {!item.enabled && <ProFeatureBadge className="ml-auto" />}
+                </>
+              )}
+            </Button>
+          ))}
+        </div>
+
+        <div className="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 p-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start",
+                  !sidebarOpen && !isMobile && "justify-center px-2"
+                )}
+              >
+                <Avatar className="h-8 w-8 border-2 border-emerald-100">
+                  <AvatarImage
+                    src={auth?.user?.image || ""}
+                    alt="User Avatar"
+                  />
+                  <AvatarFallback className="bg-emerald-600 text-white">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                {(sidebarOpen || isMobile) && (
+                  <>
+                    <span className="ml-3 truncate">
+                      {auth?.user?.name || "User"}
+                    </span>
+                    <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+                  </>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="space-y-1">
+                <div className="px-2 py-1.5 text-sm font-medium">
+                  {auth?.user?.name || "User"}
+                </div>
+                <div className="px-2 py-1 text-xs text-muted-foreground truncate">
+                  {auth?.user?.email || ""}
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-left px-2 py-1.5"
+                  onClick={() => router.push("/profile")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Profile Settings
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-left px-2 py-1.5"
+                  onClick={() => router.push("/plans")}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Subscription Plans
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-left px-2 py-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div
+        className={cn(
+          "flex-1 flex flex-col overflow-hidden",
+          isMobile ? "pb-16" : "" // Add bottom padding on mobile for the tab bar
+        )}
+      >
+        {/* Top Header */}
+        <header className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 h-16 flex items-center px-4 sticky top-0 z-20">
+          <div className="flex items-center gap-4 w-full">
+            {(!sidebarOpen || isMobile) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
+            <h1 className="text-xl font-bold flex-1 truncate">
+              {greetUser(auth?.user?.name?.split(" ")[0] || "there")}
+            </h1>
+
+            <form
+              onSubmit={handleSearch}
+              className="relative max-w-md hidden md:block flex-1"
+            >
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search..."
+                className="pl-10 h-10 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <main className="flex-1 overflow-auto p-4">
+          {/* Mobile Search - only visible on smaller screens */}
+          <form onSubmit={handleSearch} className="relative mb-4 md:hidden">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search..."
+              className="pl-10 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
+
+          <div className="bg-white dark:bg-gray-950 rounded-lg p-4 shadow-sm h-full">
+            {tabQueryState === "search" ? (
+              <SearchResults
+                results={searchResults}
+                isSearching={isSearching}
+                onClear={() => {
+                  setIsSearching(false);
+                  setSearchQuery("");
+                  setTabQueryState("sales");
+                }}
+              />
+            ) : tabQueryState === "sales" ? (
+              <SalesList />
+            ) : tabQueryState === "credit" ? (
+              <CreditList />
+            ) : (
+              <ExpensesList />
+            )}
+          </div>
+        </main>
       </div>
+
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 h-16 flex items-center justify-around z-20">
+          {navItems.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              className={cn(
+                "flex-col h-full rounded-none relative",
+                tabQueryState === item.id ? "bg-gray-100 dark:bg-gray-900" : ""
+              )}
+              disabled={!item.enabled}
+              onClick={() => {
+                if (!item.enabled) {
+                  setFeatureClicked(item.id);
+                  setShowPlansModal(true);
+                  return;
+                }
+                setTabQueryState(item.id as any);
+              }}
+            >
+              {item.icon}
+              <span className="text-xs mt-1">{item.label}</span>
+              {!item.enabled && (
+                <span className="absolute top-2 right-2">
+                  <ProFeatureBadge className="h-4 w-4" />
+                </span>
+              )}
+            </Button>
+          ))}
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex-col h-full rounded-none",
+              tabQueryState === "search" ? "bg-gray-100 dark:bg-gray-900" : ""
+            )}
+            onClick={() => {
+              if (searchQuery.trim()) {
+                setTabQueryState("search");
+                setIsSearching(true);
+                searchSalesAndCredit(searchQuery).then(() => {
+                  setIsSearching(false);
+                });
+              }
+            }}
+          >
+            <Search className="h-5 w-5" />
+            <span className="text-xs mt-1">Search</span>
+          </Button>
+        </div>
+      )}
+
       <PlansModal />
-    </main>
+    </div>
   );
 }

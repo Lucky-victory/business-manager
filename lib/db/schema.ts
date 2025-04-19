@@ -14,6 +14,7 @@ import {
 import { relations } from "drizzle-orm";
 import { MEASUREMENT_UNITS, PAYMENT_TYPES } from "@/types";
 
+const updatedAt = timestamp("updated_at").onUpdateNow().notNull();
 // Users table for authentication
 export const users = mysqlTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -94,7 +95,7 @@ export const products = mysqlTable(
     stockQuantity: int("stock_quantity").notNull().default(0),
     lowStockThreshold: int("low_stock_threshold").default(1),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -127,7 +128,7 @@ export const sales = mysqlTable(
       enum: MEASUREMENT_UNITS,
     }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -155,7 +156,7 @@ export const debtors = mysqlTable(
     phone: varchar("phone", { length: 50 }),
     address: text("address"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -190,7 +191,7 @@ export const credits = mysqlTable(
     paidDate: timestamp("paid_date"),
     date: timestamp("date").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     invoiceId: varchar("invoice_id", { length: 36 }),
     userId: varchar("user_id", { length: 36 })
       .notNull()
@@ -225,7 +226,7 @@ export const invoices = mysqlTable(
     dueDate: timestamp("due_date").notNull(),
     notes: text("notes"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -259,7 +260,7 @@ export const expenses = mysqlTable(
     notes: text("notes"),
     date: timestamp("date").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -290,7 +291,7 @@ export const countryCurrency = mysqlTable(
     currencySymbol: varchar("currency_symbol", { length: 10 }).notNull(),
     currencyName: varchar("currency_name", { length: 100 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
   },
   (table) => [
     index("country_currency_currency_code_idx").on(table.currencyCode),
@@ -307,7 +308,7 @@ export const plans = mysqlTable(
     description: varchar("description", { length: 255 }),
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
   },
   (table) => [
     index("plan_name_idx").on(table.name),
@@ -333,7 +334,7 @@ export const pricing = mysqlTable(
     features: json("features").notNull(), // JSON string of features
     yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
   },
   (table) => [
     index("pricing_country_code_idx").on(table.countryCode),
@@ -382,7 +383,7 @@ export const userSubscriptions = mysqlTable(
     lastPaymentDate: timestamp("last_payment_date"),
     nextBillingDate: timestamp("next_billing_date"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
   },
   (table) => [
     index("user_subscription_user_id_idx").on(table.userId),
@@ -411,7 +412,7 @@ export const subscriptionPayments = mysqlTable(
     paymentDate: timestamp("payment_date").notNull(),
     metadata: json("metadata"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt,
   },
   (table) => [
     index("payment_subscription_id_idx").on(table.subscriptionId),

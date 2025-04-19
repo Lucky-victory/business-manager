@@ -15,15 +15,16 @@ import { relations } from "drizzle-orm";
 import { MEASUREMENT_UNITS, PAYMENT_TYPES } from "@/types";
 
 const updatedAt = timestamp("updated_at").onUpdateNow().notNull();
+const id = varchar("id", { length: 36 }).primaryKey();
 // Users table for authentication
 export const users = mysqlTable("users", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id,
   name: text("name").notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  updatedAt,
   username: varchar("username", { length: 255 }).unique(),
   displayUsername: text("display_username"),
   companyName: varchar("company_name", { length: 255 }),
@@ -39,11 +40,11 @@ export const users = mysqlTable("users", {
 export const session = mysqlTable(
   "session",
   {
-    id: varchar("id", { length: 36 }).primaryKey(),
+    id,
     expiresAt: timestamp("expires_at").notNull(),
     token: varchar("token", { length: 255 }).notNull().unique(),
     createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    updatedAt,
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     userId: varchar("user_id", { length: 36 })
@@ -58,7 +59,7 @@ export const session = mysqlTable(
 );
 
 export const account = mysqlTable("account", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id,
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
   userId: varchar("user_id", { length: 36 })
@@ -72,11 +73,11 @@ export const account = mysqlTable("account", {
   scope: text("scope"),
   password: text("password"),
   createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  updatedAt,
 });
 
 export const verification = mysqlTable("verification", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id,
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),

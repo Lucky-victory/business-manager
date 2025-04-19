@@ -35,6 +35,15 @@ import {
 import { CreditReportDialog } from "@/components/credit/credit-report-dialog";
 import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
 import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function CreditList() {
   const router = useRouter();
@@ -55,6 +64,7 @@ export function CreditList() {
   );
   const [filteredCredits, setFilteredCredits] = useState(credits);
   const totalOutstandingCredit = getTotalOutstandingCredit();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchCredits();
@@ -62,7 +72,6 @@ export function CreditList() {
   }, [fetchCredits, fetchDebtors]);
 
   useEffect(() => {
-    // Apply status filter
     if (statusFilter === "all") {
       setFilteredCredits(credits);
     } else if (statusFilter === "paid") {
@@ -72,7 +81,6 @@ export function CreditList() {
     }
   }, [credits, statusFilter]);
 
-  // Group credits by debtor
   const creditsByDebtor = filteredCredits.reduce(
     (acc, credit) => {
       const debtor = debtors.find((debtor) => debtor.id === credit.debtorId);
@@ -87,26 +95,21 @@ export function CreditList() {
         };
       }
 
-      // Add to total amount if it's a purchase
       if (credit.type === "purchase") {
         acc[credit.debtorId].totalAmount += Number(credit.amount);
 
-        // Track paid vs unpaid amounts
         if (credit.isPaid) {
           acc[credit.debtorId].paidAmount += Number(credit.amount);
         } else {
           acc[credit.debtorId].unpaidAmount += Number(credit.amount);
         }
       } else if (credit.type === "payment") {
-        // For payments, we don't add to paidAmount directly to avoid double counting
-        // Instead, we just reduce the unpaidAmount
         acc[credit.debtorId].unpaidAmount = Math.max(
           0,
           acc[credit.debtorId].unpaidAmount - Number(credit.amount)
         );
       }
 
-      // Update last update date if this entry is newer
       const creditDate = new Date(credit.date);
       const lastUpdateDate = new Date(acc[credit.debtorId].lastUpdate);
       if (creditDate > lastUpdateDate) {
@@ -214,89 +217,137 @@ export function CreditList() {
           </div>
         </div>
 
-        <div
-          className={cn(
-            isLoading.credits && "",
-            !isLoading?.credits && "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-          )}
-        >
-          <LoadingStateWrapper isLoading={isLoading.credits}>
-            {Object.values(creditsByDebtor).map((debtorCredit) => (
-              <Card
-                key={debtorCredit.debtorId}
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => router.push(`/credit/${debtorCredit.debtorId}`)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle>{debtorCredit.debtorName}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Owed:</span>
-                    <span
-                      className={`font-medium ${
-                        debtorCredit.totalAmount > 0
-                          ? "text-red-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {formatCurrency(Number(debtorCredit.totalAmount))}
-                    </span>
-                  </div>
-                  {statusFilter === "all" && (
-                    <>
-                      <div className="flex justify-between mt-1.5">
-                        <span className="text-muted-foreground">
-                          Paid Amount:
-                        </span>
-                        <span className="font-medium text-green-500">
-                          {formatCurrency(Number(debtorCredit.paidAmount))}
-                        </span>
-                      </div>
-                      <div className="flex justify-between mt-1.5">
-                        <span className="text-muted-foreground">
-                          Unpaid Amount:
-                        </span>
-                        <span className="font-medium text-red-500">
-                          {formatCurrency(Number(debtorCredit.unpaidAmount))}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div className="flex justify-between mt-1.5">
-                    <span className="text-muted-foreground">Last Update:</span>
-                    <span className="font-medium">
-                      {format(new Date(debtorCredit.lastUpdate), "MMM d, yyyy")}
-                    </span>
-                  </div>
-                </CardContent>
-                {/* <CardFooter className="pt-0">
-              <div className="flex gap-2 w-full justify-end">
-              <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/credit/${debtorCredit.debtorId}/invoice`);
-                  }}
+        <LoadingStateWrapper isLoading={isLoading.credits}>
+          {isMobile ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {Object.values(creditsByDebtor).map((debtorCredit) => (
+                <Card
+                  key={debtorCredit.debtorId}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() =>
+                    router.push(`/credit/${debtorCredit.debtorId}`)
+                  }
                 >
-                  <Download className="h-3 w-3 mr-1" />
-                  Invoice
-                  </Button>
-              </div>
-            </CardFooter> */}
-              </Card>
-            ))}
-          </LoadingStateWrapper>
-
-          {!isLoading.credits && filteredCredits.length === 0 && (
-            <div className="col-span-full text-center py-10 text-muted-foreground">
-              No credit records found with the selected filter.
+                  <CardHeader className="pb-2">
+                    <CardTitle>{debtorCredit.debtorName}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Owed:</span>
+                      <span
+                        className={`font-medium ${
+                          debtorCredit.totalAmount > 0
+                            ? "text-red-500"
+                            : "text-green-500"
+                        }`}
+                      >
+                        {formatCurrency(Number(debtorCredit.totalAmount))}
+                      </span>
+                    </div>
+                    {statusFilter === "all" && (
+                      <>
+                        <div className="flex justify-between mt-1.5">
+                          <span className="text-muted-foreground">
+                            Paid Amount:
+                          </span>
+                          <span className="font-medium text-green-500">
+                            {formatCurrency(Number(debtorCredit.paidAmount))}
+                          </span>
+                        </div>
+                        <div className="flex justify-between mt-1.5">
+                          <span className="text-muted-foreground">
+                            Unpaid Amount:
+                          </span>
+                          <span className="font-medium text-red-500">
+                            {formatCurrency(Number(debtorCredit.unpaidAmount))}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="flex justify-between mt-1.5">
+                      <span className="text-muted-foreground">
+                        Last Update:
+                      </span>
+                      <span className="font-medium">
+                        {format(
+                          new Date(debtorCredit.lastUpdate),
+                          "MMM d, yyyy"
+                        )}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Debtor Name</TableHead>
+                    <TableHead>Total Owed</TableHead>
+                    {statusFilter === "all" && (
+                      <>
+                        <TableHead>Paid Amount</TableHead>
+                        <TableHead>Unpaid Amount</TableHead>
+                      </>
+                    )}
+                    <TableHead>Last Update</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.values(creditsByDebtor).map((debtorCredit) => (
+                    <TableRow
+                      key={debtorCredit.debtorId}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() =>
+                        router.push(`/credit/${debtorCredit.debtorId}`)
+                      }
+                    >
+                      <TableCell className="font-medium">
+                        {debtorCredit.debtorName}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          debtorCredit.totalAmount > 0
+                            ? "text-red-500"
+                            : "text-green-500"
+                        }
+                      >
+                        {formatCurrency(Number(debtorCredit.totalAmount))}
+                      </TableCell>
+                      {statusFilter === "all" && (
+                        <>
+                          <TableCell className="text-green-500">
+                            {formatCurrency(Number(debtorCredit.paidAmount))}
+                          </TableCell>
+                          <TableCell className="text-red-500">
+                            {formatCurrency(Number(debtorCredit.unpaidAmount))}
+                          </TableCell>
+                        </>
+                      )}
+                      <TableCell>
+                        {format(
+                          new Date(debtorCredit.lastUpdate),
+                          "MMM d, yyyy"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
-        </div>
+        </LoadingStateWrapper>
+
+        {!isLoading.credits && filteredCredits.length === 0 && (
+          <div className="text-center py-10 text-muted-foreground">
+            No credit records found with the selected filter.
+          </div>
+        )}
 
         <CreditForm open={isFormOpen} onOpenChange={setIsFormOpen} />
+
         <CreditReportDialog
           open={isReportOpen}
           onOpenChange={setIsReportOpen}

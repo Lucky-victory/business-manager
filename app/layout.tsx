@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { roboto } from "@/lib/font";
-// No need for subscription provider with Zustand
+
+const metabaseUrl =
+  process.env.NODE_ENV !== "production"
+    ? "http://localhost:3000"
+    : "https://www.bizmanager.africa";
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.bizmanager.africa"),
+  metadataBase: new URL(metabaseUrl),
   title: "Biz Manager - Business Management Simplified for Africans",
   keywords: [
     "business management",

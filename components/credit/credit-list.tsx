@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Filter, Download, Sparkles } from "lucide-react";
+import { Plus, Filter, Download, Sparkles, ChevronRight } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
@@ -223,13 +223,16 @@ export function CreditList() {
               {Object.values(creditsByDebtor).map((debtorCredit) => (
                 <Card
                   key={debtorCredit.debtorId}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="cursor-pointer hover:bg-muted/50 transition-colors group"
                   onClick={() =>
                     router.push(`/credit/${debtorCredit.debtorId}`)
                   }
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle>{debtorCredit.debtorName}</CardTitle>
+                    <CardTitle className="flex items-center justify-between">
+                      {debtorCredit.debtorName}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between">
@@ -293,13 +296,14 @@ export function CreditList() {
                       </>
                     )}
                     <TableHead>Last Update</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {Object.values(creditsByDebtor).map((debtorCredit) => (
                     <TableRow
                       key={debtorCredit.debtorId}
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="cursor-pointer hover:bg-muted/50 group"
                       onClick={() =>
                         router.push(`/credit/${debtorCredit.debtorId}`)
                       }
@@ -331,6 +335,9 @@ export function CreditList() {
                           new Date(debtorCredit.lastUpdate),
                           "MMM d, yyyy"
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
                       </TableCell>
                     </TableRow>
                   ))}

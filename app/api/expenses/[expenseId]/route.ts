@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { IS_DEV } from "@/lib/utils";
+import isEmpty from "just-is-empty";
 
 export async function GET(
   request: NextRequest,
@@ -74,17 +75,16 @@ export async function PATCH(
 
     // Prepare update data
     const updateData = {
-      item: body.item !== undefined ? body.item : existingExpense.item,
-      amount: body.amount !== undefined ? body.amount : existingExpense.amount,
-      paymentType:
-        body.paymentType !== undefined
-          ? body.paymentType
-          : existingExpense.paymentType,
-      category:
-        body.category !== undefined ? body.category : existingExpense.category,
-      notes: body.notes !== undefined ? body.notes : existingExpense.notes,
-      date:
-        body.date !== undefined ? new Date(body.date) : existingExpense.date,
+      item: !isEmpty(body.item) ? body.item : existingExpense.item,
+      amount: !isEmpty(body.amount) ? body.amount : existingExpense.amount,
+      paymentType: !isEmpty(body.paymentType)
+        ? body.paymentType
+        : existingExpense.paymentType,
+      category: !isEmpty(body.category)
+        ? body.category
+        : existingExpense.category,
+      notes: !isEmpty(body.notes) ? body.notes : existingExpense.notes,
+      date: !isEmpty(body.date) ? new Date(body.date) : existingExpense.date,
       updatedAt: new Date(),
     };
 

@@ -62,8 +62,6 @@ export async function POST(request: NextRequest) {
       category: body.category || null,
       notes: body.notes || null,
       date: new Date(body.date),
-      createdAt: new Date(),
-      updatedAt: new Date(),
     };
 
     const createdExpense = await db.transaction(async (tx) => {

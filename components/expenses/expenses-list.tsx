@@ -9,18 +9,10 @@ import {
   Trash2,
   Calendar,
   BarChart3,
-  Sparkles,
 } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { ExpenseForm } from "./expense-form";
 import { formatDate } from "@/lib/utils";
 import {
@@ -33,7 +25,6 @@ import {
 } from "@/components/ui/table";
 import { ExpenseSelect } from "@/lib/store";
 import { EmptyState } from "../empty-state";
-import { Loader } from "@/components/ui/loader";
 import Link from "next/link";
 import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
 import { DrawerOrModal } from "../ui/drawer-or-modal";

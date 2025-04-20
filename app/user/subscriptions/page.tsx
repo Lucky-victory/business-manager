@@ -33,6 +33,7 @@ export default function SubscriptionsPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [subscription, setSubscription] = useState<any>(null);
+  const [pricingDetails, setPricingDetails] = useState<any>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -71,10 +72,11 @@ export default function SubscriptionsPage() {
 
       const data = await response.json();
       setSubscription(data.subscription);
+      setPricingDetails(data.pricing);
 
       // Set the selected plan based on current subscription
-      if (data.subscription?.pricing?.planId) {
-        setSelectedPlan(data.subscription.pricing.planId);
+      if (data.subscription && data.pricing) {
+        setSelectedPlan(data.pricing.planId);
         setBillingCycle(data.subscription.billingCycle || "monthly");
       }
     } catch (error) {
@@ -190,7 +192,7 @@ export default function SubscriptionsPage() {
   const getCurrentPlanTier = (): SubscriptionTier => {
     if (!subscription) return "free";
 
-    const planName = subscription?.pricing?.plan?.name?.toLowerCase();
+    const planName = pricingDetails?.plan?.name?.toLowerCase();
     if (planName === "premium") return "premium";
     if (planName === "basic") return "basic";
     return "free";

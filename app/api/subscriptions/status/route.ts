@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { userSubscriptions } from "@/lib/db/schema";
+import { userSubscriptions, pricing } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 
@@ -19,21 +19,31 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Get the user's subscription with pricing and plan details
+    // Get the user's subscription
     const subscription = await db.query.userSubscriptions.findFirst({
       where: eq(userSubscriptions.userId, userId),
-      with: {
-        pricing: {
-          with: {
-            plan: true,
-          },
-        },
-      },
       orderBy: [desc(userSubscriptions.createdAt)],
     });
 
+    // If subscription exists, fetch pricing and plan details separately
+    if (subscription) {
+      const pricingDetails = await db.query.pricing.findFirst({
+        where: eq(pricing.id, subscription.pricingId),
+        with: {
+          plan: true,
+        },
+      });
+
+      // Return the subscription and pricing details separately
+      return NextResponse.json({
+        subscription: subscription,
+        pricing: pricingDetails || null,
+      });
+    }
+
     return NextResponse.json({
-      subscription: subscription || null,
+      subscription: null,
+      pricing: null,
     });
   } catch (error) {
     console.error("Error fetching subscription status:", error);

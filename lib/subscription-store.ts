@@ -75,7 +75,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         throw new Error("Failed to fetch subscription status");
       }
 
-      const { subscription } = await subscriptionResponse.json();
+      const { subscription, pricing: pricingDetails } =
+        await subscriptionResponse.json();
 
       // Determine tier based on subscription
       let tier: SubscriptionTier = "free";
@@ -84,9 +85,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       let isExpired = false;
       let daysLeft: number | null = null;
 
-      if (subscription) {
+      if (subscription && pricingDetails) {
         // Determine tier based on plan name
-        const planName = subscription.pricing?.plan?.name?.toLowerCase();
+        const planName = pricingDetails.plan?.name?.toLowerCase();
         if (planName === "premium") {
           tier = "premium";
         } else if (planName === "basic") {
@@ -111,17 +112,17 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         }
       }
 
-      // Fetch plans and pricing
+      // Fetch plans and pricing options
       const plansResponse = await fetch(
         `/api/plans?countryCode=${detectedCountryCode}`
       ).catch(() => null);
       let plans: any[] = [];
-      let pricing: any[] = [];
+      let pricingOptions: any[] = [];
 
       if (plansResponse?.ok) {
         const plansData = await plansResponse.json();
         plans = plansData.plans || [];
-        pricing = plansData.pricing || [];
+        pricingOptions = plansData.pricing || [];
       }
 
       // Update state
@@ -134,7 +135,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         daysLeft,
         features: SUBSCRIPTION_PLANS[tier].features,
         plans,
-        pricing,
+        pricing: pricingOptions,
         country,
         detectedCountryCode,
         isLoading: false,

@@ -146,6 +146,33 @@ export const sales = mysqlTable(
     index("sales_date_idx").on(table.date),
   ]
 );
+// Add this to your schema.ts file to track usage
+export const userUsage = mysqlTable(
+  "user_usage",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().notNull(),
+    userId: varchar("user_id", { length: 36 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    year: int("year").notNull(),
+    month: int("month").notNull(),
+    salesCount: int("sales_count").default(0).notNull(),
+    creditsCount: int("credits_count").default(0).notNull(),
+    expensesCount: int("expenses_count").default(0).notNull(),
+    invoicesCount: int("invoices_count").default(0).notNull(),
+    storageUsed: int("storage_used").default(0).notNull(), // in KB
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt,
+  },
+  (table) => [
+    uniqueIndex("unique_user_month").on(table.userId, table.year, table.month),
+    index("user_usage_user_id_idx").on(table.userId),
+  ]
+);
+
+
+
+
 
 // Debtors table - stores information about people who owe money
 export const debtors = mysqlTable(
@@ -472,8 +499,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   invoices: many(invoices),
   expenses: many(expenses),
   subscriptions: many(userSubscriptions),
+    usage: many(userUsage),
 }));
-
+export const userUsageRelations = relations(userUsage, ({ one }) => ({
+  user: one(users, {
+    fields: [userUsage.userId],
+    references: [users.id],
+  }),
+}));
 export const debtorsRelations = relations(debtors, ({ many, one }) => ({
   credits: many(credits),
   invoices: many(invoices),

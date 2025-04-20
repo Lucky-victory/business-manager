@@ -31,7 +31,7 @@ export function ProFeatureBadge({
               className
             )}
           >
-            <Sparkles className="h-3 w-3 mr-1" />
+            {/* <Sparkles className="h-3 w-3 mr-1" /> */}
             PRO
           </Badge>
         </TooltipTrigger>

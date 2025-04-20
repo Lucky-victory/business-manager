@@ -42,6 +42,11 @@ type State = {
   };
   error: string | null;
 
+  // User operations
+  fetchUser: () => Promise<void>;
+  updateUser: (userData: Partial<UserSelect>) => Promise<void>;
+  removeUser: () => void;
+
   // Sales operations
   fetchSales: () => Promise<void>;
   addSale: (sale: SaleInsert) => Promise<SaleSelect | null>;
@@ -51,8 +56,6 @@ type State = {
   ) => Promise<SaleSelect | null>;
   deleteSale: (saleId: string) => Promise<void>;
 
-  fetchUser: () => Promise<void>;
-  removeUser: () => void;
   // Credit operations
   fetchCredits: () => Promise<void>;
   addCredit: (credit: CreditInsert) => Promise<CreditSelect | null>;
@@ -122,6 +125,7 @@ export const useStore = create<State>()(
         // }));
         return formatPrice(amount, userCurrencySymbol, { addPrefix: true });
       },
+      // User operations
       fetchUser: async () => {
         try {
           set((state) => ({
@@ -142,6 +146,40 @@ export const useStore = create<State>()(
             isLoading: { ...state.isLoading, user: false },
           }));
         }
+      },
+
+      updateUser: async (userData: Partial<UserSelect>) => {
+        try {
+          set((state) => ({
+            isLoading: { ...state.isLoading, user: true },
+            error: null,
+          }));
+
+          const response = await fetch("/api/profile", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+          });
+
+          if (!response.ok) throw new Error("Failed to update user profile");
+
+          const { data } = await response.json();
+
+          set((state) => ({
+            user: { ...state.user, ...data },
+            isLoading: { ...state.isLoading, user: false },
+          }));
+        } catch (error: any) {
+          console.error("Error updating user profile:", error);
+          set((state) => ({
+            error: error.message,
+            isLoading: { ...state.isLoading, user: false },
+          }));
+        }
+      },
+
+      removeUser: () => {
+        set({ user: {} as UserSelect });
       },
       // Sales operations
       fetchSales: async () => {
@@ -257,9 +295,6 @@ export const useStore = create<State>()(
             isLoading: { ...state.isLoading, sales: false },
           }));
         }
-      },
-      removeUser: () => {
-        set({ user: {} as UserSelect });
       },
       // Credit operations
       fetchCredits: async () => {

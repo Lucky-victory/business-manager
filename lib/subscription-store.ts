@@ -1,160 +1,190 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { SubscriptionService } from "./subscription/subscription-service";
 import {
   PlanFeatures,
-  SubscriptionPlanSelect,
-  PricingWithPlan,
-  CountryCurrencySelect,
-  FEATURE_DESCRIPTIONS,
+  SubscriptionTier,
+  SUBSCRIPTION_PLANS,
+  COUNTRY_PRICING,
+  CountryPricing,
+  DEFAULT_COUNTRY_PRICING,
 } from "@/types/subscription";
 
-interface SubscriptionState {
-  // Data
-  plans: SubscriptionPlanSelect[];
-  pricing: PricingWithPlan[];
-  country: CountryCurrencySelect | null;
-  detectedCountryCode: string | null;
-  currentPlanId: string; // Plan ID
+export type SubscriptionState = {
+  // Subscription data
+  subscription: any | null;
+  tier: SubscriptionTier;
+  isActive: boolean;
+  isTrial: boolean;
+  isExpired: boolean;
+  daysLeft: number | null;
+  features: PlanFeatures;
 
-  // UI state
-  showPlansModal: boolean;
-  featureClicked: keyof PlanFeatures | null;
+  // Plans and pricing data
+  plans: any[];
+  pricing: any[];
+
+  // Country and currency data
+  country: CountryPricing | null;
+  detectedCountryCode: string | null;
+
+  // Loading state
   isLoading: boolean;
   error: string | null;
 
-  // Actions
+  // Methods
   fetchSubscriptionData: () => Promise<void>;
-  setShowPlansModal: (show: boolean) => void;
-  setFeatureClicked: (feature: keyof PlanFeatures | null) => void;
-  isFeatureEnabled: (feature: keyof PlanFeatures) => boolean;
-  getPlanPrice: (planId: string, interval: "monthly" | "yearly") => number;
-  getCurrencySymbol: () => string;
-  getFeatureDescriptions: () => typeof FEATURE_DESCRIPTIONS;
-}
-
-// Default features (all disabled)
-const defaultFeatures: PlanFeatures = {
-  expenses: false,
-  expensesAnalytics: false,
-  credit: false,
-  creditReports: false,
-  invoicing: false,
-  inventory: false,
+  hasFeatureAccess: (featureKey: string) => boolean;
+  getUpgradeSuggestion: (limitType: "transaction" | "user" | "storage") => any;
 };
 
-// Default country
-const defaultCountry: Partial<CountryCurrencySelect> = {
-  countryCode: "US",
-  name: "United States",
-  currencyCode: "USD",
-  currencySymbol: "$",
-  currencyName: "United States Dollar",
-};
+export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
+  // Default state
+  subscription: null,
+  tier: "free",
+  isActive: false,
+  isTrial: false,
+  isExpired: false,
+  daysLeft: null,
+  features: SUBSCRIPTION_PLANS.free.features,
 
-export const useSubscriptionStore = create<SubscriptionState>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      plans: [],
-      pricing: [],
-      country: null,
-      detectedCountryCode: null,
-      currentPlanId: "", // Will be set after fetching data
-      showPlansModal: false,
-      featureClicked: null,
-      isLoading: false,
-      error: null,
+  plans: [],
+  pricing: [],
 
-      // Actions
-      fetchSubscriptionData: async () => {
-        try {
-          set({ isLoading: true, error: null });
+  country: null,
+  detectedCountryCode: "NG", // Default to Nigeria
 
-          // Fetch subscription data from API
-          const response = await fetch("/api/subscriptions");
+  isLoading: false,
+  error: null,
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch subscription data");
-          }
+  // Fetch subscription data from the server
+  fetchSubscriptionData: async () => {
+    try {
+      set({ isLoading: true, error: null });
 
-          const { data } = await response.json();
+      // Detect country (in a real app, this would use geolocation or IP detection)
+      const detectedCountryCode = "NG"; // Default to Nigeria
 
-          // Find the free plan ID
-          const freePlan = data.plans.find(
-            (plan: SubscriptionPlanSelect) =>
-              plan.name.toLowerCase() === "basic"
-          );
-          const sortedPlans = (data?.plans as SubscriptionPlanSelect[]).sort(
-            (a, b) => (a.name.toLowerCase() === "free" ? -1 : 1)
-          );
+      // Get country data
+      const country =
+        COUNTRY_PRICING[detectedCountryCode as keyof typeof COUNTRY_PRICING] ||
+        DEFAULT_COUNTRY_PRICING;
 
-          // In a real app, we would also fetch the user's current subscription
-          // For now, we'll default to free plan
-          set({
-            plans: sortedPlans,
-            pricing: data.pricing,
-            country: data.country || defaultCountry,
-            detectedCountryCode: data.detectedCountryCode,
-            currentPlanId: freePlan?.id || "",
-            isLoading: false,
-          });
-        } catch (error) {
-          console.error("Error fetching subscription data:", error);
-          set({
-            error: error instanceof Error ? error.message : "Unknown error",
-            isLoading: false,
-          });
+      // Fetch subscription status
+      const subscriptionResponse = await fetch("/api/subscriptions/status");
+      if (!subscriptionResponse.ok) {
+        throw new Error("Failed to fetch subscription status");
+      }
+
+      const { subscription } = await subscriptionResponse.json();
+
+      // Determine tier based on subscription
+      let tier: SubscriptionTier = "free";
+      let isActive = false;
+      let isTrial = false;
+      let isExpired = false;
+      let daysLeft: number | null = null;
+
+      if (subscription) {
+        // Determine tier based on plan name
+        const planName = subscription.pricing?.plan?.name?.toLowerCase();
+        if (planName === "premium") {
+          tier = "premium";
+        } else if (planName === "basic") {
+          tier = "basic";
         }
-      },
 
-      setShowPlansModal: (show) => set({ showPlansModal: show }),
+        // Check subscription status
+        isActive = subscription.status === "active";
+        isTrial = subscription.status === "trial";
+        isExpired = ["expired", "canceled"].includes(subscription.status);
 
-      setFeatureClicked: (feature) => set({ featureClicked: feature }),
+        // Calculate days left
+        if (subscription.endDate) {
+          const now = new Date();
+          const endDate = new Date(subscription.endDate);
+          daysLeft = Math.max(
+            0,
+            Math.ceil(
+              (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+            )
+          );
+        }
+      }
 
-      isFeatureEnabled: (feature) => {
-        const { pricing, currentPlanId } = get();
+      // Fetch plans and pricing
+      const plansResponse = await fetch(
+        `/api/plans?countryCode=${detectedCountryCode}`
+      ).catch(() => null);
+      let plans: any[] = [];
+      let pricing: any[] = [];
 
-        if (!currentPlanId) return false;
+      if (plansResponse?.ok) {
+        const plansData = await plansResponse.json();
+        plans = plansData.plans || [];
+        pricing = plansData.pricing || [];
+      }
 
-        const currentPricing = pricing.find((p) => p.planId === currentPlanId);
-        if (!currentPricing) return false;
-
-        // Parse the features JSON
-        const features =
-          typeof currentPricing.features === "string"
-            ? (JSON.parse(currentPricing.features as string) as PlanFeatures)
-            : (currentPricing.features as unknown as PlanFeatures);
-
-        return features[feature] || false;
-      },
-
-      getPlanPrice: (planId, interval) => {
-        const { pricing, country } = get();
-
-        if (!planId) return 0;
-
-        const planPricing = pricing.find((p) => p.planId === planId);
-        if (!planPricing) return 0;
-
-        return interval === "monthly"
-          ? Number(planPricing.monthlyPrice)
-          : Number(planPricing.yearlyPrice);
-      },
-
-      getCurrencySymbol: () => {
-        return get().country?.currencySymbol || "$";
-      },
-
-      getFeatureDescriptions: () => FEATURE_DESCRIPTIONS,
-    }),
-    {
-      name: "subscription-storage",
-      partialize: (state) => ({
-        // Only persist these parts of the state
-        currentPlanId: state.currentPlanId,
-        country: state.country,
-        detectedCountryCode: state.detectedCountryCode,
-      }),
+      // Update state
+      set({
+        subscription,
+        tier,
+        isActive,
+        isTrial,
+        isExpired,
+        daysLeft,
+        features: SUBSCRIPTION_PLANS[tier].features,
+        plans,
+        pricing,
+        country,
+        detectedCountryCode,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Error fetching subscription data:", error);
+      set({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+        isLoading: false,
+      });
     }
-  )
-);
+  },
+
+  // Check if user has access to a specific feature
+  hasFeatureAccess: (featureKey: string) => {
+    const { tier, isActive, isTrial } = get();
+
+    // If the subscription is not active or in trial, only allow free features
+    if (!isActive && !isTrial && tier !== "free") {
+      return (
+        SUBSCRIPTION_PLANS.free.features[featureKey as keyof PlanFeatures] ||
+        false
+      );
+    }
+
+    return (
+      SUBSCRIPTION_PLANS[tier].features[featureKey as keyof PlanFeatures] ||
+      false
+    );
+  },
+
+  // Get upgrade suggestion when limits are reached
+  getUpgradeSuggestion: (limitType: "transaction" | "user" | "storage") => {
+    const { tier } = get();
+
+    if (tier === "premium") return null; // Already on highest tier
+
+    if (tier === "free") {
+      return {
+        title: "Upgrade to Basic",
+        description: `Get higher ${limitType} limits and unlock expenses & credit tracking`,
+        targetTier: "basic",
+      };
+    } else {
+      return {
+        title: "Upgrade to Premium",
+        description: `Get unlimited ${limitType}s and unlock all advanced features`,
+        targetTier: "premium",
+      };
+    }
+  },
+}));

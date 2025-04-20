@@ -2,78 +2,97 @@
 
 import React from "react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
-import { PlanFeatures } from "@/types/subscription";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { ProFeatureBadge } from "./pro-feature-badge";
-import { Sparkles } from "lucide-react";
-import { PlansModal } from "@/components/subscription/plans-modal";
+import { LockIcon } from "lucide-react";
 
 interface ProFeatureWrapperProps {
-  feature: keyof PlanFeatures;
+  /**
+   * The feature key to check against the user's subscription
+   */
+  feature: string;
+  /**
+   * The content to render if the user has access to the feature
+   */
   children: React.ReactNode;
-  className?: string;
+  /**
+   * Optional fallback content to render if the user doesn't have access
+   */
+  fallback?: React.ReactNode;
+  /**
+   * Whether to show a badge indicating this is a premium feature
+   */
   showBadge?: boolean;
-  tooltipText?: string;
-  disabledMessage?: string;
+  /**
+   * Whether to show a lock icon for premium features
+   */
+  showLock?: boolean;
+  /**
+   * Whether to show an upgrade button for premium features
+   */
+  showUpgradeButton?: boolean;
+  /**
+   * Custom class name for the wrapper
+   */
+  className?: string;
 }
 
+/**
+ * A wrapper component that conditionally renders content based on the user's subscription
+ * and whether they have access to a specific feature.
+ */
 export function ProFeatureWrapper({
   feature,
   children,
-  className,
+  fallback,
   showBadge = true,
-  tooltipText,
-  disabledMessage = "This feature requires a Pro subscription",
+  showLock = true,
+  showUpgradeButton = true,
+  className = "",
 }: ProFeatureWrapperProps) {
-  const { isFeatureEnabled, isLoading, setShowPlansModal, setFeatureClicked } =
-    useSubscriptionStore();
-  const isEnabled = isFeatureEnabled(feature);
+  const router = useRouter();
+  const { hasFeatureAccess, isLoading } = useSubscriptionStore();
 
-  if (isLoading) {
-    return <div className="animate-pulse h-8 bg-gray-200 rounded"></div>;
-  }
-
-  const handleProFeatureClick = () => {
-    if (!isEnabled) {
-      setFeatureClicked(feature);
-      setShowPlansModal(true);
-    }
-  };
-
-  return (
-    <div className={cn("relative", className)}>
-      {showBadge && !isEnabled && (
-        <div className="absolute top-0 right-0 z-10">
-          <ProFeatureBadge tooltipText={tooltipText} />
+  // Default fallback content if none provided
+  const defaultFallback = (
+    <div className="flex flex-col items-center justify-center p-6 text-center space-y-4 border border-dashed rounded-lg bg-gray-50 dark:bg-gray-900">
+      {showLock && (
+        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <LockIcon className="w-6 h-6 text-gray-400" />
         </div>
       )}
-
-      <div
-        className={cn(
-          !isEnabled &&
-            "opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
+      <div>
+        <h3 className="text-lg font-medium mb-1">Premium Feature</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Upgrade your plan to access this feature
+        </p>
+        {showUpgradeButton && (
+          <Button size="sm" onClick={() => router.push("/user/subscriptions")}>
+            Upgrade Now
+          </Button>
         )}
-        onClick={!isEnabled ? handleProFeatureClick : undefined}
-      >
-        {children}
       </div>
-
-      {!isEnabled && (
-        <div
-          className="absolute inset-0 bg-background/50 flex items-center justify-center z-20 cursor-pointer hover:bg-background/40 transition-colors"
-          onClick={handleProFeatureClick}
-        >
-          <div className="text-center p-4 rounded-lg bg-background/80 shadow-sm border max-w-xs">
-            <Sparkles className="h-5 w-5 mx-auto mb-2 text-amber-500" />
-            <p className="text-sm font-medium">{disabledMessage}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Click to upgrade
-            </p>
-          </div>
-        </div>
-      )}
-
-      <PlansModal />
     </div>
   );
+
+  // If loading, show a placeholder
+  if (isLoading) {
+    return (
+      <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-lg min-h-[100px]" />
+    );
+  }
+
+  // If user has access to the feature, render the children
+  if (hasFeatureAccess(feature)) {
+    return (
+      <div className={className}>
+        {showBadge && <ProFeatureBadge className="mb-2" />}
+        {children}
+      </div>
+    );
+  }
+
+  // Otherwise, render the fallback content
+  return <div className={className}>{fallback || defaultFallback}</div>;
 }

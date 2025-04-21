@@ -31,6 +31,9 @@ export const users = mysqlTable("users", {
   companyAddress: varchar("company_address", { length: 255 }),
   companyPhone: varchar("company_phone", { length: 255 }),
   companyEmail: varchar("company_email", { length: 255 }),
+  isOnboardingComplete: boolean("is_onboarding_complete")
+    .default(false)
+    .notNull(),
   role: text("role"),
   currencyCode: varchar("currency_code", { length: 5 }).default("NGN"),
   currencySymbol: varchar("currency_symbol", { length: 5 }).default(""),

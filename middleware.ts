@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
       });
 
       // If user hasn't set company name, redirect to onboarding
-      if (!user?.companyName && !isOnboardingPath) {
+      if (!user?.isOnboardingComplete && !isOnboardingPath) {
         return NextResponse.redirect(new URL("/onboarding", request.url));
       }
 

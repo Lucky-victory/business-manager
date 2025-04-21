@@ -11,7 +11,6 @@ export default function OnboardingPage() {
   const { user, fetchUser } = useStore();
   const { fetchSubscriptionData } = useSubscriptionStore();
 
-  // Fetch user data and subscription data on component mount
   useEffect(() => {
     fetchUser();
     fetchSubscriptionData();
@@ -19,8 +18,8 @@ export default function OnboardingPage() {
 
   // If user has already completed onboarding, redirect to app
   useEffect(() => {
-    // Check if user has company name set (indicating onboarding completion)
-    if (user?.companyName) {
+    // Check if user has onboarding completion
+    if (user?.isOnboardingComplete) {
       router.push("/app");
     }
   }, [user, router]);

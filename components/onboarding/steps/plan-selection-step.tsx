@@ -8,7 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  CheckCircle2,
+  CheckIcon,
+  CircleIcon,
+  RadioIcon,
+} from "lucide-react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 
 interface PlanSelectionStepProps {
@@ -99,25 +106,34 @@ export function PlanSelectionStep({
                   onClick={() => handlePlanSelection(plan.id)}
                 >
                   <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{plan.plan?.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {plan.plan?.description}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">
-                        {country?.currencySymbol}
-                        {price.toFixed(2)}
-                        <span className="text-sm font-normal text-gray-500">
-                          /mo
-                        </span>
-                      </div>
-                      {billingCycle === "yearly" && (
-                        <div className="text-xs text-emerald-600">
-                          Billed annually
-                        </div>
+                    <div className="mr-2">
+                      {isSelected ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <CircleIcon className="h-4 w-4 text-gray-500" />
                       )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium">{plan.plan?.name}</h3>
+                        <p className="text-sm text-gray-500">
+                          {plan.plan?.description}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold">
+                          {country?.currencySymbol}
+                          {price.toFixed(2)}
+                          <span className="text-sm font-normal text-gray-500">
+                            /mo
+                          </span>
+                        </div>
+                        {billingCycle === "yearly" && (
+                          <div className="text-xs text-emerald-600">
+                            Billed annually
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

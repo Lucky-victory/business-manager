@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { SubscriptionService } from "@/lib/subscription/subscription-service";
+import { IS_DEV } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Error starting free trial:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to start free trial" },
+      { error: IS_DEV ? error.message : "Failed to start free trial" },
       { status: 500 }
     );
   }

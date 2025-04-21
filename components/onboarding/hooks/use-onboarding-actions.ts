@@ -4,12 +4,13 @@ import type { ProfileFormData } from "../steps/profile-step";
 import type { BusinessFormData } from "../steps/business-step";
 import type { CurrencyFormData } from "../steps/currency-step";
 import type { OnboardingStep } from "../onboarding-flow";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface OnboardingActionsProps {
   setCurrentStep: (step: OnboardingStep) => void;
   selectedPlan: string;
   billingCycle: "monthly" | "yearly";
+  //   setLoading: (loading: boolean) => void;
   toast: any; // Replace with proper type from your toast library
   router: any; // Replace with proper type from your router
 }
@@ -20,10 +21,15 @@ export function useOnboardingActions({
   billingCycle,
   toast,
   router,
-}: OnboardingActionsProps) {
+}: //   setLoading
+OnboardingActionsProps) {
   const { updateUser } = useStore();
-  const [isLoading, setIsLoading] = useState(false);
-
+  const loadingState = useRef(false);
+  const isLoading = loadingState.current;
+  function setIsLoading(loading: boolean) {
+    loadingState.current = loading;
+    // setLoading(loading);
+  }
   // Handle profile form submission
   const handleProfileSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
@@ -179,7 +185,11 @@ export function useOnboardingActions({
 
   // Handle completion
   const handleComplete = () => {
-    router.push("/app");
+    updateUser({
+      isOnboardingComplete: true,
+    }).then(() => {
+      router.push("/app");
+    });
   };
 
   return {

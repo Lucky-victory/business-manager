@@ -6,7 +6,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { OnboardingProgress } from "./onboarding-progress";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 
-// Import step components
 import { WelcomeStep } from "./steps/welcome-step";
 import { ProfileStep } from "./steps/profile-step";
 import { BusinessStep } from "./steps/business-step";
@@ -15,7 +14,6 @@ import { PlanSelectionStep } from "./steps/plan-selection-step";
 import { TrialStep } from "./steps/trial-step";
 import { CompleteStep } from "./steps/complete-step";
 
-// Import custom hooks
 import { useOnboardingState } from "./hooks/use-onboarding-state";
 import { useOnboardingActions } from "./hooks/use-onboarding-actions";
 // Define the steps in the onboarding flow
@@ -33,15 +31,15 @@ export function OnboardingFlow() {
   const { toast } = useToast();
   const { fetchSubscriptionData } = useSubscriptionStore();
 
-  // Custom hooks for state and actions
   const {
     currentStep,
     setCurrentStep,
-    isLoading,
+    // isLoading,
     selectedPlan,
     setSelectedPlan,
     billingCycle,
     setBillingCycle,
+    setIsLoading,
   } = useOnboardingState();
 
   const {
@@ -50,6 +48,7 @@ export function OnboardingFlow() {
     handleCurrencySubmit,
     handleStartTrial,
     handleComplete,
+    isLoading,
   } = useOnboardingActions({
     setCurrentStep,
     selectedPlan,

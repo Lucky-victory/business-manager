@@ -7,6 +7,7 @@ import {
   COUNTRY_PRICING,
   CountryPricing,
   DEFAULT_COUNTRY_PRICING,
+  FEATURE_DESCRIPTIONS,
 } from "@/types/subscription";
 
 export type SubscriptionState = {
@@ -27,6 +28,10 @@ export type SubscriptionState = {
   country: CountryPricing | null;
   detectedCountryCode: string | null;
 
+  // UI state
+  showPlansModal: boolean;
+  featureClicked: keyof PlanFeatures | null;
+
   // Loading state
   isLoading: boolean;
   error: string | null;
@@ -35,6 +40,11 @@ export type SubscriptionState = {
   fetchSubscriptionData: () => Promise<void>;
   hasFeatureAccess: (featureKey: string) => boolean;
   getUpgradeSuggestion: (limitType: "transaction" | "user" | "storage") => any;
+  setShowPlansModal: (show: boolean) => void;
+  setFeatureClicked: (feature: keyof PlanFeatures | null) => void;
+  getPlanPrice: (planId: string, interval: "monthly" | "yearly") => number;
+  getCurrencySymbol: () => string;
+  getFeatureDescriptions: () => Record<keyof PlanFeatures, string>;
 };
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
@@ -52,6 +62,10 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
   country: null,
   detectedCountryCode: "NG", // Default to Nigeria
+
+  // UI state
+  showPlansModal: false,
+  featureClicked: null,
 
   isLoading: false,
   error: null,
@@ -188,4 +202,26 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       };
     }
   },
+
+  // UI state management
+  setShowPlansModal: (show) => set({ showPlansModal: show }),
+  setFeatureClicked: (feature) => set({ featureClicked: feature }),
+
+  // Helper methods for plans modal
+  getPlanPrice: (planId, interval) => {
+    const { pricing } = get();
+    const plan = pricing.find((p) => p.planId === planId);
+    if (!plan) return 0;
+
+    return interval === "monthly"
+      ? Number(plan.monthlyPrice || 0)
+      : Number(plan.yearlyPrice || 0);
+  },
+
+  getCurrencySymbol: () => {
+    const { country } = get();
+    return country?.currencySymbol || "₦";
+  },
+
+  getFeatureDescriptions: () => FEATURE_DESCRIPTIONS,
 }));

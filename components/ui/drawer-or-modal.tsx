@@ -45,14 +45,14 @@ export const DrawerOrModal = ({
                 <DrawerDescription>{description}</DrawerDescription>
               )}
             </DrawerHeader>
-            <div className="px-4">{children}</div>
+            <div className="px-4 overflow-y-auto">{children}</div>
 
             {footer && <DrawerFooter>{footer}</DrawerFooter>}
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-          <DialogContent className="pointer-events-auto">
+          <DialogContent>
             <DialogHeader>
               {title && <DialogTitle>{title}</DialogTitle>}
               {description && (

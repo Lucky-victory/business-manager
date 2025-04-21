@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Calendar,
-  BarChart3,
-} from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, BarChart3 } from "lucide-react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
@@ -31,7 +25,7 @@ import { DrawerOrModal } from "../ui/drawer-or-modal";
 
 export function ExpensesList() {
   const { expenses, isLoading, deleteExpense, formatCurrency } = useStore();
-  const { isFeatureEnabled } = useSubscriptionStore();
+  const { hasFeatureAccess } = useSubscriptionStore();
   const [editingExpense, setEditingExpense] = useState<ExpenseSelect | null>(
     null
   );
@@ -73,10 +67,7 @@ export function ExpensesList() {
   );
 
   return (
-    <ProFeatureWrapper
-      feature="expenses"
-      disabledMessage="Expense tracking requires a Basic or Premium subscription"
-    >
+    <ProFeatureWrapper feature="expenses">
       <LoadingStateWrapper
         isLoading={isLoading.expenses}
         loadingText="Loading expenses..."
@@ -93,16 +84,13 @@ export function ExpensesList() {
                     variant="outline"
                     asChild
                     className="text-sm"
-                    disabled={!isFeatureEnabled("expensesAnalytics")}
+                    disabled={!hasFeatureAccess("expensesAnalytics")}
                   >
                     <Link href="/expenses">
                       <BarChart3 className="mr-2 h-4 w-4" />
                       View Expense Analytics
-                      {!isFeatureEnabled("expensesAnalytics") && (
-                        <ProFeatureBadge
-                          className="ml-2"
-                          tooltipText="Advanced analytics requires a Premium subscription"
-                        />
+                      {!hasFeatureAccess("expensesAnalytics") && (
+                        <ProFeatureBadge className="ml-2" />
                       )}
                     </Link>
                   </Button>

@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState, Fragment } from "react";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 import { ProFeatureBadge } from "@/components/ui/pro-feature-badge";
+import { ProFeatureWrapper } from "@/components/ui/pro-feature-wrapper";
 import {
   Search,
   User,
@@ -50,7 +51,7 @@ import {
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import { PlansModal } from "@/components/subscription/plans-modal";
 import { cn } from "@/lib/utils";
-import { PlanFeatures } from "@/lib/types/subscription";
+import { PlanFeatures } from "@/types/subscription";
 import { MobileSearchPage } from "@/components/search/mobile-search-page";
 import Link from "next/link";
 
@@ -78,7 +79,7 @@ export default function Home() {
     parseAsStringLiteral(tabs).withDefault("sales")
   );
   const {
-    isFeatureEnabled,
+    hasFeatureAccess,
     setShowPlansModal,
     setFeatureClicked,
     fetchSubscriptionData,
@@ -150,13 +151,13 @@ export default function Home() {
       id: "credit" as keyof PlanFeatures,
       label: "Credit",
       icon: <CreditCard className="h-5 w-5" />,
-      enabled: isFeatureEnabled("credit"),
+      enabled: hasFeatureAccess("credit"),
     },
     {
       id: "expenses" as keyof PlanFeatures,
       label: "Expenses",
       icon: <DollarSign className="h-5 w-5" />,
-      enabled: isFeatureEnabled("expenses"),
+      enabled: hasFeatureAccess("expenses"),
     },
   ];
 
@@ -445,9 +446,13 @@ export default function Home() {
             ) : tabQueryState === "sales" ? (
               <SalesList />
             ) : tabQueryState === "credit" ? (
-              <CreditList />
+              <ProFeatureWrapper feature="credit">
+                <CreditList />
+              </ProFeatureWrapper>
             ) : (
-              <ExpensesList />
+              <ProFeatureWrapper feature="expenses">
+                <ExpensesList />
+              </ProFeatureWrapper>
             )}
           </div>
         </main>
@@ -466,7 +471,7 @@ export default function Home() {
               )}
               onClick={() => {
                 if (!item.enabled) {
-                  setFeatureClicked(item.id);
+                  setFeatureClicked(item.id as keyof PlanFeatures);
                   setShowPlansModal(true);
                   return;
                 }
@@ -476,8 +481,8 @@ export default function Home() {
               {item.icon}
               <span className="text-xs mt-1">{item.label}</span>
               {!item.enabled && (
-                <span className="absolute top-2 right-2">
-                  <ProFeatureBadge className="h-4 w-4" />
+                <span className="absolute top-1 right-[5%] translate-x-[-50%] ">
+                  <ProFeatureBadge />
                 </span>
               )}
             </Button>

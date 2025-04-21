@@ -56,7 +56,7 @@ export function CreditList() {
     formatCurrency,
     isLoading,
   } = useStore();
-  const { isFeatureEnabled } = useSubscriptionStore();
+  const { hasFeatureAccess } = useSubscriptionStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">(
@@ -132,10 +132,7 @@ export function CreditList() {
   );
 
   return (
-    <ProFeatureWrapper
-      feature="credit"
-      disabledMessage="Credit management requires a Basic or Premium subscription"
-    >
+    <ProFeatureWrapper feature="credit">
       <div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
@@ -170,11 +167,8 @@ export function CreditList() {
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
                   Reports
-                  {!isFeatureEnabled("creditReports") && (
-                    <ProFeatureBadge
-                      className="ml-2"
-                      tooltipText="Credit reports require a Premium subscription"
-                    />
+                  {!hasFeatureAccess("creditReports") && (
+                    <ProFeatureBadge className="ml-2" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
@@ -183,26 +177,26 @@ export function CreditList() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    if (isFeatureEnabled("creditReports")) {
+                    if (hasFeatureAccess("creditReports")) {
                       setIsReportOpen(true);
                     }
                   }}
-                  disabled={!isFeatureEnabled("creditReports")}
+                  disabled={!hasFeatureAccess("creditReports")}
                   className={
-                    !isFeatureEnabled("creditReports") ? "opacity-50" : ""
+                    !hasFeatureAccess("creditReports") ? "opacity-50" : ""
                   }
                 >
                   Generate Report
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    if (isFeatureEnabled("creditReports")) {
+                    if (hasFeatureAccess("creditReports")) {
                       router.push("/credit/summary");
                     }
                   }}
-                  disabled={!isFeatureEnabled("creditReports")}
+                  disabled={!hasFeatureAccess("creditReports")}
                   className={
-                    !isFeatureEnabled("creditReports") ? "opacity-50" : ""
+                    !hasFeatureAccess("creditReports") ? "opacity-50" : ""
                   }
                 >
                   View Summary

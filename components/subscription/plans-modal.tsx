@@ -14,6 +14,7 @@ import {
 import { PlanFeatures } from "@/types/subscription";
 import { useSubscriptionStore } from "@/lib/subscription-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DrawerOrModal } from "../ui/drawer-or-modal";
 
 export function PlansModal() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export function PlansModal() {
     pricing,
     getPlanPrice,
     getCurrencySymbol,
-    isFeatureEnabled,
+    hasFeatureAccess,
     getFeatureDescriptions,
   } = useSubscriptionStore();
 
@@ -82,144 +83,137 @@ export function PlansModal() {
   };
 
   return (
-    <Dialog open={showPlansModal} onOpenChange={setShowPlansModal}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Upgrade Your Plan</DialogTitle>
-          <DialogDescription>
-            {featureClicked
-              ? `Upgrade to access ${FEATURE_DESCRIPTIONS[featureClicked]}`
-              : "Choose the plan that best fits your business needs"}
-          </DialogDescription>
-        </DialogHeader>
+    <DrawerOrModal
+      title="Upgrade Your Plan"
+      open={showPlansModal}
+      description={`${
+        featureClicked
+          ? `Upgrade to access ${FEATURE_DESCRIPTIONS[featureClicked]}`
+          : "Choose the plan that best fits your business needs"
+      }`}
+      onOpenChange={setShowPlansModal}
+    >
+      <div className="py-4">
+        <div className="flex justify-center mb-6">
+          <Tabs
+            defaultValue="monthly"
+            value={billingInterval}
+            onValueChange={(value) =>
+              setBillingInterval(value as "monthly" | "yearly")
+            }
+            className="w-[300px]"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly">
+                Yearly{" "}
+                <span className="ml-1 text-xs text-emerald-600">
+                  (Save 15%)
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-        <div className="py-4">
-          <div className="flex justify-center mb-6">
-            <Tabs
-              defaultValue="monthly"
-              value={billingInterval}
-              onValueChange={(value) =>
-                setBillingInterval(value as "monthly" | "yearly")
-              }
-              className="w-[300px]"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">
-                  Yearly{" "}
-                  <span className="ml-1 text-xs text-emerald-600">
-                    (Save 15%)
-                  </span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredPlans.map((plan) => (
-              <div
-                key={plan.id}
-                className="border rounded-lg p-4 flex flex-col"
-              >
-                <div className="mb-2">
-                  <h3 className="text-lg font-bold">{plan.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-2xl font-bold">
-                    {plan.price === 0
-                      ? "Free"
-                      : `${plan.currencySymbol}${plan.price.toLocaleString()}`}
-                  </span>
-                  {plan.price > 0 && (
-                    <span className="text-muted-foreground ml-1 text-sm">
-                      /{billingInterval === "monthly" ? "month" : "year"}
-                    </span>
-                  )}
-                </div>
-
-                {featureClicked && (
-                  <div className="mb-4 flex items-center">
-                    {/* Find the pricing for this plan */}
-                    {(() => {
-                      const planPricing = pricing.find(
-                        (p) => p.planId === plan.id
-                      );
-                      if (!planPricing) return null;
-
-                      // Parse features
-                      const features =
-                        typeof planPricing.features === "string"
-                          ? (JSON.parse(
-                              planPricing.features as string
-                            ) as PlanFeatures)
-                          : (planPricing.features as unknown as PlanFeatures);
-
-                      return features[featureClicked] ? (
-                        <>
-                          <Check className="h-5 w-5 text-emerald-500 mr-2" />
-                          <span>
-                            Includes {FEATURE_DESCRIPTIONS[featureClicked]}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <X className="h-5 w-5 text-gray-300 mr-2" />
-                          <span className="text-muted-foreground">
-                            Does not include{" "}
-                            {FEATURE_DESCRIPTIONS[featureClicked]}
-                          </span>
-                        </>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                <div className="mt-auto pt-4">
-                  <Button
-                    className="w-full"
-                    variant={plan.id.includes("free") ? "outline" : "default"}
-                    onClick={() => handleUpgrade(plan.id)}
-                    disabled={
-                      featureClicked
-                        ? (() => {
-                            const planPricing = pricing.find(
-                              (p) => p.planId === plan.id
-                            );
-                            if (!planPricing) return true;
-
-                            // Parse features
-                            const features =
-                              typeof planPricing.features === "string"
-                                ? (JSON.parse(
-                                    planPricing.features as string
-                                  ) as PlanFeatures)
-                                : (planPricing.features as unknown as PlanFeatures);
-
-                            return !features[featureClicked];
-                          })()
-                        : false
-                    }
-                  >
-                    {plan.id.includes("free")
-                      ? "Continue with Free"
-                      : "Upgrade"}
-                  </Button>
-                </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {filteredPlans.map((plan) => (
+            <div key={plan.id} className="border rounded-lg p-4 flex flex-col">
+              <div className="mb-2">
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
+              <div className="mb-4">
+                <span className="text-2xl font-bold">
+                  {plan.price === 0
+                    ? "Free"
+                    : `${plan.currencySymbol}${plan.price.toLocaleString()}`}
+                </span>
+                {plan.price > 0 && (
+                  <span className="text-muted-foreground ml-1 text-sm">
+                    /{billingInterval === "monthly" ? "month" : "year"}
+                  </span>
+                )}
+              </div>
+
+              {featureClicked && (
+                <div className="mb-4 flex items-center">
+                  {/* Find the pricing for this plan */}
+                  {(() => {
+                    const planPricing = pricing.find(
+                      (p) => p.planId === plan.id
+                    );
+                    if (!planPricing) return null;
+
+                    // Parse features
+                    const features =
+                      typeof planPricing.features === "string"
+                        ? (JSON.parse(
+                            planPricing.features as string
+                          ) as PlanFeatures)
+                        : (planPricing.features as unknown as PlanFeatures);
+
+                    return features[featureClicked] ? (
+                      <>
+                        <Check className="h-5 w-5 text-emerald-500 mr-2" />
+                        <span>
+                          Includes {FEATURE_DESCRIPTIONS[featureClicked]}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-5 w-5 text-gray-300 mr-2" />
+                        <span className="text-muted-foreground">
+                          Does not include{" "}
+                          {FEATURE_DESCRIPTIONS[featureClicked]}
+                        </span>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="mt-auto pt-4">
+                <Button
+                  className="w-full"
+                  variant={plan.id.includes("free") ? "outline" : "default"}
+                  onClick={() => handleUpgrade(plan.id)}
+                  disabled={
+                    featureClicked
+                      ? (() => {
+                          const planPricing = pricing.find(
+                            (p) => p.planId === plan.id
+                          );
+                          if (!planPricing) return true;
+
+                          // Parse features
+                          const features =
+                            typeof planPricing.features === "string"
+                              ? (JSON.parse(
+                                  planPricing.features as string
+                                ) as PlanFeatures)
+                              : (planPricing.features as unknown as PlanFeatures);
+
+                          return !features[featureClicked];
+                        })()
+                      : false
+                  }
+                >
+                  {plan.id.includes("free") ? "Continue with Free" : "Upgrade"}
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={handleClose}>
+          Cancel
+        </Button>
+      </div>
+    </DrawerOrModal>
   );
 }

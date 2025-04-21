@@ -17,7 +17,7 @@ export function ProFeatureBadge({ className, ...props }: ProFeatureBadgeProps) {
       )}
       {...props}
     >
-      <SparklesIcon className="h-3 w-3" />
+      {/* <SparklesIcon className="h-3 w-3" /> */}
       <span>PRO</span>
     </Badge>
   );

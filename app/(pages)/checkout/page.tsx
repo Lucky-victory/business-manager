@@ -29,7 +29,7 @@ export default function CheckoutPage() {
   const interval = searchParams.get("interval") as "monthly" | "yearly";
 
   // Validate plan and interval
-  const isValidPlan = planId && ["basic", "premium"].includes(planId);
+  const isValidPlan = planId;
   const isValidInterval = interval && ["monthly", "yearly"].includes(interval);
 
   if (!isValidPlan || !isValidInterval) {
@@ -56,7 +56,7 @@ export default function CheckoutPage() {
   }
 
   // Get plan details from the store
-  const plan = plans.find((p) => p.name.toLowerCase() === planId);
+  const plan = plans.find((p) => p.id === planId);
 
   if (!plan) {
     return (

@@ -22,15 +22,26 @@ import { EmptyState } from "../empty-state";
 import Link from "next/link";
 import { LoadingStateWrapper } from "../ui/loading-state-wrapper";
 import { DrawerOrModal } from "../ui/drawer-or-modal";
+import OfflineSyncStatus from "@/components/sync/offline-sync-status";
+import { useSyncFetch } from "@/lib/sync/use-offline-sync";
+import { useToast } from "@/hooks/use-toast";
 
 export function ExpensesList() {
   const { expenses, isLoading, deleteExpense, formatCurrency } = useStore();
   const { hasFeatureAccess } = useSubscriptionStore();
+  const { toast } = useToast();
   const [editingExpense, setEditingExpense] = useState<ExpenseSelect | null>(
     null
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Use the sync fetch hook for delete operations - we'll use a generic endpoint
+  // and update the specific ID when executing
+  const deleteFetch = useSyncFetch({
+    method: "DELETE",
+    endpoint: "/api/expenses/placeholder",
+  });
 
   const handleEdit = (expense: ExpenseSelect) => {
     setEditingExpense(expense);
@@ -39,7 +50,36 @@ export function ExpensesList() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this expense?")) {
-      await deleteExpense(id);
+      try {
+        // Execute the delete operation with the specific ID
+        await deleteFetch.execute(null, { id });
+
+        // Delete from local store
+        await deleteExpense(id);
+
+        // Show appropriate toast based on online/offline status
+        if (deleteFetch.isOffline) {
+          toast({
+            title: "Expense deleted offline",
+            description: "This change will sync when you're back online",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Expense deleted",
+            description: "Your expense has been deleted successfully",
+            variant: "default",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to delete expense:", error);
+
+        toast({
+          title: "Error",
+          description: "Failed to delete expense. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -73,6 +113,9 @@ export function ExpensesList() {
         loadingText="Loading expenses..."
       >
         <>
+          {/* Show offline sync status at the top */}
+          <OfflineSyncStatus />
+
           {!expenses || expenses.length === 0 ? (
             emptyState
           ) : (

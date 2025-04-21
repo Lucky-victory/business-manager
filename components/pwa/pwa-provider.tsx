@@ -2,6 +2,8 @@
 
 import React, { useEffect } from "react";
 import InstallPrompt from "./install-prompt";
+import { initOfflineSync } from "@/lib/sync/use-offline-sync";
+import OfflineSyncStatus from "@/components/sync/offline-sync-status";
 
 export default function PWAProvider({
   children,
@@ -34,6 +36,9 @@ export default function PWAProvider({
         console.log("Service workers are not supported.");
       }
     };
+
+    // Initialize offline sync
+    initOfflineSync();
 
     // Check for online/offline status
     const handleOnlineStatusChange = () => {
@@ -72,6 +77,7 @@ export default function PWAProvider({
 
   return (
     <>
+      <OfflineSyncStatus />
       {children}
       <InstallPrompt />
     </>

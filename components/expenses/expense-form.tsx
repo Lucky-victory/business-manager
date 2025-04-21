@@ -22,11 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, WifiOff } from "lucide-react";
 import CustomNumberInput from "../ui/custom-number-input";
 import { Textarea } from "../ui/textarea";
 import { DatePickerField } from "../ui/date-picker";
 import { SheetFooter } from "../ui/sheet";
+import { useSyncFetch } from "@/lib/sync/use-offline-sync";
+import { useToast } from "@/hooks/use-toast";
 
 const expenseFormSchema = z.object({
   item: z.string().min(1, "Item is required"),
@@ -46,7 +48,21 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
   const { addExpense, updateExpense } = useStore();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use the sync fetch hook for offline-first data synchronization
+  const addExpenseFetch = useSyncFetch({
+    endpoint: "/api/expenses",
+    method: "POST",
+  });
+
+  const updateExpenseFetch = expense
+    ? useSyncFetch({
+        endpoint: `/api/expenses/${expense.id}`,
+        method: "PATCH",
+      })
+    : null;
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -73,8 +89,8 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
     setIsSubmitting(true);
     try {
       if (expense) {
-        await updateExpense({
-          id: expense.id,
+        // Update existing expense
+        const updateData = {
           item: data.item,
           amount: String(data.amount),
           paymentType: data.paymentType as
@@ -85,9 +101,39 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
           category: data.category || null,
           notes: data.notes || null,
           date: new Date(data.date),
-        });
+        };
+
+        // Use the sync fetch hook for offline-first data synchronization
+        const result = await updateExpenseFetch?.execute(updateData);
+
+        if (updateExpenseFetch?.isOffline) {
+          // If offline, update the local store and show offline message
+          await updateExpense({
+            id: expense.id,
+            ...updateData,
+          });
+
+          toast({
+            title: "Expense updated offline",
+            description: "Changes will sync when you're back online",
+            variant: "default",
+          });
+        } else if (result) {
+          // If online and successful, update the local store
+          await updateExpense({
+            id: expense.id,
+            ...updateData,
+          });
+
+          toast({
+            title: "Expense updated",
+            description: "Your expense has been updated successfully",
+            variant: "default",
+          });
+        }
       } else {
-        await addExpense({
+        // Add new expense
+        const newExpense: ExpenseInsert = {
           item: data.item,
           amount: String(data.amount),
           paymentType: data.paymentType as
@@ -100,11 +146,41 @@ export function ExpenseForm({ expense, onSuccess }: ExpenseFormProps) {
           date: new Date(data.date),
           userId: "", // This will be set by the server
           id: "", // This will be set by the server
-        });
+        };
+
+        // Use the sync fetch hook for offline-first data synchronization
+        const result = await addExpenseFetch.execute(newExpense);
+
+        if (addExpenseFetch.isOffline) {
+          // If offline, add to local store and show offline message
+          await addExpense(newExpense);
+
+          toast({
+            title: "Expense saved offline",
+            description: "It will be synced when you're back online",
+            variant: "default",
+          });
+        } else if (result) {
+          // If online and successful, add to local store
+          await addExpense(newExpense);
+
+          toast({
+            title: "Expense added",
+            description: "Your expense has been added successfully",
+            variant: "default",
+          });
+        }
       }
+
       onSuccess();
     } catch (error) {
       console.error("Failed to save expense:", error);
+
+      toast({
+        title: "Error",
+        description: "Failed to save expense. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

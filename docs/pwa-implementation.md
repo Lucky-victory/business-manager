@@ -12,6 +12,7 @@ The Biz Manager PWA implementation includes:
 4. **Offline Page** - Dedicated page shown when the user is offline
 5. **Online/Offline Status Components** - Utilities for conditional rendering based on connectivity
 6. **Offline Styling** - Visual indicators for offline mode
+7. **Offline-First Data Synchronization** - Premium feature allowing operations while offline with sync when online
 
 ## Key Files
 
@@ -22,6 +23,11 @@ The Biz Manager PWA implementation includes:
 - `/components/pwa/install-prompt.tsx` - Installation prompt component
 - `/components/pwa/pwa-provider.tsx` - PWA functionality provider
 - `/components/pwa/online-status.tsx` - Online/offline status utilities
+- `/lib/sync/sync-service.ts` - Core offline sync functionality
+- `/lib/sync/use-offline-sync.ts` - Hooks and utilities for offline sync
+- `/components/sync/offline-sync-status.tsx` - UI component showing sync status
+- `/components/admin/offline-sync-config.tsx` - Admin configuration for offline sync
+- `/app/(pages)/admin/offline-sync/page.tsx` - Admin page for managing offline sync
 
 ## Features
 
@@ -51,6 +57,16 @@ The app provides visual indicators when the user is offline:
 - Certain elements can be hidden or shown based on connectivity
 - The `OnlineOnly` and `OfflineOnly` components can be used for conditional rendering
 
+### Offline-First Data Synchronization
+
+Premium users can continue working with the application even when offline:
+
+- Operations performed while offline are queued locally
+- When the connection is restored, queued operations are automatically synchronized
+- Clear visual indicators show users when they're working offline and what will happen when connectivity is restored
+- Administrators can enable/disable this feature through a dedicated admin interface
+- Only users with premium subscriptions have access to this functionality
+
 ## Usage Examples
 
 ### Conditional Rendering Based on Connectivity
@@ -77,6 +93,67 @@ function MyComponent() {
 }
 ```
 
+### Using Offline-First Data Synchronization
+
+```tsx
+import { useSyncFetch } from "@/lib/sync/use-offline-sync";
+
+function ExpenseForm() {
+  const { execute, loading, error, isOffline, isPending } = useSyncFetch({
+    endpoint: "/api/expenses",
+    method: "POST",
+  });
+
+  const handleSubmit = async (formData) => {
+    const result = await execute(formData);
+
+    if (isOffline) {
+      // Show message that the operation will be synced when online
+      toast.info(
+        "Your expense has been saved and will be synced when you're back online"
+      );
+    } else if (result) {
+      // Operation was successful and performed online
+      toast.success("Expense saved successfully");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+
+      {isPending && (
+        <div className="text-amber-500 text-sm">
+          You have pending operations that will sync when you're online
+        </div>
+      )}
+
+      <button type="submit" disabled={loading}>
+        {loading ? "Saving..." : "Save Expense"}
+      </button>
+    </form>
+  );
+}
+```
+
+### Displaying Sync Status
+
+```tsx
+import OfflineSyncStatus from "@/components/sync/offline-sync-status";
+
+function ExpensesPage() {
+  return (
+    <div>
+      {/* Show sync status at the top of the page */}
+      <OfflineSyncStatus />
+
+      <h1>Expenses</h1>
+      {/* Rest of the page content */}
+    </div>
+  );
+}
+```
+
 ### CSS Classes for Offline Styling
 
 ```css
@@ -94,6 +171,26 @@ body.offline .offline-visible {
 }
 ```
 
+### Admin Configuration
+
+```tsx
+import OfflineSyncConfig from "@/components/admin/offline-sync-config";
+
+function AdminPage() {
+  // Check if the current user is an admin
+  const isAdmin = checkUserIsAdmin();
+
+  return (
+    <div>
+      <h1>Admin Settings</h1>
+
+      {/* Only render the config component if the user is an admin */}
+      <OfflineSyncConfig isAdmin={isAdmin} />
+    </div>
+  );
+}
+```
+
 ## Testing PWA Features
 
 To test the PWA features:
@@ -101,6 +198,11 @@ To test the PWA features:
 1. **Offline Mode**: Use Chrome DevTools > Network tab > "Offline" checkbox
 2. **Installation**: Use Chrome DevTools > Application > Manifest
 3. **Service Worker**: Use Chrome DevTools > Application > Service Workers
+4. **Offline Sync**:
+   - Enable offline sync in the admin panel
+   - Switch to offline mode
+   - Perform operations (create/update/delete)
+   - Switch back to online mode and verify synchronization
 
 ## Production Considerations
 
@@ -111,6 +213,9 @@ Before deploying to production:
 3. Ensure the service worker is properly caching critical assets
 4. Test the installation process on various devices and browsers
 5. Consider implementing push notifications for enhanced engagement
+6. Implement proper error handling and conflict resolution for offline sync
+7. Consider data size limitations for offline storage
+8. Implement security measures to protect offline-stored data
 
 ## Resources
 

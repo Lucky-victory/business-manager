@@ -1,0 +1,9 @@
+This file is a placeholder for the splash-screen.png that should be created for the PWA.
+
+In a production environment, you should replace this with an actual PNG image that:
+1. Has dimensions of 1242x2688 pixels (recommended for modern iPhones)
+2. Uses the brand color (#4f46e5) as the background
+3. Contains the Biz Manager logo centered on the screen
+4. Is properly optimized for web use
+
+The splash-screen.png is used as the startup image for iOS devices when launching the PWA from the home screen.

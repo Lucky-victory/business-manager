@@ -1,0 +1,9 @@
+This file is a placeholder for the offline-image.png that should be created for the PWA.
+
+In a production environment, you should replace this with an actual PNG image that:
+1. Has dimensions of at least 512x512 pixels
+2. Uses the brand color (#4f46e5) as the background
+3. Contains a simple icon or text indicating that the content is unavailable offline
+4. Is properly optimized for web use
+
+The offline-image.png is used by the service worker when image requests fail in offline mode.

@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* PWA Offline Indicator Styles */
+body.offline::before {
+  content: "Offline Mode";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #f97316;
+  color: white;
+  text-align: center;
+  padding: 4px 8px;
+  font-size: 14px;
+  z-index: 9999;
+  font-weight: 500;
+}
+
+body.offline .offline-hidden {
+  display: none !important;
+}
+
+body.offline .offline-visible {
+  display: block !important;
+}
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

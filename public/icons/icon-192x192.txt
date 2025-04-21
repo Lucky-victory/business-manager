@@ -1,0 +1,13 @@
+This file is a placeholder for the icon-192x192.png that should be created for the PWA.
+
+In a production environment, you should replace this with an actual PNG image that:
+1. Has dimensions of 192x192 pixels
+2. Uses the brand color (#4f46e5) as the background
+3. Contains the "BM" text or Biz Manager logo in white
+4. Is properly optimized for web use
+5. Has the "purpose": "any maskable" attribute in the manifest.json
+
+This icon is used for:
+- App icon on Android devices
+- Apple touch icon on iOS devices
+- Favicon in browsers that support larger icons

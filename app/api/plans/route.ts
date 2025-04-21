@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { plans, pricing } from "@/lib/db/schema";
+import { countryCurrency, plans, pricing } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
@@ -12,11 +12,18 @@ export async function GET(request: NextRequest) {
     const allPlans = await db.query.plans.findMany({
       where: eq(plans.isActive, true),
     });
+    console.log({
+      allPlans,
+    });
 
     // Get pricing for the specified country
     const pricingData = await db.query.pricing.findMany({
-      where: eq(pricing.countryCode, countryCode),
+      where: eq(
+        pricing.countryCode,
+        countryCode as "NG" | "US" | "KE" | "ZAR" | "GH"
+      ),
       with: {
+        country: true,
         plan: true,
       },
     });

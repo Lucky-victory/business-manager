@@ -50,7 +50,7 @@ import {
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import { PlansModal } from "@/components/subscription/plans-modal";
 import { cn } from "@/lib/utils";
-import { PlanFeatures } from "@/types/subscription";
+import { PlanFeatures } from "@/lib/types/subscription";
 import { MobileSearchPage } from "@/components/search/mobile-search-page";
 import Link from "next/link";
 

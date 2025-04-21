@@ -170,10 +170,6 @@ export const userUsage = mysqlTable(
   ]
 );
 
-
-
-
-
 // Debtors table - stores information about people who owe money
 export const debtors = mysqlTable(
   "debtors",
@@ -372,12 +368,6 @@ export const pricing = mysqlTable(
 );
 
 // Define relations for better TypeScript type inference
-export const countryCurrencyRelations = relations(
-  countryCurrency,
-  ({ many }) => ({
-    pricing: many(pricing),
-  })
-);
 
 // User subscriptions table
 export const userSubscriptions = mysqlTable(
@@ -453,6 +443,12 @@ export const plansRelations = relations(plans, ({ many }) => ({
   pricing: many(pricing),
 }));
 
+export const countryCurrencyRelations = relations(
+  countryCurrency,
+  ({ many }) => ({
+    pricing: many(pricing),
+  })
+);
 export const userSubscriptionRelations = relations(
   userSubscriptions,
   ({ one, many }) => ({
@@ -499,7 +495,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   invoices: many(invoices),
   expenses: many(expenses),
   subscriptions: many(userSubscriptions),
-    usage: many(userUsage),
+  usage: many(userUsage),
 }));
 export const userUsageRelations = relations(userUsage, ({ one }) => ({
   user: one(users, {

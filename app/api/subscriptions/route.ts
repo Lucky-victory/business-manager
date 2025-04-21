@@ -22,6 +22,10 @@ async function getCountryFromIp(ip: string): Promise<string> {
 
     // Return the country code if available and supported, otherwise default to US
     const countryCode = data.countryCode;
+    console.log({
+      countryCode,
+      data,
+    });
 
     // Check if the country code is one we support
     const supportedCountries = ["NG", "GH", "KE", "ZAR", "US"] as const;

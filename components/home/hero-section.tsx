@@ -61,7 +61,7 @@ export const HeroSection = () => {
               </div>
               <div className="flex items-center gap-1">
                 <CreditCard className="h-5 w-5 text-emerald-600" />
-                <span>Money-back guarantee</span>
+                <span>14-day free trial</span>
               </div>
             </div>
           </motion.div>

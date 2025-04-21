@@ -32,7 +32,7 @@ export const CTASection = () => {
             </Button>
           </div>
           <p className="text-sm text-emerald-100">
-            Completely free. No hidden fees.
+            Start your 14-day free trial today.
           </p>
         </motion.div>
       </div>

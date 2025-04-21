@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { userSubscriptions, pricing } from "@/lib/db/schema";
+import { userSubscriptions, pricing, plans } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 
@@ -27,17 +27,19 @@ export async function GET(request: NextRequest) {
 
     // If subscription exists, fetch pricing and plan details separately
     if (subscription) {
-      const pricingDetails = await db.query.pricing.findFirst({
-        where: eq(pricing.id, subscription.pricingId),
-        with: {
-          plan: true,
-        },
-      });
-
+      const pricingDetails = await db
+        .select()
+        .from(pricing)
+        .where(eq(pricing.id, subscription.pricingId))
+        .leftJoin(plans, eq(plans.id, pricing.planId));
+      const pricingDetail = pricingDetails.map((row) => ({
+        ...row.pricing,
+        plan: row.plans,
+      }))[0];
       // Return the subscription and pricing details separately
       return NextResponse.json({
         subscription: subscription,
-        pricing: pricingDetails || null,
+        pricing: pricingDetail || null,
       });
     }
 

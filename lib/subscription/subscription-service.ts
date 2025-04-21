@@ -210,10 +210,7 @@ export class SubscriptionService {
   /**
    * Start a free trial for a user
    */
-  static async startFreeTrial(
-    userId: string,
-    pricingId: string
-  ): Promise<UserSubscriptionSelect | null> {
+  static async startFreeTrial(userId: string, pricingId: string) {
     try {
       // Check if user already has a subscription
       const existingSubscription = await db.query.userSubscriptions.findFirst({
@@ -229,13 +226,19 @@ export class SubscriptionService {
       }
 
       // Verify pricing exists
-      const pricingDetails = await db.query.pricing.findFirst({
+      const pricingDetail = await db.query.pricing.findFirst({
         where: eq(pricing.id, pricingId),
-        with: {
-          plan: true,
-        },
       });
-
+      if (!pricingDetail) {
+        throw new Error("Invalid pricing plan");
+      }
+      const plan = await db.query.plans.findFirst({
+        where: eq(plans.id, pricingDetail?.planId as string),
+      });
+      const pricingDetails = {
+        ...pricingDetail,
+        plan,
+      };
       if (!pricingDetails) {
         throw new Error("Invalid pricing plan");
       }
@@ -262,18 +265,26 @@ export class SubscriptionService {
         nextBillingDate: trialEndDate,
       });
 
-      const newSubscription = await db.query.userSubscriptions.findFirst({
-        where: eq(userSubscriptions.id, id),
-        with: {
-          pricing: {
-            with: {
-              plan: true,
-            },
+      const newSubscription = await db
+        .select()
+        .from(userSubscriptions)
+        .where(eq(userSubscriptions.id, id))
+        .leftJoin(pricing, eq(pricing.id, userSubscriptions.pricingId))
+        .leftJoin(plans, eq(plans.id, pricing.planId));
+      console.log({
+        newSubscription: newSubscription[0],
+      });
+      const sub = newSubscription.map((sub) => ({
+        ...sub.user_subscriptions,
+        pricing: {
+          ...sub.pricing,
+          plan: {
+            ...sub.plans,
           },
         },
-      });
+      }));
 
-      return newSubscription || null;
+      return sub || null;
     } catch (error) {
       console.error("Error starting free trial:", error);
       throw error;

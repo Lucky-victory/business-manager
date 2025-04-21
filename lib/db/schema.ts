@@ -14,7 +14,7 @@ import {
 import { relations } from "drizzle-orm";
 import { MEASUREMENT_UNITS, PAYMENT_TYPES } from "@/types";
 
-const updatedAt = timestamp("updated_at").onUpdateNow().notNull();
+const updatedAt = timestamp("updated_at").onUpdateNow();
 const id = varchar("id", { length: 36 }).primaryKey();
 // Users table for authentication
 export const users = mysqlTable("users", {

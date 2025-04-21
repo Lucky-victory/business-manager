@@ -155,6 +155,13 @@
       "when": 1745213796074,
       "tag": "0021_pink_william_stryker",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1745217415142,
+      "tag": "0022_parched_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

@@ -73,6 +73,7 @@ export async function PATCH(request: NextRequest) {
       "currencyCode",
       "currencySymbol",
       "currencyName",
+      "isOnboardingComplete",
     ];
 
     // Filter out any fields that are not allowed

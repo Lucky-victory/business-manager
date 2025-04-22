@@ -126,7 +126,7 @@ export function ExpensesList() {
                   <Button
                     variant="outline"
                     asChild
-                    className="text-sm"
+                    className="text-sm here-is-here"
                     disabled={!hasFeatureAccess("expensesAnalytics")}
                   >
                     <Link href="/expenses">

@@ -46,7 +46,7 @@ export function ProFeatureWrapper({
   feature,
   children,
   fallback,
-  showBadge = true,
+  showBadge = false,
   showLock = true,
   showUpgradeButton = true,
   className = "",

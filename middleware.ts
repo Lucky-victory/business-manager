@@ -11,10 +11,23 @@ export async function middleware(request: NextRequest) {
   // Define public paths that don't require authentication
   const isAuthPath = path.startsWith("/auth");
   const isPublicPath =
-    isAuthPath || ["/", "/terms", "/privacy", "/landing"].includes(path);
+    isAuthPath ||
+    ["/", "/terms", "/privacy", "/landing", "/offline"].includes(path);
   const isOnboardingPath = path.startsWith("/onboarding");
   const isCheckoutPath = path.startsWith("/checkout");
   const isApiPath = path.startsWith("/api");
+
+  // PWA-related paths that should be publicly accessible
+  const isPwaPath =
+    path === "/sw.js" ||
+    path === "/manifest.json" ||
+    path.startsWith("/icons/") ||
+    path === "/offline";
+
+  // Skip middleware for PWA-related paths
+  if (isPwaPath) {
+    return NextResponse.next();
+  }
 
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -99,7 +112,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      * - asset files (.svg, .png, .jpg, .jpeg, .gif, etc.)
+     * - PWA-related files (sw.js, manifest.json)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.json|offline|icons/|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico).*)",
   ],
 };

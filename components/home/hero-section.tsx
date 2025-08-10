@@ -75,7 +75,7 @@ export const HeroSection = () => {
           >
             <div className="relative aspect-video overflow-hidden rounded-xl border bg-background shadow-xl hover:shadow-2xl transition-shadow duration-300">
               <Image
-                src="/biz-manager-sales.png"
+                src="/sales-page.png"
                 alt="Biz Manager Dashboard"
                 width={1280}
                 height={720}
